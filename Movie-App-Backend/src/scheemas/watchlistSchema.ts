@@ -10,4 +10,4 @@ const WatchlistSchema = new Schema({
 });
 
 WatchlistSchema.index({ userId: 1 });
-export default model("User", WatchlistSchema);
+export default model("Watchlist", WatchlistSchema);

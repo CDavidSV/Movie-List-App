@@ -29,11 +29,11 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
         username: { type: "string", required: true },
         password: { type: "string", required: true },
         email: { type: "string", required: true },
-        favorite_genres: { type: "array", required: true }
+        favorite_genres: { type: "array", required: false }
     }
 
-    const missingFields = validateJsonBody(registerSchema, req.body);
-    if (missingFields.invalid) return res.status(400).send({ status: "error", message: "Invalid request body", missingFields: missingFields });
+    const missingFields = validateJsonBody(req.body, registerSchema);
+    if (!missingFields.valid) return res.status(400).send({ status: "error", message: "Invalid request body", missing: missingFields.missing, invalid: missingFields.invalid });
 
     if (password.length < 8 || password.length > 50) return res.status(400).send({ status: "error", message: "Password must be between 8 and 50 characters long" });
 
@@ -42,15 +42,16 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
 
     try {
         // Check if username already exists.
-        const user = await UserSchema.findOne({ username });
-        if (user) return res.status(400).send({ status: "error", message: "Username already in use" });
+        const user = await UserSchema.findOne({ "$or": [{ email }, { username }] });
+        if (user && user.username === username) return res.status(400).send({ status: "error", message: "Username already in use" });
+        if (user && user.email === email) return res.status(400).send({ status: "error", message: "Email already in use" });
 
         // Create new user.
         const newUser = await UserSchema.create({ username, email, favorite_genres, verified: false, password_hash: hashResult.hashedPassword, password_salt: hashResult.salt });
         
         const { accessToken, refreshToken } = generateTokens(newUser._id.toString());
 
-        res.status(201).send({ status: "success", message: "User created", "access_token": accessToken, "refresh_token": refreshToken });
+        res.status(201).send({ status: "success", message: "User created", "username": newUser.username, "access_token": accessToken, "refresh_token": refreshToken });
     } catch (err) {
         console.log(err);
         return res.status(500).send({ status: "error", message: "Error creating user" });
@@ -58,6 +59,9 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
 });
 
 router.post('/login', async (req: express.Request, res: express.Response) => {
+    // Check if the request type is form encoded.
+    if (!req.is("application/x-www-form-urlencoded")) return res.status(401).send({ status: "error" });
+
     const { username, password } = req.body;
 
     const loginSchema = {
@@ -65,8 +69,8 @@ router.post('/login', async (req: express.Request, res: express.Response) => {
         password: { type: "string", required: true }
     }
 
-    const missingFields = validateJsonBody(loginSchema, req.body);
-    if (missingFields.invalid) return res.status(400).send({ status: "error", message: "Invalid request body", missingFields: missingFields });
+    const missingFields = validateJsonBody(req.body, loginSchema);
+    if (!missingFields.valid) return res.status(400).send({ status: "error", message: "Invalid request body", missing: missingFields.missing, invalid: missingFields.invalid });
 
     try {
         const user = await UserSchema.findOne({ "$or": [{ email: username }, { username }] });
@@ -77,6 +81,10 @@ router.post('/login', async (req: express.Request, res: express.Response) => {
         const passwordSalt = user.password_salt;
 
         if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return res.status(400).send({ status: "error", message: "Invalid username or password" });
+
+        const { accessToken, refreshToken } = generateTokens(user._id.toString());
+
+        res.status(200).send({ status: "success", message: "User logged in", "username": user.username, "access_token": accessToken, "refresh_token": refreshToken });
     } catch {
         return res.status(500).send({ status: "error", message: "Error logging in" });
     }

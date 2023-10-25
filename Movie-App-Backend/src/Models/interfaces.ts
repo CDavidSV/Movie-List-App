@@ -2,4 +2,6 @@ interface User {
     id: string;
 }
 
-export { User };
+export { 
+    User
+};
