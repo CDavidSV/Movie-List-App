@@ -4,6 +4,8 @@ import { authenticateAccessToken } from "../../middlewares/auth-controller";
 import { findMediaById } from "../../util/TMDB";
 import Media from "../../Models/Media";
 import saveMovie from "../../util/mediaHandler";
+import { validateJsonBody } from "../../util/validateJson";
+import { calculateLexoRank, getNextLexoRank } from "../../util/lexorank";
 
 const router = express.Router();
 
@@ -30,7 +32,8 @@ router.get("/", authenticateAccessToken, (req: express.Request, res: express.Res
                 description: favorite.media.length >= 1 ? favorite.media[0].description : "No description available",
                 poster_url: favorite.media.length >= 1 ? favorite.media[0].poster_url : "https://via.placeholder.com/300x450.png?text=No+Poster",
                 release_date: favorite.media.length >= 1 ? favorite.media[0].release_date : "NA",
-                runtime: favorite.media.length >= 1 ? favorite.media[0].runtime : 0
+                runtime: favorite.media.length >= 1 ? favorite.media[0].runtime : 0,
+                next_favorite_id: favorite.next_favorite_id
             }
         });
         res.status(200).send({ status: "success", favorites });
@@ -53,14 +56,19 @@ router.post("/add", authenticateAccessToken, async (req: express.Request, res: e
             res.status(404).send({ status: "error", message: "Media not found" });
         }
 
-        // Create a new favorite
-        const userFavorites = await favoritesSchema.find({ user_id: req.user!.id });
+        // Get the last favorite added based on rank.
+        const lastFavorite = await favoritesSchema.findOne({ user_id: req.user!.id }).sort({ rank: -1 });
 
-        if (userFavorites.find((favorite) => favorite.media_id === media_id)) return res.status(201).send({ status: "success", message: "Favorite added" });
+        // Calculate the new rank for the new favorite.
+        const newRank = lastFavorite ? getNextLexoRank(lastFavorite.rank) : getNextLexoRank();
+
+        // Create a new favorite if it doesn't exist.
         const media = new Media(mediaData);
-
-        const newRank = userFavorites.at(-1) ? userFavorites.at(-1)!.order + 1 : 0;
-        await favoritesSchema.create({ user_id: req.user!.id, media_id: media_id as string, date_added: new Date(), order: newRank });
+        await favoritesSchema.findOneAndUpdate(
+            { user_id: req.user!.id, media_id: media_id as string }, 
+            { user_id: req.user!.id, media_id: media_id as string, date_added: new Date(), rank: newRank },
+            { upsert: true, new: true }
+        );
         res.status(201).send({ status: "success", message: "Favorite added" });
         
         saveMovie(media);
@@ -82,6 +90,10 @@ router.delete("/remove", authenticateAccessToken, async (req: express.Request, r
         console.log(err);
         res.status(500).send({ status: "error", message: "Error removing favorite" });
     });
+});
+
+router.post("/reorder", authenticateAccessToken, async (req: express.Request, res: express.Response) => {
+    
 });
 
 export default router;

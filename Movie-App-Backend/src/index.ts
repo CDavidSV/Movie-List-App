@@ -1,5 +1,6 @@
 import server from "./server";
 import connectMongoDB from "./config/db";
+import userSchema from "./scheemas/userSchema";
 
 // Server port
 const port = 8080;

@@ -7,7 +7,7 @@ const UserSchema = new Schema({
     verified: { type: Boolean, default: false, required: true },
     password_hash: { type: String },
     password_salt: { type: String },
-    favorite_genres: { type: [String] },
+    favorite_genres: { type: [String] }
 });
 
 UserSchema.index({ username: 1 });
