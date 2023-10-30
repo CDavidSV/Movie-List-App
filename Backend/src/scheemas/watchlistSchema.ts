@@ -5,8 +5,7 @@ const WatchlistSchema = new Schema({
     media_id: { type: String, required: true },
     status: { type: String, required: true },
     progress: { type: Number, required: true },
-    rating: { type: Number, required: true },
-    episode_ratings: { type: [Number] },
+    rating: { type: Number, required: true }
 });
 
 WatchlistSchema.index({ userId: 1 });
