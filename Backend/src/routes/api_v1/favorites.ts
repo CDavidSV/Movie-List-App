@@ -6,15 +6,21 @@ import Media from "../../Models/Media";
 import saveMovie from "../../util/mediaHandler";
 import { validateJsonBody } from "../../util/validateJson";
 import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../util/lexorank";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
 router.get("/", authenticateAccessToken, (req: express.Request, res: express.Response) => {
     const page = parseInt(req.query.page as string) || 1;
 
-    const skip = isNaN(page) ? 0 : (page - 1) * 100;
+    const skip = isNaN(page) ? 0 : (page - 1) * 500;
     favoritesSchema.aggregate([
         {
+            $match: {
+                user_id: new mongoose.Types.ObjectId(req.user?.id) 
+            }
+        },
+        {   
             $lookup: {
                 from: 'media',
                 localField: 'media_id',
@@ -22,7 +28,7 @@ router.get("/", authenticateAccessToken, (req: express.Request, res: express.Res
                 as: 'media'
             }
         }
-    ]).skip(skip).limit(100).sort({ rank: 1 }).then((response) => {
+    ]).skip(skip).limit(500).sort({ rank: 1 }).then((response) => {
         const favorites = response.map((favorite) => {
             return {
                 id: favorite._id,
@@ -32,8 +38,7 @@ router.get("/", authenticateAccessToken, (req: express.Request, res: express.Res
                 description: favorite.media.length >= 1 ? favorite.media[0].description : "No description available",
                 poster_url: favorite.media.length >= 1 ? favorite.media[0].poster_url : "https://via.placeholder.com/300x450.png?text=No+Poster",
                 release_date: favorite.media.length >= 1 ? favorite.media[0].release_date : "NA",
-                runtime: favorite.media.length >= 1 ? favorite.media[0].runtime : 0,
-                next_favorite_id: favorite.next_favorite_id
+                runtime: favorite.media.length >= 1 ? favorite.media[0].runtime : 0
             }
         });
 
