@@ -21,14 +21,4 @@ const validateJsonBody = (body: any, schema: { [key: string]: JsonValidator }) =
     return true;
 };
 
-const testValidator = {
-    name: { type: "string", required: true },
-    age: { type: "number", required: true }
-}
-const testBody = {
-    name: "John",
-    age: [1,2,3,4]
-}
-console.log(validateJsonBody(testBody, testValidator));
-
 export { validateJsonBody, JsonValidator };
