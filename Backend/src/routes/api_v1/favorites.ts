@@ -63,16 +63,14 @@ router.post("/add", authenticateAccessToken, async (req: express.Request, res: e
 
         if (!mediaData) return res.status(404).send({ status: "error", message: "Media not found" });
 
-        if (lastFavorite?.media_id === media_id) return res.status(200).send({ status: "success", message: "Favorite added" });
-
         // Calculate the new rank for the new favorite.
         const newRank = lastFavorite ? getNextLexoRank(lastFavorite.rank) : getNextLexoRank();
 
         // Create a new favorite if it doesn't exist.
-        await favoritesSchema.findOneAndUpdate(
-            { user_id: req.user!.id, media_id: mediaData.id.toString() }, 
-            { user_id: req.user!.id, media_id: mediaData.id.toString(), date_added: new Date(), rank: newRank },
-            { upsert: true, new: true }
+        await favoritesSchema.updateOne(
+            { user_id: req.user!.id, media_id: mediaData.id.toString() },
+            { $setOnInsert: { date_added: new Date(), rank: newRank } },
+            { upsert: true }
         );
         res.status(201).send({ status: "success", message: "Favorite added" });
         
