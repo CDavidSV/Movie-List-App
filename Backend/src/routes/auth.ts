@@ -33,7 +33,7 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
     }
 
     const missingFields = validateJsonBody(req.body, registerSchema);
-    if (!missingFields.valid) return res.status(400).send({ status: "error", message: "Invalid request body", missing: missingFields.missing, invalid: missingFields.invalid });
+    if (!missingFields) return res.status(400).send({ status: "error", message: "Invalid request body" });
 
     if (password.length < 8 || password.length > 50) return res.status(400).send({ status: "error", message: "Password must be between 8 and 50 characters long" });
 
@@ -70,7 +70,7 @@ router.post('/login', async (req: express.Request, res: express.Response) => {
     }
 
     const missingFields = validateJsonBody(req.body, loginSchema);
-    if (!missingFields.valid) return res.status(400).send({ status: "error", message: "Invalid request body", missing: missingFields.missing, invalid: missingFields.invalid });
+    if (!missingFields) return res.status(400).send({ status: "error", message: "Invalid request body" });
 
     try {
         const user = await UserSchema.findOne({ "$or": [{ email: username }, { username }] });

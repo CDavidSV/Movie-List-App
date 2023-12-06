@@ -3,29 +3,32 @@ interface JsonValidator {
     type: string;
 }
 
-interface JsonValidatorResponse {
-    valid: boolean;
-    missing?: string[];
-    invalid?: string[];
-}
-
 const validateJsonBody = (body: any, schema: { [key: string]: JsonValidator }) => {
-    let missing: string[] = [];
-    let invalid: string[] = [];
-    const keys = Object.keys(schema);
-    missing = keys.filter((key) => schema[key].required && (body[key] === null || body[key] === undefined));
-    invalid = keys.filter((key) => {
-        const value = body[key] ?? null;
-        if (value === null) return false;
-    
-        return schema[key].type === 'array' ? !Array.isArray(value) : typeof value !== schema[key].type;
-    });
+    for (let key in Object.keys(schema)) {
+        console.log(schema)
+        if (schema[key].required && !body.hasOwnProperty(key)) {
+            return false;
+        }
 
-    return {
-        valid: missing.length === 0 && invalid.length === 0,
-        missing: missing.length > 0 ? missing : undefined,
-        invalid: invalid.length > 0 ? invalid : undefined
-    } as JsonValidatorResponse;
+        if (schema[key].type !== 'array' && typeof body[key] !== schema[key].type) { 
+            return false;
+        }
+
+        if (schema[key].type === 'array' && !Array.isArray(body[key])) {
+            return false;
+        }   
+    }
+    return true;
 };
 
-export { validateJsonBody, JsonValidatorResponse, JsonValidator };
+const testValidator = {
+    name: { type: "string", required: true },
+    age: { type: "number", required: true }
+}
+const testBody = {
+    name: "John",
+    age: [1,2,3,4]
+}
+console.log(validateJsonBody(testBody, testValidator));
+
+export { validateJsonBody, JsonValidator };

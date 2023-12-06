@@ -106,7 +106,7 @@ router.post("/reorder", authenticateAccessToken, async (req: express.Request, re
         position: { type: "string", required: true }
     };
     const validation = validateJsonBody(req.body, reorderSchema);
-    if (!validation.valid) return res.status(400).send({ status: "error", message: "Invalid request body", invalid: validation.invalid, missing: validation.missing });
+    if (!validation) return res.status(400).send({ status: "error", message: "Invalid request body" });
 
     // Get the reference and target favorites
     try {
