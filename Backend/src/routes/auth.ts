@@ -1,25 +1,29 @@
 import express from "express";
-import jwt from "jsonwebtoken";
 import { User } from "../Models/interfaces";
 import UserSchema from "../scheemas/userSchema";
 import { validateJsonBody } from "../util/validateJson";
 import hashPassword from "../util/hashPassword";
-import generateToken from "../util/generateJWT";
-import RefreshToken from "../scheemas/refreshTokenSchema";
+import { generateToken, verifyToken } from "../util/jwt";
 import SHA256 from "crypto-js/sha256";
+import { createSession, getSession, invalidateSession } from "../util/sessionHandler";
 
 const router: express.Router = express.Router();
 
-const generateTokens = (user_id: string) => {
+const generateAccessToken = (user_id: string, sessionId: string) => {
     // Generate access token.
     let expirationTime = 24 * 60 * 60; // 24 hours in seconds.
-    const accessToken = generateToken({ id: user_id } as User, expirationTime);
+    // expirationTime = 30; // 30 seconds for testing.
+    const accessToken = generateToken({ id: user_id, sessionId } as User, expirationTime);
 
+    return accessToken;
+}
+
+const generateRefreshToken = (user_id: string, sessionId: string) => {
     // Generate refresh token.
-    expirationTime *= 7; // 7 days in seconds.
-    const refreshToken = generateToken({ id: user_id } as User, expirationTime, true);
+    let expirationTime = 24 * 60 * 60 * 30; // 30 days in seconds.
+    const refreshToken = generateToken({ id: user_id, sessionId } as User, expirationTime, true);
 
-    return { accessToken, refreshToken };
+    return refreshToken;
 }
 
 router.post('/register', async (req: express.Request, res: express.Response) => {
@@ -49,9 +53,15 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
         // Create new user.
         const newUser = await UserSchema.create({ username, email, favorite_genres, verified: false, password_hash: hashResult.hashedPassword, password_salt: hashResult.salt });
         
-        const { accessToken, refreshToken } = generateTokens(newUser._id.toString());
+        // Create session.
+        const session = await createSession(newUser.email, newUser._id.toString(), new Date(Date.now() + 2.592e+9)); // Set expiration date to 30 days from now.
 
-        res.status(201).send({ status: "success", message: "User created", "username": newUser.username, "access_token": accessToken, "refresh_token": refreshToken });
+        if (!session) return res.status(500).send({ status: "error", message: "Error creating user" });
+        
+        const accessToken = generateAccessToken(newUser._id.toString(), session);
+        const refreshToken = generateRefreshToken(newUser._id.toString(), session);
+
+        res.status(201).send({ status: "success", message: "User created", "username": newUser.username, userId: newUser._id.toString(), "access_token": accessToken, "refresh_token": refreshToken });
     } catch (err) {
         console.log(err);
         return res.status(500).send({ status: "error", message: "Error creating user" });
@@ -82,46 +92,57 @@ router.post('/login', async (req: express.Request, res: express.Response) => {
 
         if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return res.status(400).send({ status: "error", message: "Invalid username or password" });
 
-        const { accessToken, refreshToken } = generateTokens(user._id.toString());
+        // Create session.
+        const session = await createSession(user.email, user._id.toString(), new Date(Date.now() + 2.592e+9));
 
-        res.status(200).send({ status: "success", message: "User logged in", "username": user.username, "access_token": accessToken, "refresh_token": refreshToken });
+        if (!session) return res.status(500).send({ status: "error", message: "Error logging in" });
+
+        const accessToken = generateAccessToken(user._id.toString(), session);
+        const refreshToken = generateRefreshToken(user._id.toString(), session);
+
+        if (!accessToken) return res.status(500).send({ status: "error", message: "Error logging in" });
+
+        res.status(200).send({ status: "success", message: "User logged in", "username": user.username, userId: user._id.toString(), "access_token": accessToken, "refresh_token": refreshToken });
     } catch {
         return res.status(500).send({ status: "error", message: "Error logging in" });
     }
 });
 
 router.post('/revoke', async (req: express.Request, res: express.Response) => {
-    const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(400).send({ status: "error", message: "No token specified" });
+    const { refresh_token } = req.body;
 
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_KEY as string, (err: any, tokenData: any) => {
-        if (err) return res.sendStatus(401);
+    if (!refresh_token) return res.status(400).send({ status: "error", message: "Invalid request body" });
 
-        RefreshToken.findOneAndDelete({ token: refreshToken, user_id: tokenData.id }).then((deletedToken) => {  
-            if (!deletedToken) return res.status(400).send({ status: "error", message: "Invalid Token Provided" });  
-            res.status(200).send({ status: "success", message: "Token revoked" });
-        }).catch(() => {
-            return res.status(500).send({ status: "error", message: "Error revoking token" });
-        });
-    });
+    // Validate refresh token.
+    const { payload, valid } = verifyToken(refresh_token, true);
+    if (!valid || !payload) return res.status(403).send({ status: "error", message: "Invalid refresh token" });
+
+    // Invalidate session.
+    const sessionInvalidated = await invalidateSession((payload as User).sessionId);
+
+    if (!sessionInvalidated) return res.status(500).send({ status: "error", message: "Error invalidating session" });
+
+    res.status(200).send({ status: "success", message: "Session invalidated" });
 });
 
-router.post('/refreshToken', async (req: express.Request, res: express.Response) => {
-    const { refreshToken } = req.body;
-    if (!refreshToken) return res.status(400).send({ status: "error", message: "No token specified" });
+router.post('/refresh', async (req: express.Request, res: express.Response) => {
+    const { refresh_token } = req.body;
 
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_KEY as string, async (err: any, tokenData: any) => {
-        if (err) return res.sendStatus(401);
+    if (!refresh_token) return res.status(400).send({ status: "error", message: "Invalid request body" });
 
-        try {
-            const { accessToken, refreshToken: newRefreshToken } = generateTokens(tokenData.id);
-            const updatedToken = await RefreshToken.findOneAndUpdate({ token: refreshToken, user_id: tokenData.id }, { token: newRefreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) });
-            if (!updatedToken) return res.status(400).send({ status: "error", message: "Invalid Token Provided" });
-            res.status(200).send({ status: "success", message: "Token refreshed", newAccessToken: accessToken, refreshToken: newRefreshToken });
-        } catch {
-            res.status(500).send({ status: "error", message: "Error refreshing token. Please try again." });
-        }
-    });
+    // Validate refresh token.
+    const { payload, valid } = verifyToken(refresh_token, true);
+    if (!valid || !payload) return res.status(403).send({ status: "error", message: "Invalid refresh token" });
+
+    // Validate session.
+    const session = await getSession((payload as User).sessionId);
+
+    if (!session) return res.status(403).send({ status: "error", message: "Invalid refresh token" });
+
+    // Generate new tokens.
+    const accessToken = generateAccessToken((payload as User).id, session._id.toString());
+
+    return res.status(200).send({ status: "success", message: "Token refreshed", "access_token": accessToken });
 });
 
 export default router;

@@ -16,11 +16,7 @@ const logger = morgan('dev');
 // Middleware
 app.use(logger);
 app.use(bodyParser.json());
-app.use(
-    bodyParser.urlencoded({
-      extended: true,
-    }),
-);
+app.use(bodyParser.urlencoded({ extended: true }));
   
 // Register routes
 app.use(routes);
