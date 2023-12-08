@@ -1,8 +1,5 @@
 import express from "express";
-import mongoose from "mongoose";
 import watchlistSchema from "../../scheemas/watchlistSchema";
-import { authenticateAccessToken } from "../../middlewares/auth-controller";
-import { validateJsonBody } from "../../util/validateJson";
 
 enum WatchlistStatus {
     Watching = "0",
@@ -21,7 +18,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
     watchlistSchema.aggregate([
         {
             $match: {
-                user_id: new mongoose.Types.ObjectId(req.user?.id),
+                user_id: req.user?.id,
                 status: status_type
             }
         },

@@ -1,21 +1,22 @@
 import express from "express";
 import favoritesSchema from "../../scheemas/favoritesSchema";
-import { authenticateAccessToken } from "../../middlewares/auth-controller";
 import { findMediaById } from "../../util/TMDB";
 import Media from "../../Models/Media";
 import saveMovie from "../../util/mediaHandler";
 import { validateJsonBody } from "../../util/validateJson";
 import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../util/lexorank";
-import mongoose from "mongoose";
 
 const getFavorites = async (req: express.Request, res: express.Response) => {
     const page = parseInt(req.query.page as string) || 1;
 
-    const skip = isNaN(page) ? 0 : (page - 1) * 500;
+    let skip = isNaN(page) ? 0 : (page - 1) * 500;
+    const count = await favoritesSchema.countDocuments({ user_id: req.user?.id }).then((count) => count).catch((err) => 0);
+    const pages = Math.ceil(count / 500);
+    page > pages ? skip = 0 : skip = skip;
     favoritesSchema.aggregate([
         {
             $match: {
-                user_id: new mongoose.Types.ObjectId(req.user?.id) 
+                user_id: req.user?.id
             }
         },
         {   
@@ -40,7 +41,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
             }
         });
 
-        res.status(200).send({ status: "success", favorites });
+        res.status(200).send({ status: "success", page, pages, favorites });
     }).catch((err) => {
         console.log(err);
         res.status(500).send({ status: "error", message: "Error fetching favorites" });
