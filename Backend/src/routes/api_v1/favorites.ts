@@ -8,9 +8,7 @@ import { validateJsonBody } from "../../util/validateJson";
 import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../util/lexorank";
 import mongoose from "mongoose";
 
-const router = express.Router();
-
-router.get("/", authenticateAccessToken, (req: express.Request, res: express.Response) => {
+const getFavorites = async (req: express.Request, res: express.Response) => {
     const page = parseInt(req.query.page as string) || 1;
 
     const skip = isNaN(page) ? 0 : (page - 1) * 500;
@@ -47,9 +45,9 @@ router.get("/", authenticateAccessToken, (req: express.Request, res: express.Res
         console.log(err);
         res.status(500).send({ status: "error", message: "Error fetching favorites" });
     });
-});
+};
 
-router.post("/add", authenticateAccessToken, async (req: express.Request, res: express.Response) => {
+const addFavorite = async (req: express.Request, res: express.Response) => {
     const media_id = req.query.media_id;
 
     if (!media_id) return res.status(400).send({ status: "error", message: "Invalid media id" });
@@ -79,9 +77,9 @@ router.post("/add", authenticateAccessToken, async (req: express.Request, res: e
         console.log(err);
         res.status(500).send({ status: "error", message: "Error adding favorite" });
     }
-});
+};
 
-router.delete("/remove", authenticateAccessToken, async (req: express.Request, res: express.Response) => {
+const removeFavorite = async (req: express.Request, res: express.Response) => {
     const favorite_id = req.query.id;
 
     if (!favorite_id) return res.status(400).send({ status: "error", message: "Invalid favorite id" });
@@ -93,9 +91,9 @@ router.delete("/remove", authenticateAccessToken, async (req: express.Request, r
         console.log(err);
         res.status(500).send({ status: "error", message: "Error removing favorite" });
     });
-});
+};
 
-router.post("/reorder", authenticateAccessToken, async (req: express.Request, res: express.Response) => {
+const reorderFavorites = async (req: express.Request, res: express.Response) => {
     const { ref_id, target_id, position } = req.body;
 
     const reorderSchema = {
@@ -155,7 +153,6 @@ router.post("/reorder", authenticateAccessToken, async (req: express.Request, re
         console.error(err);
         return res.status(500).send({ status: "error", message: "Error reordering favorites" });
     }
+};
 
-});
-
-export default router;
+export { getFavorites, addFavorite, removeFavorite, reorderFavorites };

@@ -4,8 +4,6 @@ import watchlistSchema from "../../scheemas/watchlistSchema";
 import { authenticateAccessToken } from "../../middlewares/auth-controller";
 import { validateJsonBody } from "../../util/validateJson";
 
-const router = express.Router();
-
 enum WatchlistStatus {
     Watching = "0",
     Completed = "1",
@@ -14,7 +12,7 @@ enum WatchlistStatus {
     PlanToWatch = "4"
 }
 
-router.get("/get", authenticateAccessToken, async (req: express.Request, res: express.Response) => {
+const getWatchlist = async (req: express.Request, res: express.Response) => {
     const { status_type } = req.query;
 
     const page = parseInt(req.query.page as string) || 1;
@@ -58,7 +56,7 @@ router.get("/get", authenticateAccessToken, async (req: express.Request, res: ex
         console.error(err);
         res.status(500).send({ status: "error", message: "Error fetching watchlist" });
     });
-});
+};
 
 // router.post("/add", authenticateAccessToken, (req: express.Request, res: express.Response) => {
 //     const { media_id, status, progress } = req.query;
@@ -68,4 +66,4 @@ router.get("/get", authenticateAccessToken, async (req: express.Request, res: ex
 //     const { media_id, status, progress } = req.query;
 // });
 
-export default router;
+export { getWatchlist };

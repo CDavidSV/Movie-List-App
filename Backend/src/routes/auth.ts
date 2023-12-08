@@ -7,8 +7,6 @@ import { generateToken, verifyToken } from "../util/jwt";
 import SHA256 from "crypto-js/sha256";
 import { createSession, getSession, invalidateSession } from "../util/sessionHandler";
 
-const router: express.Router = express.Router();
-
 const generateAccessToken = (user_id: string, sessionId: string) => {
     // Generate access token.
     let expirationTime = 24 * 60 * 60; // 24 hours in seconds.
@@ -26,7 +24,7 @@ const generateRefreshToken = (user_id: string, sessionId: string) => {
     return refreshToken;
 }
 
-router.post('/register', async (req: express.Request, res: express.Response) => {
+const registerUser = async (req: express.Request, res: express.Response) => {
     const { username, password, email, favorite_genres } = req.body;
 
     const registerSchema = {
@@ -66,9 +64,9 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
         console.log(err);
         return res.status(500).send({ status: "error", message: "Error creating user" });
     }
-});
+};
 
-router.post('/login', async (req: express.Request, res: express.Response) => {
+const loginUser = async (req: express.Request, res: express.Response) => {
     // Check if the request type is form encoded.
     if (!req.is("application/x-www-form-urlencoded")) return res.status(401).send({ status: "error" });
 
@@ -106,9 +104,9 @@ router.post('/login', async (req: express.Request, res: express.Response) => {
     } catch {
         return res.status(500).send({ status: "error", message: "Error logging in" });
     }
-});
+};
 
-router.post('/revoke', async (req: express.Request, res: express.Response) => {
+const revokeSession = async (req: express.Request, res: express.Response) => {
     const { refresh_token } = req.body;
 
     if (!refresh_token) return res.status(400).send({ status: "error", message: "Invalid request body" });
@@ -123,9 +121,9 @@ router.post('/revoke', async (req: express.Request, res: express.Response) => {
     if (!sessionInvalidated) return res.status(500).send({ status: "error", message: "Error invalidating session" });
 
     res.status(200).send({ status: "success", message: "Session invalidated" });
-});
+};
 
-router.post('/refresh', async (req: express.Request, res: express.Response) => {
+const refreshToken = async (req: express.Request, res: express.Response) => {
     const { refresh_token } = req.body;
 
     if (!refresh_token) return res.status(400).send({ status: "error", message: "Invalid request body" });
@@ -143,6 +141,6 @@ router.post('/refresh', async (req: express.Request, res: express.Response) => {
     const accessToken = generateAccessToken((payload as User).id, session._id.toString());
 
     return res.status(200).send({ status: "success", message: "Token refreshed", "access_token": accessToken });
-});
+};
 
-export default router;
+export { registerUser, loginUser, revokeSession, refreshToken };
