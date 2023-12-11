@@ -2,7 +2,7 @@ import express from "express";
 
 // Routes
 import { addFavorite, getFavorites, removeFavorite, reorderFavorites } from "./favorites";
-import { getWatchlist } from "./watchlist";
+import { getWatchlist, updateWatchlist } from "./watchlist";
 import requireUser from "../../middlewares/requireUser";
 
 const router: express.Router = express.Router();
@@ -13,5 +13,7 @@ router.delete("/favorites/remove", requireUser, removeFavorite);
 router.post("/favorites/reorder", requireUser, reorderFavorites);
 
 router.get("/watchlist", requireUser, getWatchlist);
+router.post("/watchlist/update", requireUser, updateWatchlist);
+router.delete("/watchlist/remove", requireUser, updateWatchlist);
 
 export default router;

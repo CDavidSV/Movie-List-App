@@ -1,17 +1,19 @@
 import express from "express";
 import watchlistSchema from "../../scheemas/watchlistSchema";
+import { validateJsonBody } from "../../util/validateJson";
+import { findMediaById } from "../../util/TMDB";
+import Media from "../../Models/Media";
+import saveMovie from "../../util/mediaHandler";
 
-enum WatchlistStatus {
-    Watching = "0",
-    Completed = "1",
-    OnHold = "2",
-    Dropped = "3",
-    PlanToWatch = "4"
-}
+const watchlistStatus = new Map([
+    [0, "Not Started"],
+    [1, "Watching"],
+    [2, "Paused"],
+    [3, "Finished"],
+    [4, "Dropped"]
+]);
 
 const getWatchlist = async (req: express.Request, res: express.Response) => {
-    const { status_type } = req.query;
-
     const page = parseInt(req.query.page as string) || 1;
     const skip = isNaN(page) ? 0 : (page - 1) * 500;
 
@@ -19,7 +21,6 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
         {
             $match: {
                 user_id: req.user?.id,
-                status: status_type
             }
         },
         {   
@@ -35,7 +36,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
             return {
                 id: item._id,
                 media_id: item.media_id,
-                status: item.status,
+                status: watchlistStatus.get(item.status),
                 progress: item.progress,
                 rating: item.rating,
                 added_date: item.added_date,
@@ -55,12 +56,46 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
     });
 };
 
-// router.post("/add", authenticateAccessToken, (req: express.Request, res: express.Response) => {
-//     const { media_id, status, progress } = req.query;
-// });
+const updateWatchlist = async (req: express.Request, res: express.Response) => {
+    const { media_id, status, progress } = req.body;
 
-// router.post("/update-status", (req: express.Request, res: express.Response) => {
-//     const { media_id, status, progress } = req.query;
-// });
+    const registerSchema = {
+        media_id: { type: "string", required: true },
+        status: { type: "number", required: true },
+        progress: { type: "number", required: true }
+    }
 
-export { getWatchlist };
+    const missingFields = validateJsonBody(req.body, registerSchema);
+    if (!missingFields) return res.status(400).send({ status: "error", message: "Invalid request body" });
+    if (status < 0 || status > 4) return res.status(400).send({ status: "error", message: "Invalid status integer" });
+    // Validate id and get the latest favorite saved
+    try {
+        const mediaData = await findMediaById(media_id as string);
+        if (!mediaData) return res.status(404).send({ status: "error", message: "Media not found" });
+
+        // Save to database
+        await watchlistSchema.findOneAndUpdate({ user_id: req.user!.id, media_id }, { status, progress, updated_date: Date.now() }, { upsert: true, setDefaultsOnInsert: true }).then(() => { });
+        
+        res.status(201).send({ status: "success", message: "Added to watchlist" });
+
+        saveMovie(mediaData as Media);
+    } catch (err) {
+        return res.status(404).send({ status: "error", message: "Could not add to watchlist" });
+    }
+};
+
+const removeItemFromWatchlist = async (req: express.Request, res: express.Response) => {
+    const media_id = req.query.media_id;
+
+    if (!media_id) return res.status(400).send({ status: "error", message: "Invalid media id" });
+
+    try {
+        await watchlistSchema.deleteOne({ user_id: req.user!.id, media_id });
+        res.status(200).send({ status: "success", message: "Removed from watchlist" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send({ status: "error", message: "Error removing item from watchlist" });
+    }
+};
+
+export { getWatchlist, updateWatchlist, removeItemFromWatchlist };

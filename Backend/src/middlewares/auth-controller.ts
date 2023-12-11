@@ -5,7 +5,6 @@ import { getSession } from "../util/sessionHandler";
 import config from "../../config.json";
 
 const generateRefreshToken = async (token: string) => {
-    console.log("Generating new refresh token");
     // Validate refresh token.
     const { payload, valid } = verifyToken(token, true);
     if (!valid || !payload) return { refreshedToken: null, payloadData: null };

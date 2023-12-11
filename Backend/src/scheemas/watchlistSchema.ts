@@ -6,7 +6,7 @@ const WatchlistSchema = new Schema({
     status: { type: Number, required: true },
     progress: { type: Number, required: true },
     rating: { type: Number, required: true },
-    added_date: { type: Date, required: true },
+    added_date: { type: Date, required: true, default: Date.now() },
     updated_date: { type: Date, required: true }
 });
 
