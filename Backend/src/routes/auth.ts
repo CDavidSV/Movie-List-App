@@ -6,20 +6,18 @@ import hashPassword from "../util/hashPassword";
 import { generateToken, verifyToken } from "../util/jwt";
 import SHA256 from "crypto-js/sha256";
 import { createSession, getSession, invalidateSession } from "../util/sessionHandler";
+import config from "../../config.json";
 
-const generateAccessToken = (user_id: string, sessionId: string) => {
+const generateAccessToken = (user_id: string, sessionId: string, expirationDelta: number) => {
     // Generate access token.
-    let expirationTime = 24 * 60 * 60; // 24 hours in seconds.
-    // expirationTime = 30; // 30 seconds for testing.
-    const accessToken = generateToken({ id: user_id, sessionId } as User, expirationTime);
+    const accessToken = generateToken({ id: user_id, sessionId } as User, expirationDelta);
 
     return accessToken;
 }
 
-const generateRefreshToken = (user_id: string, sessionId: string) => {
+const generateRefreshToken = (user_id: string, sessionId: string, expirationDelta: number) => {
     // Generate refresh token.
-    let expirationTime = 24 * 60 * 60 * 30; // 30 days in seconds.
-    const refreshToken = generateToken({ id: user_id, sessionId } as User, expirationTime, true);
+    const refreshToken = generateToken({ id: user_id, sessionId } as User, expirationDelta, true);
 
     return refreshToken;
 }
@@ -56,12 +54,26 @@ const registerUser = async (req: express.Request, res: express.Response) => {
 
         if (!session) return res.status(500).send({ status: "error", message: "Error creating user" });
         
-        const accessToken = generateAccessToken(newUser._id.toString(), session);
-        const refreshToken = generateRefreshToken(newUser._id.toString(), session);
+        const accessToken = generateAccessToken(newUser._id.toString(), session, config.expiration1Day);
+        const refreshToken = generateRefreshToken(newUser._id.toString(), session, config.expiration30Days);
 
-        res.status(201).send({ status: "success", message: "User created", "username": newUser.username, userId: newUser._id.toString(), "access_token": accessToken, "refresh_token": refreshToken });
+        // Set client cookies for access and refresh tokens.
+        res.cookie("a_token", accessToken,
+            {
+                httpOnly: true,
+                maxAge: config.expiration30Days * 1000
+            }
+        );
+        res.cookie("r_token", refreshToken,
+            {
+                httpOnly: true,
+                maxAge: config.expiration30Days * 1000
+            }
+        );
+
+        res.status(201).send({ status: "success", message: "User created", "username": newUser.username, userId: newUser._id.toString() });
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return res.status(500).send({ status: "error", message: "Error creating user" });
     }
 };
@@ -95,21 +107,34 @@ const loginUser = async (req: express.Request, res: express.Response) => {
 
         if (!session) return res.status(500).send({ status: "error", message: "Error logging in" });
 
-        const accessToken = generateAccessToken(user._id.toString(), session);
-        const refreshToken = generateRefreshToken(user._id.toString(), session);
+        const accessToken = generateAccessToken(user._id.toString(), session, config.expiration1Day);
+        const refreshToken = generateRefreshToken(user._id.toString(), session, config.expiration30Days);
 
         if (!accessToken) return res.status(500).send({ status: "error", message: "Error logging in" });
 
-        res.status(200).send({ status: "success", message: "User logged in", "username": user.username, userId: user._id.toString(), "access_token": accessToken, "refresh_token": refreshToken });
+        res.cookie("a_token", accessToken,
+            {
+                httpOnly: true,
+                maxAge: config.expiration30Days * 1000
+            }
+        );
+        res.cookie("r_token", refreshToken,
+            {
+                httpOnly: true,
+                maxAge: config.expiration30Days * 1000
+            }
+        );
+
+        res.status(200).send({ status: "success", message: "User logged in", "username": user.username, userId: user._id.toString() });
     } catch {
         return res.status(500).send({ status: "error", message: "Error logging in" });
     }
 };
 
 const revokeSession = async (req: express.Request, res: express.Response) => {
-    const { refresh_token } = req.body;
+    const refresh_token = req.cookies.r_token;
 
-    if (!refresh_token) return res.status(400).send({ status: "error", message: "Invalid request body" });
+    if (!refresh_token) return res.sendStatus(403);
 
     // Validate refresh token.
     const { payload, valid } = verifyToken(refresh_token, true);
@@ -120,27 +145,11 @@ const revokeSession = async (req: express.Request, res: express.Response) => {
 
     if (!sessionInvalidated) return res.status(500).send({ status: "error", message: "Error invalidating session" });
 
+    // Update cookies.
+    res.clearCookie("a_token");
+    res.clearCookie("r_token");
+
     res.status(200).send({ status: "success", message: "Session invalidated" });
 };
 
-const refreshToken = async (req: express.Request, res: express.Response) => {
-    const { refresh_token } = req.body;
-
-    if (!refresh_token) return res.status(400).send({ status: "error", message: "Invalid request body" });
-
-    // Validate refresh token.
-    const { payload, valid } = verifyToken(refresh_token, true);
-    if (!valid || !payload) return res.status(403).send({ status: "error", message: "Invalid refresh token" });
-
-    // Validate session.
-    const session = await getSession((payload as User).sessionId);
-
-    if (!session) return res.status(403).send({ status: "error", message: "Invalid refresh token" });
-
-    // Generate new tokens.
-    const accessToken = generateAccessToken((payload as User).id, session._id.toString());
-
-    return res.status(200).send({ status: "success", message: "Token refreshed", "access_token": accessToken });
-};
-
-export { registerUser, loginUser, revokeSession, refreshToken };
+export { registerUser, loginUser, revokeSession };

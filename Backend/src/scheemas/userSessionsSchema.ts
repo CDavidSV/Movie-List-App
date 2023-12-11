@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose"
 
 const UserSchema = new Schema({
-    user_id: { type: String, required: true, unique: true },
+    user_id: { type: String, required: true },
     email: { type: String, required: true },
     created_at: { type: Date, required: true, default: Date.now },
     expires_at: { type: Date, required: true }

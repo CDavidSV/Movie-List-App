@@ -8,15 +8,15 @@ const generateToken = (payload: any, expirationDelta: number, refresh: boolean =
     return jwt.sign(payload, key as string, { expiresIn: expirationDelta });
 }
 
-const verifyToken = (token: string, refresh: boolean = false): {payload: User | null, valid: boolean} => {
+const verifyToken = (token: string, refresh: boolean = false): {payload: User | null, valid: boolean, expired: boolean} => {
     let key = process.env.ACCESS_TOKEN_KEY as string
     if (refresh) key = process.env.REFRESH_TOKEN_KEY as string
 
     try {
-        const decodedJWT = jwt.verify(token, key as string );
-        return { payload: decodedJWT as User, valid: true };
+        const decodedJWT = jwt.verify(token, key as string);
+        return { payload: decodedJWT as User, valid: true, expired: false };
     } catch (err) {
-        return { payload: null, valid: false };
+        return { payload: null, valid: false, expired: (err as jwt.JsonWebTokenError).message === "jwt expired" };
     }
 }
 
