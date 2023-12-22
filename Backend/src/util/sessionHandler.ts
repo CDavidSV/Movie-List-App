@@ -23,6 +23,8 @@ const invalidateSession = async (sessionId: string) => {
 const getSession = async (sessionId: string) => {
     try {
         const session = await userSessionsSchema.findById(sessionId);
+        if (!session) return null;
+        
         return session;
     } catch (err) {
         console.error(err);

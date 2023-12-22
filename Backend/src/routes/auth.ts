@@ -83,14 +83,7 @@ const loginUser = async (req: express.Request, res: express.Response) => {
     if (!req.is("application/x-www-form-urlencoded")) return res.status(401).send({ status: "error" });
 
     const { username, password } = req.body;
-
-    const loginSchema = {
-        username: { type: "string", required: true },
-        password: { type: "string", required: true }
-    }
-
-    const missingFields = validateJsonBody(req.body, loginSchema);
-    if (!missingFields) return res.status(400).send({ status: "error", message: "Invalid request body" });
+    if (!username || !password) return res.status(400).send({ status: "error", message: "Invalid request body" });
 
     try {
         const user = await UserSchema.findOne({ "$or": [{ email: username }, { username }] });
@@ -115,13 +108,15 @@ const loginUser = async (req: express.Request, res: express.Response) => {
         res.cookie("a_token", accessToken,
             {
                 httpOnly: true,
-                maxAge: config.expiration30Days * 1000
+                maxAge: config.expiration1Day * 1000,
+                sameSite: "strict"
             }
         );
         res.cookie("r_token", refreshToken,
             {
                 httpOnly: true,
-                maxAge: config.expiration30Days * 1000
+                maxAge: config.expiration30Days * 1000,
+                sameSite: "strict"
             }
         );
 
@@ -137,8 +132,8 @@ const revokeSession = async (req: express.Request, res: express.Response) => {
     if (!refresh_token) return res.sendStatus(403);
 
     // Validate refresh token.
-    const { payload, valid } = verifyToken(refresh_token, true);
-    if (!valid || !payload) return res.status(403).send({ status: "error", message: "Invalid refresh token" });
+    const { payload, expired } = verifyToken(refresh_token, true);
+    if (expired || !payload) return res.status(403).send({ status: "error", message: "Invalid refresh token" });
 
     // Invalidate session.
     const sessionInvalidated = await invalidateSession((payload as User).sessionId);

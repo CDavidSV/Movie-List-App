@@ -6,8 +6,8 @@ import config from "../../config.json";
 
 const generateRefreshToken = async (token: string) => {
     // Validate refresh token.
-    const { payload, valid } = verifyToken(token, true);
-    if (!valid || !payload) return { refreshedToken: null, payloadData: null };
+    const { payload, expired } = verifyToken(token, true);
+    if (expired || !payload) return { refreshedToken: null, payloadData: null };
 
     // Validate session.
     const session = await getSession((payload as User).sessionId).catch(() => null);
@@ -23,18 +23,19 @@ const deserializeUser = async (req: Request, res: Response, next: NextFunction) 
     const accessToken = req.cookies.a_token;
     const refreshToken = req.cookies.r_token;
 
-    const { payload, valid, expired } = verifyToken(accessToken);
+    const { payload, expired } = verifyToken(accessToken);
 
     if (payload) req.user = payload as User;
 
-    if (!valid) {
+    if (expired || !payload) {
         const { refreshedToken, payloadData } = await generateRefreshToken(refreshToken);
         if (!refreshedToken) return next();
 
         res.cookie("a_token", refreshedToken,
             {
                 httpOnly: true,
-                maxAge: config.expiration30Days * 1000
+                maxAge: config.expiration30Days * 1000,
+                sameSite: "strict"
             }
         );
         

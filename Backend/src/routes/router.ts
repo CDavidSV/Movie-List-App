@@ -8,8 +8,8 @@ const router: express.Router = express.Router();
 
 router.use('/api/v1', apiV1);
 
-router.post('/oauth2/register', registerUser);
-router.post('/oauth2/login', loginUser);
-router.post('/oauth2/revoke', revokeSession);
+router.post('/auth/register', registerUser);
+router.post('/auth/login', loginUser);
+router.post('/auth/logout', revokeSession);
 
 export default router;
