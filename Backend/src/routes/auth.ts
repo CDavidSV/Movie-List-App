@@ -3,24 +3,10 @@ import { User } from "../Models/interfaces";
 import UserSchema from "../scheemas/userSchema";
 import { validateJsonBody } from "../util/validateJson";
 import hashPassword from "../util/hashPassword";
-import { generateToken, verifyToken } from "../util/jwt";
+import { generateNewAccessToken, generateToken, verifyToken } from "../util/jwt";
 import SHA256 from "crypto-js/sha256";
 import { createSession, getSession, invalidateSession } from "../util/sessionHandler";
-import config from "../../config.json";
-
-const generateAccessToken = (user_id: string, sessionId: string, expirationDelta: number) => {
-    // Generate access token.
-    const accessToken = generateToken({ id: user_id, sessionId } as User, expirationDelta);
-
-    return accessToken;
-}
-
-const generateRefreshToken = (user_id: string, sessionId: string, expirationDelta: number) => {
-    // Generate refresh token.
-    const refreshToken = generateToken({ id: user_id, sessionId } as User, expirationDelta, true);
-
-    return refreshToken;
-}
+import config from "../config/config";
 
 const registerUser = async (req: express.Request, res: express.Response) => {
     const { username, password, email, favorite_genres } = req.body;
@@ -47,27 +33,36 @@ const registerUser = async (req: express.Request, res: express.Response) => {
         if (user && user.email === email) return res.status(400).send({ status: "error", message: "Email already in use" });
 
         // Create new user.
-        const newUser = await UserSchema.create({ username, email, favorite_genres, verified: false, password_hash: hashResult.hashedPassword, password_salt: hashResult.salt });
+        const newUser = await UserSchema.create(
+            { 
+                username, 
+                email, 
+                favorite_genres, 
+                verified: false, 
+                password_hash: hashResult.hashedPassword, 
+                password_salt: hashResult.salt 
+            });
         
         // Create session.
-        const session = await createSession(newUser.email, newUser._id.toString(), new Date(Date.now() + 2.592e+9)); // Set expiration date to 30 days from now.
-
-        if (!session) return res.status(500).send({ status: "error", message: "Error creating user" });
-        
-        const accessToken = generateAccessToken(newUser._id.toString(), session, config.expiration1Day);
-        const refreshToken = generateRefreshToken(newUser._id.toString(), session, config.expiration30Days);
+        const session = await createSession(newUser._id.toString(), req);
+        if (!session) return res.status(500).send({ status: "error", message: "Error on sign up" });
 
         // Set client cookies for access and refresh tokens.
-        res.cookie("a_token", accessToken,
+        res.cookie("a_t", session.accessToken,
             {
                 httpOnly: true,
-                maxAge: config.expiration30Days * 1000
+                maxAge: session.tokenExpirations.accessTokenExpitation / 1000
             }
         );
-        res.cookie("r_token", refreshToken,
+        res.cookie("r_t", session.refreshToken,
             {
                 httpOnly: true,
-                maxAge: config.expiration30Days * 1000
+                maxAge: session.tokenExpirations.refreshTokenExpiration / 1000
+            }
+        );
+        res.cookie("s_id", session.sessionId,
+            {
+                maxAge: session.tokenExpirations.refreshTokenExpiration / 1000
             }
         );
 
@@ -87,7 +82,6 @@ const loginUser = async (req: express.Request, res: express.Response) => {
 
     try {
         const user = await UserSchema.findOne({ "$or": [{ email: username }, { username }] });
-
         if (!user) return res.status(400).send({ status: "error", message: "Invalid username or password" });
 
         const passwordHash = user.password_hash;
@@ -96,27 +90,24 @@ const loginUser = async (req: express.Request, res: express.Response) => {
         if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return res.status(400).send({ status: "error", message: "Invalid username or password" });
 
         // Create session.
-        const session = await createSession(user.email, user._id.toString(), new Date(Date.now() + 2.592e+9));
-
+        const session = await createSession(user._id.toString(), req);
         if (!session) return res.status(500).send({ status: "error", message: "Error logging in" });
 
-        const accessToken = generateAccessToken(user._id.toString(), session, config.expiration1Day);
-        const refreshToken = generateRefreshToken(user._id.toString(), session, config.expiration30Days);
-
-        if (!accessToken) return res.status(500).send({ status: "error", message: "Error logging in" });
-
-        res.cookie("a_token", accessToken,
+        res.cookie("a_t", session.accessToken,
             {
                 httpOnly: true,
-                maxAge: config.expiration1Day * 1000,
-                sameSite: "strict"
+                maxAge: session.tokenExpirations.accessTokenExpitation
             }
         );
-        res.cookie("r_token", refreshToken,
+        res.cookie("r_t", session.refreshToken,
             {
                 httpOnly: true,
-                maxAge: config.expiration30Days * 1000,
-                sameSite: "strict"
+                maxAge: session.tokenExpirations.refreshTokenExpiration
+            }
+        );
+        res.cookie("s_id", session.sessionId,
+            {
+                maxAge: session.tokenExpirations.refreshTokenExpiration
             }
         );
 
@@ -126,8 +117,37 @@ const loginUser = async (req: express.Request, res: express.Response) => {
     }
 };
 
+const refreshToken = async (req: express.Request, res: express.Response) => {
+    const refreshToken = req.cookies.r_t;
+
+    if (!refreshToken) return res.status(403).send({ status: 'error', message: "Invalid token" });
+
+    const { payload, expired } = verifyToken(refreshToken, true);
+    if (expired || !payload) return res.status(403).send({ status: 'error', message: "Invalid token" });
+
+    // Attempt to refresh token.
+    const tokens = await generateNewAccessToken(refreshToken);
+    if (!tokens) return res.status(500).send({ status: 'error', message: "Error refreshing token" });
+
+    // Update cookies.
+    res.cookie("a_t", tokens.newAccessToken,
+        {
+            httpOnly: true,
+            maxAge: config.expiration1Hour
+        }
+    );
+    res.cookie("r_t", tokens.newRefreshToken,
+        {
+            httpOnly: true,
+            maxAge: config.expiration30Days
+        }
+    );
+
+    res.status(200).send({ status: "success", message: "Access token refreshed successfully", expires_id: tokens.expiresIn });
+};
+
 const revokeSession = async (req: express.Request, res: express.Response) => {
-    const refresh_token = req.cookies.r_token;
+    const refresh_token = req.cookies.r_t;
 
     if (!refresh_token) return res.sendStatus(403);
 
@@ -136,15 +156,14 @@ const revokeSession = async (req: express.Request, res: express.Response) => {
     if (expired || !payload) return res.status(403).send({ status: "error", message: "Invalid refresh token" });
 
     // Invalidate session.
-    const sessionInvalidated = await invalidateSession((payload as User).sessionId);
-
-    if (!sessionInvalidated) return res.status(500).send({ status: "error", message: "Error invalidating session" });
+    invalidateSession((payload as User).sessionId);
 
     // Update cookies.
-    res.clearCookie("a_token");
-    res.clearCookie("r_token");
+    res.clearCookie("a_t");
+    res.clearCookie("r_t");
+    res.clearCookie("s_id");
 
     res.status(200).send({ status: "success", message: "Session invalidated" });
 };
 
-export { registerUser, loginUser, revokeSession };
+export { registerUser, loginUser, revokeSession, refreshToken };

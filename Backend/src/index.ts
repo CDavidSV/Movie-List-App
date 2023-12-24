@@ -1,8 +1,9 @@
 import server from "./server";
+import config from "./config/config";
 import connectMongoDB from "./config/db";
 
 // Server port
-const port = 8080;
+const port = config.port;
 // Mongo URI
 const MONGO_URI = process.env.MONGO_URI as string;
 
