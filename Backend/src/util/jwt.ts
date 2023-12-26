@@ -43,11 +43,7 @@ const generateNewAccessToken = async (token: string) => {
     if (expired || !payload) return null;
 
     // Validate session.
-    const session = await getSession((payload as User).sessionId)
-        .catch((err) => { 
-            console.error(err); 
-            return null 
-        });
+    const session = await getSession((payload as User).sessionId);
     if (!session) return null;
 
     const hashedCookieRefreshToken = SHA256(token).toString();

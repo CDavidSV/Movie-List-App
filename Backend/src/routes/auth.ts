@@ -81,13 +81,13 @@ const loginUser = async (req: express.Request, res: express.Response) => {
     if (!username || !password) return res.status(400).send({ status: "error", message: "Invalid request body" });
 
     try {
-        const user = await UserSchema.findOne({ "$or": [{ email: username }, { username }] });
-        if (!user) return res.status(400).send({ status: "error", message: "Invalid username or password" });
+        const user = await UserSchema.findOne({ email: username });
+        if (!user) return res.status(400).send({ status: "error", message: "Invalid email or password" });
 
         const passwordHash = user.password_hash;
         const passwordSalt = user.password_salt;
 
-        if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return res.status(400).send({ status: "error", message: "Invalid username or password" });
+        if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return res.status(400).send({ status: "error", message: "Invalid email or password" });
 
         // Create session.
         const session = await createSession(user._id.toString(), req);

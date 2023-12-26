@@ -39,6 +39,7 @@ const createSession = async (userId: string, req: express.Request) => {
         return { sessionId, accessToken, refreshToken, tokenExpirations: { accessTokenExpitation, refreshTokenExpiration } };
     } catch (err) {
         console.error(err);
+        return null;
     }
 };
 
