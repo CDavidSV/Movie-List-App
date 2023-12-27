@@ -4,7 +4,7 @@ header {
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    background-color: #2a2a2c;
+    background-color: #313233;
 }
 
 .header-section {
@@ -13,17 +13,35 @@ header {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    background-color: #2a2a2c;
-    gap: 10px;
+    background-color: #313233;
 }
 
 .header-hoverable {
+    position: relative;
     padding: 0 10px 0 10px;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: ease 0.2s;
+}
+
+.header-hoverable::after {
+    content: "";
+    position: absolute;
+    display: block;
+    height: 0.2rem;
+    background-color: #0053ba;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: scaleX(0);
+    transition: ease 0.2s;
+}
+
+.header-hoverable:hover::after, 
+.header-hoverable.selected::after {
+    transform: scaleX(1);
 }
 
 .header-hoverable:hover {

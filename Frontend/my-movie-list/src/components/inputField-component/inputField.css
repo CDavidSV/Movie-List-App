@@ -1,0 +1,50 @@
+.input-box {
+    position: relative;
+    margin: 20px 0;
+    width: 320px;
+    border-bottom: 2px solid #fff;
+    transition: ease 0.2s;
+}
+
+.input-box label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 1em;
+    pointer-events: none;
+    transition: ease 0.3s;
+}
+
+input:focus ~ label,
+input:valid ~ label {
+    left: 0;
+    top: -5px;
+    font-size: 0.7em;
+    color: #b4b4b4;
+}
+
+.input-box:focus-within {
+    border-bottom: 2px solid #0053ba;
+    transition: ease 0.2s;
+}
+
+.input-box input {
+    width: 100%;
+    height: 50px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    color: #fff;
+}
+
+.input-box span {
+    position: absolute;
+    right: 8px;
+    color: #fff;
+    font-size: 1.3em;
+    top: 20px;
+    cursor: pointer;
+}
