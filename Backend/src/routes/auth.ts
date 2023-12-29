@@ -3,9 +3,9 @@ import { User } from "../Models/interfaces";
 import UserSchema from "../scheemas/userSchema";
 import { validateJsonBody } from "../util/validateJson";
 import hashPassword from "../util/hashPassword";
-import { generateNewAccessToken, generateToken, verifyToken } from "../util/jwt";
+import { generateNewAccessToken, verifyToken } from "../util/jwt";
 import SHA256 from "crypto-js/sha256";
-import { createSession, getSession, invalidateSession } from "../util/sessionHandler";
+import { createSession, invalidateSession } from "../util/sessionHandler";
 import config from "../config/config";
 
 const registerUser = async (req: express.Request, res: express.Response) => {

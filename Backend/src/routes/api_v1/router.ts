@@ -27,19 +27,10 @@ router.delete('list/:id/remove', requireUser, () => { });
 router.post('list/:id/reorder', requireUser, () => { });
 
 // User routes
+router.get("/me", requireUser, () => { });
 router.get("/user", requireUser, () => { });
+router.post("/user/change-profile-picture", requireUser, () => { });
 router.post("/user/update", requireUser, () => { });
 router.post("/user/password-update", requireUser, () => { });
-
-// Media routes
-router.get('/media/movies/popular', requireUser, () => { });
-router.get('/media/movies/trending', requireUser, () => { });
-router.get('/media/movies/top-rated', requireUser, () => { });
-router.get('/media/movies/upcoming', requireUser, () => { });
-router.get('/media/shows/popular', requireUser, () => { });
-router.get('/media/shows/trending', requireUser, () => { });
-router.get('/media/shows/top-rated', requireUser, () => { });
-router.get('/media/shows/upcoming', requireUser, () => { });
-router.get("/media/search", requireUser, () => { });
 
 export default router;

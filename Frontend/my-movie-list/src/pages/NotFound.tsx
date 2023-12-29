@@ -1,16 +1,15 @@
 import { Link } from "react-router-dom";
+import Header from "../components/header-component/header";
 
 export default function Home() {
     return <div>
-        <div className="title-header">
-            <h2>My Movie List</h2>
-        </div>
+        <Header />
         <div className="page-flex">
             <h1 style={{fontSize: '74px', margin: '20px 0 0 0'}}>404</h1>
             <h2>Page Not Found</h2>
             <p>Nothing to see here. At least that's what I think anyway...</p>
             <Link to="/">
-            <button className="button">
+            <button className="primary-button">
                 TAKE ME BACK
             </button>
             </Link>
