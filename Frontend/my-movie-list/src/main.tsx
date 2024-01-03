@@ -11,13 +11,16 @@ import SignUp from './pages/Signup'
 import PageNotFound from './pages/NotFound'
 import Genres from './pages/Genres'
 import Search from './pages/Search'
+import Watchlist from './pages/Watchlist'
+import History from './History'
+import MyProfile from './pages/MyProfile'
 
 function App() {
   const location = useLocation();
-  const showNavIn: string[] = ["/", "/movies", "/shows", "/my-lists", "/genres", "/search"];
+  const showNavIn: string[] = ["/", "/movies", "/shows", "/my-lists", "/genres", "/search", "/watchlist", "/history", "/profile"];
 
   return (
-    <div>
+    <>
       {showNavIn.includes(location.pathname) && <Navbar/>}
       <Routes>
         <Route path="/" Component={Home}/>
@@ -26,11 +29,14 @@ function App() {
         <Route path="/my-lists" Component={MyLists}/>
         <Route path="/genres" Component={Genres}/>
         <Route path="/search" Component={Search}/>
+        <Route path="/watchlist" Component={Watchlist}/>
+        <Route path="/history" Component={History}/>
+        <Route path="/profile" Component={MyProfile}/>
         <Route path="/login" Component={Login}/>
         <Route path="/signup" Component={SignUp}/>
         <Route path="*" Component={PageNotFound}/>
       </Routes>
-    </div>
+    </>
   );
 }
 

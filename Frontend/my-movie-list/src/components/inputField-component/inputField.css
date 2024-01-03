@@ -2,7 +2,7 @@
     position: relative;
     margin: 20px 0;
     width: 320px;
-    border-bottom: 2px solid #fff;
+    border-bottom: 2px solid var(--text-color);
     transition: ease 0.2s;
 }
 
@@ -11,7 +11,7 @@
     top: 50%;
     left: 5px;
     transform: translateY(-50%);
-    color: #fff;
+    color: var(--text-color);
     font-size: 1em;
     pointer-events: none;
     transition: ease 0.3s;
@@ -27,12 +27,35 @@ input:valid ~ label {
 
 .input-box:focus-within {
     border-bottom: 2px solid var(--primary-color);
-    transition: ease 0.2s;
+}
+
+.input-box.valid {
+    border-bottom: 2px solid green;
+}
+
+.input-box.valid label {
+    color: green;
+}
+
+.input-box.valid input:focus ~ label {
+    color: #b4b4b4;
+}
+
+.input-box.invalid {
+    border-bottom: 2px solid red;
+}
+
+.input-box.invalid label {
+    color: red;
+}
+
+.input-box.invalid input:focus ~ label {
+    color: #b4b4b4;
 }
 
 .input-box input {
     width: 100%;
-    height: 50px;
+    height: 35px;
     background: transparent;
     border: none;
     outline: none;
@@ -45,6 +68,6 @@ input:valid ~ label {
     right: 8px;
     color: #fff;
     font-size: 1.3em;
-    top: 20px;
+    top: 7px;
     cursor: pointer;
 }

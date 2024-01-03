@@ -1,17 +1,21 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-import { Link, useLocation } from 'react-router-dom';
-import React, { useEffect, useRef, useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import defaultPfp from '../../assets/images/profile-default.png';
 import Logo from '../../assets/logos/mml_logo.svg?react';
 import LogoWithName from '../../assets/logos/mml_logo_with_name.svg?react';
+import onRouteChange from '../../hooks/onRouteChange';
+import { getSessionData, logOut, SessionData } from '../../helpers/session.helpers';
 import './navbar.css';
 
-function NavDropdown(props: { children: React.ReactNode, button: React.ReactNode, flexJustifyContent?: string }) {
+const genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
+
+function useDropdown() {
     const [menuState, setMenuState] = useState(false);
     const node = useRef<HTMLDivElement>(null);
-    const location = useLocation();
-
+    
+    const toggleMenu = () => setMenuState(!menuState);
     const handleClick = (e: MouseEvent) => {
         if (node.current!.contains(e.target as Node)) {
             return;
@@ -19,139 +23,168 @@ function NavDropdown(props: { children: React.ReactNode, button: React.ReactNode
 
         setMenuState(false);
     };
-
+    
+    // Hook to detect when the user clicks outside the dropdown menu
     useEffect(() => {
         document.addEventListener("mousedown", handleClick);
-
+    
         return () => {
             document.removeEventListener("mousedown", handleClick);
         };
     }, []);
 
+    // Hook to detect when the user changes the route to close the dropdown menu
+    onRouteChange(() => setMenuState(false));
+
+    return { node, menuState, toggleMenu };
+}
+
+function GenresDropdown() {
+    const { node, menuState, toggleMenu } = useDropdown();
+
+    return (
+        <div 
+            ref={node} 
+            style={{
+                height: "100%",
+                width: "100%",
+                display: "flex"
+            }}
+            >
+            <div className="select-button" onClick={toggleMenu}>
+                <p>Browse</p>
+                <span className={menuState ? "select-arrow select-active" : "select-arrow"}></span>
+            </div>
+            <div className={menuState ? "dropdown genre-dropdown select-active" : "dropdown genre-dropdown"}>
+                {genres.map((genre) => (
+                    <li key={genre} className="menu-item">
+                        <NavLink className={({isActive}) => isActive ? "menu-item-title selected" : "menu-item-title"} to="/genres">{genre}</NavLink>
+                    </li>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function ProfileDropdown() {
+    const { node, menuState, toggleMenu } = useDropdown();
+    const [sessionData, setSessionData] = useState<SessionData | null>(null);
+
     useEffect(() => {
-        setMenuState(false);
-    }, [location]);
-    
+        setSessionData(getSessionData());
+    }, []);
+
     return (
         <div 
             ref={node} 
             style={{
                 height: "100%", 
-                display: "flex", 
-                justifyContent: `${props.flexJustifyContent || "flex-start"}`
+                display: "flex",
+                justifyContent: "flex-end"
             }}
-            className={menuState ? "select-active" : ""}
             >
-            <div className="select-button" onClick={() => setMenuState(!menuState)}>
-                {props.button}
-                <span className="select-arrow"></span>
-            </div>
-            {props.children}
-        </div>
-    );
-}
-
-function GenresDropdown() {
-    const genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"]
-
-    return (
-        <NavDropdown
-            button={<p>Browse</p>}
-        >
-            <div className="genre-dropdown">
-                {genres.map((genre) => (
-                    <li key={genre} className="menu-item">
-                        <Link className="menu-item-title" to="/genres">{genre}</Link>
-                    </li>
-                ))}
-            </div>
-        </NavDropdown>
-    );
-}
-
-function ProfileDropdown() {
-    return (
-        <NavDropdown
-            button={
+            <div className="select-button" onClick={toggleMenu}>
                 <div className="profile-img">
                     <img src={defaultPfp} alt="profile-picture"/>
                 </div>
-            }
-            flexJustifyContent="flex-end"
-        >
-        <div className="profile-dropdown">
-            <div className="menu-profile-section">
-                <li className="menu-profile-item">
-                    <img src={defaultPfp} alt="profile-picture"/>
-                    <div className="profile-name">
-                        <p>Username</p>
-                        <p>Email</p>
+                <span className={menuState ? "select-arrow select-active" : "select-arrow"}></span>
+            </div>
+            { sessionData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
+                <div className="menu-profile-section">
+                    <div className="menu-user-profile-item">
+                        <img src={defaultPfp} alt="profile-picture"/>
+                        <div className="profile-name">
+                            <p>{sessionData.username || "Username"}</p>
+                            <p>{sessionData.email || "Email"}</p>
+                        </div>
                     </div>
-                </li>
-            </div>
-            <div className="profile-dropdown-section">
-                <li className="menu-item">
-                    <Link className="menu-item-title" to="/profile">My Profile</Link>
-                </li>
-                <li className="menu-item">
-                    <Link className="menu-item-title" to="/my-lists">Watchlist</Link>
-                </li>
-                <li className="menu-item">
-                    <Link className="menu-item-title" to="/my-lists">My lists</Link>
-                </li>
-                <li className="menu-item">
-                    <Link className="menu-item-title" to="/history">History</Link>
-                </li>
-            </div>
-            <div className="profile-dropdown-section">
-                <li className="menu-item">
-                    <Link className="menu-item-title" to="/logout">Log out</Link>
-                </li>
-            </div>
+                </div>
+                <div className="profile-dropdown-section">   
+                    <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/profile">
+                        <span className="material-symbols-outlined">account_circle</span>
+                        <div>
+                            My Profile
+                            <p className="menu-item-subtext">Manage your profile settings</p>
+                        </div>
+                    </NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/watchlist">
+                        <span className="material-symbols-outlined">bookmark</span>
+                        Watchlist
+                    </NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/my-lists">
+                        <span className="material-symbols-outlined">lists</span>
+                        My lists
+                    </NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/history">
+                    <span className="material-symbols-outlined">history</span>
+                        History
+                    </NavLink>
+                </div>
+                <div className="profile-dropdown-section">
+                    <NavLink className="menu-profile-item" to="/login" onClick={logOut}>
+                        <span className="material-symbols-outlined">logout</span>
+                        Log out
+                    </NavLink>
+                </div>
+            </div>}
+            {!sessionData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
+            <div className="menu-profile-section">   
+                    <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/login">
+                        <span className="material-symbols-outlined">login</span>
+                        <div>
+                            Log in
+                            <p className="menu-item-subtext">Log in to your existing account</p>
+                        </div>
+                    </NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/signup">
+                        <span className="material-symbols-outlined">person_add</span>
+                        <div>
+                            Create Account
+                            <p className="menu-item-subtext">Don't have an account? Create one now.</p>
+                        </div>
+                    </NavLink>
+                </div>
+            </div>}
         </div>
-        </NavDropdown>
     );
 }
 
 export default function Navbar() {
-    const currentPage = useLocation().pathname;
-
-    const selectedPage = (path: string) => {
-        return `header-hoverable ${currentPage === path ? "selected" : ""}`;
-    }
+    const { node, menuState, toggleMenu } = useDropdown();
 
     return (
         <header>
-            <div className="header-section">
-                <div className="hamburger-icon header-hoverable">
-                    <span className="material-symbols-outlined">menu</span>
+            <div ref={node} className="header-section">
+                <div className="header-section" onClick={toggleMenu}>
+                    <div className="header-hoverable hamburger-btn">
+                        <span className="material-symbols-outlined">menu</span>
+                    </div>
                 </div>
                 <div className="logo-container">
                     <LogoWithName className="logo-desktop"/>
                     <Logo className="logo-mobile"/>
                 </div>
-
-                <div className="header-pages">
-                    <Link to="/" className="header-hoverable">
+                <div className={`header-pages${menuState ? " active-hamburger-menu" : ""}`}>
+                    <NavLink to="/" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
                         <p>Home</p>
-                    </Link>
-                    <Link to="/movies" className="header-hoverable">
+                    </NavLink>
+                    <NavLink to="/movies" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
                         <p>Movies</p>
-                    </Link>
-                    <Link to="/shows" className="header-hoverable">
+                    </NavLink>
+                    <NavLink to="/shows" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
                         <p>Shows</p>
-                    </Link>
+                    </NavLink>
                     <GenresDropdown/>
                 </div>
             </div>
 
             <div className="header-section">
-                <Link to="/search" className="header-hoverable">
+                <NavLink to="/search" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
                     <span className="material-symbols-outlined">search</span>     
-                </Link>
-                <Link to="/my-lists" className="header-hoverable lists-icon">
-                    <span className="material-symbols-outlined">lists</span>     
-                </Link>
+                </NavLink>
+                <NavLink to="/watchlist" className={({ isActive }) => isActive ? "header-hoverable lists-icon selected " : "header-hoverable lists-icon"}>
+                    <span className="material-symbols-outlined">bookmark</span>     
+                </NavLink>
                 
                 <ProfileDropdown/>
             </div>

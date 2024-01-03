@@ -4,6 +4,7 @@ const UserSchema = new Schema({
     username: { type: String, required: true, unique: true },
     avatar: { type: String },
     email: { type: String, required: true },
+    profile_picture: { type: String },
     verified: { type: Boolean, default: false, required: true },
     password_hash: { type: String },
     password_salt: { type: String },

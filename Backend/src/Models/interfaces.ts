@@ -3,6 +3,13 @@ interface User {
     sessionId: string;
 }
 
+interface APIResponse<T> {
+    status: string;
+    message: string;
+    responseData?: T;
+}
+
 export { 
-    User
+    User,
+    APIResponse
 };

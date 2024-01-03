@@ -1,32 +1,115 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import InputField from '../components/inputField-component/inputField';
+import { useState } from 'react';
+import mml_api from '../axios/mml_api_intance';
+import Header from '../components/header-component/header';
+import { setSessionData } from '../helpers/session.helpers';
 
-export default function Login() {
-    let username = "";
-    let email = "";
-    let password = "";
-    let passwordConfirm = "";
+interface SignUpData {
+    username: string;
+    email: string;
+    password: string;
+    passwordConfirm: string;
+}
 
-    const attemptLogin = (event: React.FormEvent<HTMLFormElement>) => {
+interface SignUpError {
+    usernameError: string;
+    emailError: string;
+    passwordError: string;
+}
+
+export default function SignUp() {
+    const [signUpData, setSignUpData] = useState<SignUpData | null>(null);
+    const [signUpErrors, setSignUpErrors] = useState<SignUpError>({ usernameError: '', emailError: '', passwordError: '' });
+    const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
+    const attemptSignUp = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("Email: " + email);
-        console.log("Password: " + password);
+
+        if (signUpData!.password.length < 8) {
+            setSignUpErrors({ ...signUpErrors!, passwordError: 'invalid' });
+            setErrorMessage("Password must be at least 8 characters long");
+            return;
+        }
+
+        if (signUpData!.password !== signUpData!.passwordConfirm) {
+            setSignUpErrors({ ...signUpErrors!, passwordError: 'invalid' });
+            setErrorMessage("Passwords do not match");
+            return;
+        }
+
+        // Reset error messages
+        setSignUpErrors({ usernameError: 'valid', emailError: 'valid', passwordError: 'valid' });
+        setErrorMessage("");
+        setLoading(true);
+        mml_api.post("/auth/register", 
+        signUpData, 
+        { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
+        .then((response) => {
+            setSessionData(response.data.responseData.userEmail, response.data.responseData.username);
+
+            navigate("/");
+        }).catch(((err) => {
+            const message = err.response.data.message;
+
+            switch (message) {
+                case "Username already in use":
+                    setSignUpErrors({ ...signUpErrors!, usernameError: 'invalid' });
+                    setErrorMessage("Username already in use");
+                    break;
+                case "Email already in use":
+                    setSignUpErrors({ ...signUpErrors!, emailError: 'invalid' });
+                    setErrorMessage("Email already in use");
+                    break;
+                default:
+                    setErrorMessage(message);
+                    break;
+            }
+        })).finally(() => setLoading(false));
     }
 
     return (
         <div>
-            <div className="title-header">
-                <Link to="/"><h2>My Movie List</h2></Link>
-            </div>
+            <Header />
             <div className="login-container">
-                <form className="signup-form" onSubmit={attemptLogin}>
+                <form className="signup-form" onSubmit={attemptSignUp}>
                     <h1 style={{textAlign: "center"}}>Sign Up</h1>
-                    <InputField type="text" id="email" label="Email" required={true} onInputChange={(value: string) => {email = value}}/>
-                    <InputField type="text" id="username" label="Username" required={true} onInputChange={(value: string) => {username = value}}/>
-                    <InputField type="password" id="password" label="Password" required={true} onInputChange={(value: string) => {password = value}}/>
-                    <InputField type="password" id="password-confirm" label="Confirm Password" required={true} onInputChange={(value: string) => {passwordConfirm = value}}/>
+                    {errorMessage && <p className="error-text">{errorMessage}</p>}
+                    <InputField 
+                        type="text" 
+                        id="email" 
+                        label="Email" 
+                        required={true} 
+                        onInputChange={(value: string) => setSignUpData({...signUpData!, email: value})}
+                        status={signUpErrors.emailError}/>
+                    <InputField 
+                        type="text" 
+                        id="username" 
+                        label="Username" 
+                        required={true} 
+                        onInputChange={(value: string) => setSignUpData({...signUpData!, username: value})}
+                        status={signUpErrors.usernameError}/>
+                    <InputField 
+                        type="password" 
+                        id="password" 
+                        label="Password" 
+                        required={true} 
+                        onInputChange={(value: string) => setSignUpData({...signUpData!, password: value})}
+                        status={signUpErrors.passwordError}/>
+                    <InputField 
+                        type="password" 
+                        id="password-confirm" 
+                        label="Confirm Password" 
+                        required={true} 
+                        onInputChange={(value: string) => setSignUpData({...signUpData!, passwordConfirm: value})}
+                        status={signUpErrors.passwordError}/>
                     
-                    <button className="primary-button">Sign up</button>
+                    <button className="primary-button" disabled={loading}>
+                        {!loading && "Sign Up"}
+                        {loading && <span className="spinning-loader"></span>}
+                    </button>
                     <p style={{fontSize: "14px", textAlign: "center"}}>Already have an account? <Link className="signup-btn" to="/login">Log In</Link></p>
                 </form>
             </div>

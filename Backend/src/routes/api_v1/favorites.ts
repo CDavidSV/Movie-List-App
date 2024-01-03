@@ -48,6 +48,9 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
     });
 };
 
+const itemInFavorites = async (req: express.Request, res: express.Response) => {
+};
+
 const addFavorite = async (req: express.Request, res: express.Response) => {
     const media_id = req.query.media_id;
 
@@ -156,4 +159,4 @@ const reorderFavorites = async (req: express.Request, res: express.Response) => 
     }
 };
 
-export { getFavorites, addFavorite, removeFavorite, reorderFavorites };
+export { getFavorites, addFavorite, removeFavorite, reorderFavorites, itemInFavorites };

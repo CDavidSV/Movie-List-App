@@ -13,6 +13,8 @@ interface Config {
     cookieSameSite?: string,
     expiration30Days: number,
     expiration1Hour: number
+    allowedProdDomains?: string[],
+    allowedDevDomains?: string[]
 }
 
 // Local config options.
@@ -24,7 +26,8 @@ const config: Config = {
     cookieSecure: false,
     cookieSameSite: 'none',
     domain: '.localhost',
-    refreshTokenDomain: '.localhost'
+    refreshTokenDomain: '.localhost',
+    allowedDevDomains: ['http://localhost:5173'],
 }
 
 export default config;

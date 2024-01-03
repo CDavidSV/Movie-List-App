@@ -1,6 +1,6 @@
 export default function Movies() {
     return (
-        <div>
+        <div className="content">
             <h1>Movies Route</h1>
         </div>
     );

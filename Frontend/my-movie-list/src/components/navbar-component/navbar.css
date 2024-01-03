@@ -1,4 +1,5 @@
 header {
+    box-sizing: border-box;
     top: 0;
     position: fixed;
     width: 100%;
@@ -9,6 +10,8 @@ header {
     align-items: center;
     padding: 0 1rem;
     background-color: var(--secondary-background-color);
+    user-select: none;
+    z-index: 1;
 }
 
 .header-section {
@@ -47,17 +50,22 @@ header {
     transform: scaleX(1);
 }
 
+.menu-item-title.selected {
+    color: var(--primary-color);
+}
+
 .header-hoverable:hover {
     cursor: pointer;
     background-color: var(--tertiary-background-color);
 }
 
-.hamburger-icon {
+.hamburger-btn {
     display: none;
 }
 
-.hamburger-icon.header-hoverable {
-    padding: 0 30px;
+.hamburger-btn.header-hoverable {
+    padding: 0 20px;
+    margin-right: 5px;
 }
 
 .header-pages {
@@ -67,6 +75,7 @@ header {
     flex-direction: row;
     justify-content: flex-end;
     height: 100%;
+    transition: 0.2s ease;
 }
 
 .nav-header {
@@ -98,11 +107,6 @@ header {
     grid-auto-flow: column;
     grid-template-rows: repeat(6,1fr);
     padding: 10px 0;
-    transition: 0.3s ease;
-
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(9vh);
 }
 
 .profile-dropdown {
@@ -111,13 +115,21 @@ header {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     background-color: var(--secondary-background-color);
     margin: 0;
-    transition: 0.3s ease;
 
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(9vh);
     width: 100vw;
     max-width: 400px;
+}
+
+.hamburger-menu {
+    position: absolute;
+    list-style: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    background-color: var(--secondary-background-color);
+    margin: 0;
+
+    width: 100vw;
+    max-width: 400px;
+
 }
 
 .profile-dropdown-section {
@@ -129,22 +141,23 @@ header {
     padding: 20px 0;
 }
 
-.select-active .profile-dropdown {
-    opacity: 1;
-    visibility: visible;
-    transition: 0.3s ease;
-    transform: translateY(var(--nav-height));
-}
-
-.select-active .genre-dropdown {
-    opacity: 1;
-    visibility: visible;
-    transition: 0.3s ease;
-    transform: translateY(var(--nav-height));
-}
-
-.select-active .select-arrow {
+.select-active.select-arrow {
     transform: rotate(180deg);
+}
+
+.dropdown {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-1vh);
+    transition: 0.3s ease;
+    top: 100%;
+}
+
+.select-active.dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: 0.3s ease;
 }
 
 .menu-item {
@@ -173,10 +186,10 @@ header {
 }
 
 .select-button {
-    background: var(--secondary-background-color);
     position: relative;
     padding: 0 10px;
     height: 100%;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -190,7 +203,7 @@ header {
     transition: ease 0.2s;
 }
 
-.menu-profile-item {
+.menu-user-profile-item {
     height: 90px;
     display: flex;
     flex-direction: row;
@@ -198,11 +211,40 @@ header {
     align-items: center;
 }
 
-.menu-profile-item img {
+.menu-user-profile-item img {
     width: 70px;
     border-radius: 100%;
     margin-right: 10px;
     margin-left: 15px;
+}
+
+.menu-profile-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    height: 100%;
+    min-height: 50px;
+    padding: 5px 20px;
+    transition: ease 0.2s;
+}
+
+.menu-profile-item:hover {
+    cursor: pointer;
+    background-color: var(--tertiary-background-color);
+    transition: ease 0.2s;
+}
+
+.menu-profile-item.selected {
+    color: var(--primary-color);
+}
+
+.menu-item-subtext {
+    margin: 3px 0;
+    font-size: 0.8rem;
+    color: var(--text-color);
+    filter: brightness(0.7);
 }
 
 .profile-name p:nth-child(1) {
@@ -222,24 +264,26 @@ header {
         padding: 0;
     }
 
-    .hamburger-icon {
+    .hamburger-btn {
         display: flex;
     }
 
     .header-pages {
-        z-index: -1;
+        top: 0;
+        left: 0;
+        background: var(--secondary-background-color);
+        pointer-events: none;
         opacity: 0;
         position: absolute;
         display: flex;
         flex-direction: column;
         justify-content: flex-end;
         align-items: center;
-        left: 0;
-        top: 6vh;
         height: 250px;
         margin: 0;
         width: 100vw;
-        max-width: 400px;
+        max-width: 500px;
+        transform: translateY(9vh);
     }
 
     .header-pages .header-hoverable {
@@ -250,12 +294,17 @@ header {
     .app-title {
         font-size: 1.2rem;
     }
+
+    .header-pages.active-hamburger-menu {
+        pointer-events: all;
+        opacity: 1;
+        transform: translateY(var(--nav-height));
+    }
 }
 
 @media screen and (max-width: 480px) { 
     header {
         justify-content: space-between;
-        padding: 0;
     }
 
     .lists-icon {

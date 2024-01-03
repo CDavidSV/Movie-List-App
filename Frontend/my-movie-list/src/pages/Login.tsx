@@ -1,15 +1,39 @@
 import { Link } from 'react-router-dom';
 import Header from '../components/header-component/header';
 import InputField from '../components/inputField-component/inputField';
+import mml_api from '../axios/mml_api_intance';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { setSessionData } from '../helpers/session.helpers';
+
+interface LoginData {
+    username: string;
+    password: string;
+}
 
 export default function Login() {
-    let email = "";
-    let password = "";
+    const [loginData, setLoginData] = useState<LoginData | null>(null);
+    const [loginError, setLoginError] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const attemptLogin = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        console.log("Email: " + email);
-        console.log("Password: " + password);
+
+        // Reset error messages
+        setErrorMessage("");
+        setLoginError("");
+        setLoading(true);
+        mml_api.post("/auth/login", loginData, { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
+        .then((response) => {
+            setSessionData(response.data.responseData.userEmail, response.data.responseData.username);
+            // If login is successful, store user data and redirect to home page
+            navigate("/");
+        }).catch((err) => {
+            setLoginError("invalid");
+            setErrorMessage(err.response.data.message);
+        }).finally(() => setLoading(false));
     }
 
     return (
@@ -18,13 +42,29 @@ export default function Login() {
             <div className="login-container">
                 <form className="login-form" onSubmit={attemptLogin}>
                     <h1 style={{textAlign: "center"}}>Log In</h1>
-                    <InputField type="text" id="email" label="Email" required={true} onInputChange={(value: string) => {email = value}}/>
+                    {loginError && <p className="error-text">{errorMessage}</p>}
+                    <InputField 
+                        type="text" 
+                        id="email" 
+                        label="Email" 
+                        required={true} 
+                        onInputChange={(value: string) => setLoginData({ ...loginData!, username: value })} 
+                        status={loginError}/>
 
                     <div>
-                        <InputField type="password" id="password" label="Password" required={true} onInputChange={(value: string) => {password = value}}/>
+                        <InputField 
+                            type="password" 
+                            id="password" 
+                            label="Password" 
+                            required={true} 
+                            onInputChange={(value: string) => setLoginData({ ...loginData!, password: value })} 
+                            status={loginError}/>
                         <Link to="/reset-password"><p className="forgot-password">Forgot Password</p></Link>
                     </div>
-                    <button className="primary-button">Log in</button>
+                    <button className="primary-button" disabled={loading}>
+                        {!loading && "Log In"}
+                        {loading && <span className="spinning-loader"></span>}
+                    </button>
                     <p style={{fontSize: "14px", textAlign: "center"}}>Don't have an account? <Link className="signup-btn" to="/signup">Sign up</Link></p>
                 </form>
             </div>

@@ -57,29 +57,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
     });
 };
 
-const getWatchlistItem = async (req: express.Request, res: express.Response) => {
-    const queryId = req.query.id;
-
-    if (!queryId) return res.status(400).send({ status: "error", message: "Invalid film id" });
-
-    try {
-        const watchlistItem = await watchlistSchema.findOne({ user_id: req.user!.id, _id: queryId });
-        if (!watchlistItem) return res.status(404).send({ status: "error", message: "Watchlist item not found" });
-
-        const responseData = {
-            id: watchlistItem._id,
-            status: watchlistStatus.get(watchlistItem.status),
-            progress: watchlistItem.progress,
-            rating: watchlistItem.rating,
-            addedDate: watchlistItem.added_date,
-            updatedDate: watchlistItem.updated_date
-        }
-
-        res.status(200).send({ status: "success", data: responseData });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send({ status: "error", message: "Error fetching watchlist item" });
-    }
+const itemInWatchlist = async (req: express.Request, res: express.Response) => {
 };
 
 const updateWatchlist = async (req: express.Request, res: express.Response) => {
@@ -124,4 +102,4 @@ const removeItemFromWatchlist = async (req: express.Request, res: express.Respon
     }
 };
 
-export { getWatchlist, updateWatchlist, removeItemFromWatchlist, getWatchlistItem };
+export { getWatchlist, updateWatchlist, removeItemFromWatchlist, itemInWatchlist };

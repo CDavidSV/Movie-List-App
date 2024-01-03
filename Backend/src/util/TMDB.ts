@@ -11,8 +11,9 @@ const findMediaById = async (id: string): Promise<Media | null> => {
         const media = new Media(response.data);
         return media;
     }).catch((err) => {
+        console.error(err);
         return null;
     });
-}
+};
 
 export { findMediaById };
