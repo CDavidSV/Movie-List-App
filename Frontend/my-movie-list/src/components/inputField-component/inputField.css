@@ -1,7 +1,7 @@
 .input-box {
     position: relative;
     margin: 20px 0;
-    width: 320px;
+    width: 100%;
     border-bottom: 2px solid var(--text-color);
     transition: ease 0.2s;
 }

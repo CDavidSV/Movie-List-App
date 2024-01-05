@@ -14,6 +14,7 @@ const saveMovie = async (mediaData: Media) => {
             description: mediaData.overview,
             release_date: mediaData.releaseDate,
             poster_url: mediaData.posterPath,
+            backdrop_url: mediaData.backdropPath,
             runtime: mediaData.runtime
         });
         

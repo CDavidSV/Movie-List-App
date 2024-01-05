@@ -1,9 +1,7 @@
 import { Link } from "react-router-dom";
-import Header from "../components/header-component/header";
 
 export default function Home() {
     return <div>
-        <Header />
         <div className="page-flex">
             <h1 style={{fontSize: '74px', margin: '20px 0 0 0'}}>404</h1>
             <h2>Page Not Found</h2>

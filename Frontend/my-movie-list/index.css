@@ -34,6 +34,15 @@
     --tertiary-background-color: #0f0f0f79;
 }
 
+.icon-btn {
+    color: var(--primary-color);
+    transition: 0.2s ease;
+}
+
+.icon-btn:hover {
+    scale: 1.1;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -54,7 +63,10 @@ body {
 }
 
 .content {
+    height: 100dvh;
     padding-top: var(--nav-height);
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .page-overlay {
@@ -150,6 +162,8 @@ button:disabled {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    max-width: 400px;
+    width: 100%;
     background-color: var(--secondary-background-color);
 }
 
@@ -159,6 +173,8 @@ button:disabled {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    max-width: 400px;
+    width: 100%;
     background-color: var(--secondary-background-color);
 }
 

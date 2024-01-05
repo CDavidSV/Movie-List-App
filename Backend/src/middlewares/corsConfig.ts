@@ -6,7 +6,7 @@ const corsConfig = (req: Request, callback: Function) => {
     const headerOrigin = req.header('Origin');
     let corsOptions: cors.CorsOptions = {
         origin: false,
-        methods: 'GET, POST',
+        methods: 'GET, POST, DELETE',
         credentials: true,
         optionsSuccessStatus: 204
     };

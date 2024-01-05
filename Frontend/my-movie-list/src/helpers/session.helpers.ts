@@ -1,8 +1,10 @@
-import mml_api from "../axios/mml_api_intance";
+import { mml_api } from "../axios/mml_api_intances";
 
 interface SessionData {
     email: string;
     username: string;
+    expiresAt: number;
+    setAt: number;
 }
 
 const isLoggedIn = () => {
@@ -17,22 +19,28 @@ const getSessionData = () => {
     return JSON.parse(localStorage.getItem('sessionData')!) as SessionData;
 };
 
-const setSessionData = (email: string, username: string) => {
+const setSessionData = (email: string, username: string, expiresAt: number) => {
     const sessionData = {
         email,
-        username
+        username,
+        expiresAt,
+        setAt: Date.now()
     } as SessionData;
 
     localStorage.setItem('sessionData', JSON.stringify(sessionData));
 }
 
-const logOut = () => {
+const clearSessionData = () => {
     localStorage.removeItem('sessionData');
+}
+
+const logOut = () => {
+   clearSessionData();
 
     mml_api.post('/auth/logout', {}, {
         withCredentials: true
     });
 }
 
-export { isLoggedIn, getSessionData, setSessionData, logOut };
+export { isLoggedIn, getSessionData, setSessionData, logOut, clearSessionData };
 export type { SessionData };

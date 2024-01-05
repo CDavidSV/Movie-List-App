@@ -4,6 +4,7 @@ import { validateJsonBody } from "../../util/validateJson";
 import { findMediaById } from "../../util/TMDB";
 import Media from "../../Models/Media";
 import saveMovie from "../../util/mediaHandler";
+import { sendResponse } from "../../util/apiHandler";
 
 const watchlistStatus = new Map([
     [0, "Not Started"],
@@ -57,9 +58,6 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
     });
 };
 
-const itemInWatchlist = async (req: express.Request, res: express.Response) => {
-};
-
 const updateWatchlist = async (req: express.Request, res: express.Response) => {
     const { media_id, status, progress } = req.body;
 
@@ -89,12 +87,12 @@ const updateWatchlist = async (req: express.Request, res: express.Response) => {
 };
 
 const removeItemFromWatchlist = async (req: express.Request, res: express.Response) => {
-    const media_id = req.query.media_id;
+    const id = req.query.id;
 
-    if (!media_id) return res.status(400).send({ status: "error", message: "Invalid media id" });
+    if (!id) return res.status(400).send({ status: "error", message: "Invalid watchlist id" });
 
     try {
-        await watchlistSchema.deleteOne({ user_id: req.user!.id, media_id });
+        await watchlistSchema.findByIdAndDelete(id as string);
         res.status(200).send({ status: "success", message: "Removed from watchlist" });
     } catch (err) {
         console.error(err);
@@ -102,4 +100,4 @@ const removeItemFromWatchlist = async (req: express.Request, res: express.Respon
     }
 };
 
-export { getWatchlist, updateWatchlist, removeItemFromWatchlist, itemInWatchlist };
+export { getWatchlist, updateWatchlist, removeItemFromWatchlist };

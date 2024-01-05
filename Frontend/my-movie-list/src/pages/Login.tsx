@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
-import Header from '../components/header-component/header';
 import InputField from '../components/inputField-component/inputField';
-import mml_api from '../axios/mml_api_intance';
+import { mml_api } from '../axios/mml_api_intances';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { setSessionData } from '../helpers/session.helpers';
@@ -27,7 +26,7 @@ export default function Login() {
         setLoading(true);
         mml_api.post("/auth/login", loginData, { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
         .then((response) => {
-            setSessionData(response.data.responseData.userEmail, response.data.responseData.username);
+            setSessionData(response.data.responseData.userEmail, response.data.responseData.username, response.data.responseData.expires_at);
             // If login is successful, store user data and redirect to home page
             navigate("/");
         }).catch((err) => {
@@ -38,13 +37,12 @@ export default function Login() {
 
     return (
         <div>
-            <Header />
             <div className="login-container">
                 <form className="login-form" onSubmit={attemptLogin}>
                     <h1 style={{textAlign: "center"}}>Log In</h1>
                     {loginError && <p className="error-text">{errorMessage}</p>}
                     <InputField 
-                        type="text" 
+                        type="email" 
                         id="email" 
                         label="Email" 
                         required={true} 

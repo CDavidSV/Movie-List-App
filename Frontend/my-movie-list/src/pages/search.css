@@ -1,0 +1,28 @@
+.search-bar {
+    display: flex;
+    justify-content: center;
+    background-color: var(--tertiary-background-color);
+    width: 100%;
+    padding: 15px 20%;
+}
+
+.search-results-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.search-results {
+    margin: 0 10vw;
+}
+
+.result-card {
+    max-height: 500px;
+}
+
+.search-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 5vh;
+}

@@ -43,12 +43,9 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
 
         res.status(200).send({ status: "success", page, pages, favorites });
     }).catch((err) => {
-        console.log(err);
+        console.error(err);
         res.status(500).send({ status: "error", message: "Error fetching favorites" });
     });
-};
-
-const itemInFavorites = async (req: express.Request, res: express.Response) => {
 };
 
 const addFavorite = async (req: express.Request, res: express.Response) => {
@@ -78,7 +75,7 @@ const addFavorite = async (req: express.Request, res: express.Response) => {
         
         saveMovie(mediaData as Media);
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500).send({ status: "error", message: "Error adding favorite" });
     }
 };
@@ -92,7 +89,7 @@ const removeFavorite = async (req: express.Request, res: express.Response) => {
     favoritesSchema.findByIdAndDelete(favorite_id).then(() => {
         res.status(200).send({ status: "success", message: "Favorite removed" });
     }).catch((err) => {
-        console.log(err);
+        console.error(err);
         res.status(500).send({ status: "error", message: "Error removing favorite" });
     });
 };
@@ -143,7 +140,6 @@ const reorderFavorites = async (req: express.Request, res: express.Response) => 
                 } else {
                     newRank = calculateLexoRank(reference.rank, nextFavorite.rank);
                 }
-                console.log(newRank);
                 break;
             default:
                 res.status(400).send({ status: "error", message: "Invalid position" });
@@ -159,4 +155,4 @@ const reorderFavorites = async (req: express.Request, res: express.Response) => 
     }
 };
 
-export { getFavorites, addFavorite, removeFavorite, reorderFavorites, itemInFavorites };
+export { getFavorites, addFavorite, removeFavorite, reorderFavorites };

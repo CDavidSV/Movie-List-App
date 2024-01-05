@@ -1,19 +1,21 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Route, BrowserRouter, Routes, useLocation } from 'react-router-dom'
 import Navbar from './components/navbar-component/navbar'
-import Home from './pages/Home'
-import Movies from './pages/Movies'
-import Shows from './pages/Shows'
-import MyLists from './pages/MyLists'
-import Login from './pages/Login'
-import SignUp from './pages/Signup'
-import PageNotFound from './pages/NotFound'
-import Genres from './pages/Genres'
-import Search from './pages/Search'
-import Watchlist from './pages/Watchlist'
-import History from './History'
-import MyProfile from './pages/MyProfile'
+import Header from './components/header-component/header';
+
+const Home = lazy(() => import('./pages/Home'));
+const Movies = lazy(() => import('./pages/Movies'));
+const Shows = lazy(() => import('./pages/Shows'));
+const MyLists = lazy(() => import('./pages/MyLists'));
+const Genres = lazy(() => import('./pages/Genres'));
+const Search = lazy(() => import('./pages/Search'));
+const Watchlist = lazy(() => import('./pages/Watchlist'));
+const History = lazy(() => import('./pages/History'));
+const MyProfile = lazy(() => import('./pages/MyProfile'));
+const Login = lazy(() => import('./pages/Login'));
+const SignUp = lazy(() => import('./pages/Signup'));
+const PageNotFound = lazy(() => import('./pages/NotFound'));
 
 function App() {
   const location = useLocation();
@@ -21,21 +23,23 @@ function App() {
 
   return (
     <>
-      {showNavIn.includes(location.pathname) && <Navbar/>}
-      <Routes>
-        <Route path="/" Component={Home}/>
-        <Route path="/movies" Component={Movies}/>
-        <Route path="/shows" Component={Shows}/>
-        <Route path="/my-lists" Component={MyLists}/>
-        <Route path="/genres" Component={Genres}/>
-        <Route path="/search" Component={Search}/>
-        <Route path="/watchlist" Component={Watchlist}/>
-        <Route path="/history" Component={History}/>
-        <Route path="/profile" Component={MyProfile}/>
-        <Route path="/login" Component={Login}/>
-        <Route path="/signup" Component={SignUp}/>
-        <Route path="*" Component={PageNotFound}/>
-      </Routes>
+      {showNavIn.includes(location.pathname) ? <Navbar/> : <Header/>}
+      <Suspense>
+        <Routes>
+          <Route path="/" Component={Home}/>
+          <Route path="/movies" Component={Movies}/>
+          <Route path="/shows" Component={Shows}/>
+          <Route path="/my-lists" Component={MyLists}/>
+          <Route path="/genres" Component={Genres}/>
+          <Route path="/search" Component={Search}/>
+          <Route path="/watchlist" Component={Watchlist}/>
+          <Route path="/history" Component={History}/>
+          <Route path="/profile" Component={MyProfile}/>
+          <Route path="/login" Component={Login}/>
+          <Route path="/signup" Component={SignUp}/>
+          <Route path="*" Component={PageNotFound}/>
+        </Routes>
+      </Suspense>
     </>
   );
 }

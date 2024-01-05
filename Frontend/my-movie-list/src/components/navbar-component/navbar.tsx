@@ -101,28 +101,28 @@ function ProfileDropdown() {
                 </div>
                 <div className="profile-dropdown-section">   
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/profile">
-                        <span className="material-symbols-outlined">account_circle</span>
+                        <span className="material-icons">account_circle</span>
                         <div>
                             My Profile
                             <p className="menu-item-subtext">Manage your profile settings</p>
                         </div>
                     </NavLink>
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/watchlist">
-                        <span className="material-symbols-outlined">bookmark</span>
+                        <span className="material-icons">bookmark_border</span>
                         Watchlist
                     </NavLink>
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/my-lists">
-                        <span className="material-symbols-outlined">lists</span>
+                        <span className="material-icons">list</span>
                         My lists
                     </NavLink>
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/history">
-                    <span className="material-symbols-outlined">history</span>
+                    <span className="material-icons">history</span>
                         History
                     </NavLink>
                 </div>
                 <div className="profile-dropdown-section">
                     <NavLink className="menu-profile-item" to="/login" onClick={logOut}>
-                        <span className="material-symbols-outlined">logout</span>
+                        <span className="material-icons">logout</span>
                         Log out
                     </NavLink>
                 </div>
@@ -130,14 +130,14 @@ function ProfileDropdown() {
             {!sessionData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
             <div className="menu-profile-section">   
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/login">
-                        <span className="material-symbols-outlined">login</span>
+                        <span className="material-icons">login</span>
                         <div>
                             Log in
                             <p className="menu-item-subtext">Log in to your existing account</p>
                         </div>
                     </NavLink>
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/signup">
-                        <span className="material-symbols-outlined">person_add</span>
+                        <span className="material-icons">person_add</span>
                         <div>
                             Create Account
                             <p className="menu-item-subtext">Don't have an account? Create one now.</p>
@@ -157,13 +157,13 @@ export default function Navbar() {
             <div ref={node} className="header-section">
                 <div className="header-section" onClick={toggleMenu}>
                     <div className="header-hoverable hamburger-btn">
-                        <span className="material-symbols-outlined">menu</span>
+                        <span className="material-icons">menu</span>
                     </div>
                 </div>
-                <div className="logo-container">
+                <NavLink to="/" className="logo-container"> 
                     <LogoWithName className="logo-desktop"/>
                     <Logo className="logo-mobile"/>
-                </div>
+                </NavLink>
                 <div className={`header-pages${menuState ? " active-hamburger-menu" : ""}`}>
                     <NavLink to="/" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
                         <p>Home</p>
@@ -180,10 +180,10 @@ export default function Navbar() {
 
             <div className="header-section">
                 <NavLink to="/search" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
-                    <span className="material-symbols-outlined">search</span>     
+                    <span className="material-icons">search</span>     
                 </NavLink>
                 <NavLink to="/watchlist" className={({ isActive }) => isActive ? "header-hoverable lists-icon selected " : "header-hoverable lists-icon"}>
-                    <span className="material-symbols-outlined">bookmark</span>     
+                    <span className="material-icons">bookmark_border</span>     
                 </NavLink>
                 
                 <ProfileDropdown/>

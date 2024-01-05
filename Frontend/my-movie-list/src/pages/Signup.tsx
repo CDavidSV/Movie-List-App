@@ -1,8 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import InputField from '../components/inputField-component/inputField';
 import { useState } from 'react';
-import mml_api from '../axios/mml_api_intance';
-import Header from '../components/header-component/header';
+import { mml_api } from '../axios/mml_api_intances';
 import { setSessionData } from '../helpers/session.helpers';
 
 interface SignUpData {
@@ -48,7 +47,7 @@ export default function SignUp() {
         signUpData, 
         { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
         .then((response) => {
-            setSessionData(response.data.responseData.userEmail, response.data.responseData.username);
+            setSessionData(response.data.responseData.userEmail, response.data.responseData.username, response.data.responseData.expires_at);
 
             navigate("/");
         }).catch(((err) => {
@@ -72,20 +71,19 @@ export default function SignUp() {
 
     return (
         <div>
-            <Header />
             <div className="login-container">
                 <form className="signup-form" onSubmit={attemptSignUp}>
                     <h1 style={{textAlign: "center"}}>Sign Up</h1>
                     {errorMessage && <p className="error-text">{errorMessage}</p>}
                     <InputField 
-                        type="text" 
+                        type="email" 
                         id="email" 
                         label="Email" 
                         required={true} 
                         onInputChange={(value: string) => setSignUpData({...signUpData!, email: value})}
                         status={signUpErrors.emailError}/>
                     <InputField 
-                        type="text" 
+                        type="username" 
                         id="username" 
                         label="Username" 
                         required={true} 
