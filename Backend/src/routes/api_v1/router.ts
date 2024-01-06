@@ -4,7 +4,7 @@ import express from "express";
 import { addFavorite, getFavorites, removeFavorite, reorderFavorites } from "./favorites";
 import { getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchlist";
 import requireUser from "../../middlewares/requireUser";
-import { getPopularMovies, getUpcomingMovies, searchByTitle } from "./media";
+import { getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle } from "./media";
 import { hasMedia } from "./user";
 
 const router: express.Router = express.Router();
@@ -37,11 +37,10 @@ router.post("/user/password-update", requireUser, () => { });
 
 // Media routes
 router.get('/media/movies/popular', getPopularMovies);
-router.get('/media/movies/trending', () => { });
-router.get('/media/movies/top-rated', () => { });
+router.get('/media/movies/now-playing', getNowPlayingMovies);
+router.get('/media/movies/top-rated', getTopRatedMovies);
 router.get('/media/movies/upcoming', getUpcomingMovies);
 router.get('/media/shows/popular', () => { });
-router.get('/media/shows/trending', () => { });
 router.get('/media/shows/top-rated', () => { });
 router.get('/media/shows/upcoming', () => { });
 router.get("/media/search", searchByTitle);

@@ -30,8 +30,8 @@ export default function Browse() {
             setShows([]);
             window.history.pushState({}, "", `/search?query=${query}`);
             
-            if (response.data.responseData.movies.length > 0) getSavedItems(response.data.responseData.movies, (movies: any) => setMovies(movies));
-            if (response.data.responseData.shows.length > 0) getSavedItems(response.data.responseData.shows, (shows: any) => setShows(shows));
+            if (response.data.responseData.movies.length > 0) getSavedItems(response.data.responseData.movies, response.data.responseData.movies.map((film: any) => film.id).join(','), (movies: any) => setMovies(movies));
+            if (response.data.responseData.shows.length > 0) getSavedItems(response.data.responseData.shows, response.data.responseData.shows.map((film: any) => film.id).join(','), (shows: any) => setShows(shows));
         });
     }
 
@@ -60,30 +60,33 @@ export default function Browse() {
                     onInputChange={(value: string) => querySearchCooldown(value)}
                 />
             </div>
-            {loading && <div className="search-loader"><div className="spinning-loader"></div></div>}
-            {movies.length > 0 &&
-                <div className="search-results">
-                    <h2>Movies</h2>
-                    <div className="search-results-container">  
-                        {movies.map((movie, index) => (
-                            <FilmCard 
-                                key={index} 
-                                filmData={movie}/>  
-                        ))}
+            <div className="results-container">
+                {loading && <div className="search-loader"><div className="spinning-loader"></div></div>}
+                {movies.length > 0 &&
+                    <div className="search-results">
+                        <h2>Movies</h2>
+                        <div className="search-results-container">  
+                            {movies.map((movie, index) => (
+                                <FilmCard 
+                                    key={index} 
+                                    filmData={movie}/>  
+                            ))}
+                        </div>
                     </div>
-                </div>
-            }
-            {shows.length > 0 &&
-                <div className="search-results">
-                    <h2>Shows</h2>
-                    <div className="search-results-container">  
-                        {shows.map((show, index) => (
-                            <FilmCard 
-                                key={index} 
-                                filmData={show}/>  
-                        ))}
+                }
+                {shows.length > 0 &&
+                    <div className="search-results">
+                        <h2>Shows</h2>
+                        <div className="search-results-container">  
+                            {shows.map((show, index) => (
+                                <FilmCard 
+                                    key={index} 
+                                    filmData={show}/>  
+                            ))}
+                        </div>
                     </div>
-                </div>}
+                }
+            </div>
         </div>
     );
 }

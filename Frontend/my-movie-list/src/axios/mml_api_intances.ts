@@ -50,16 +50,17 @@ mml_api_protected.interceptors.request.use(async (config) => {
 mml_api_protected.interceptors.response.use((response) => {
     return response;
 }, async (err) => {
-    if (err.response && (err.response.status !== 401 && err.response.status !== 403)) return err;
-    if ((err.config as AxiosRequestConfigExtended)._retry) { // Check if the request has already been retried
-        // Redirect to login
-        window.location.href = "/login";
-        return Promise.reject(err);
-    };
-
     const originalRequest = err.config;
     const sessionData = getSessionData();
     if (!sessionData) return Promise.reject("No session data found");
+
+    if (err.response && (err.response.status !== 401 && err.response.status !== 403)) return err;
+    if ((originalRequest as AxiosRequestConfigExtended)._retry) { // Check if the request has already been retried
+        // Redirect to login
+        clearSessionData();
+        window.location.href = "/login";
+        return Promise.reject(err);
+    };
 
     // Attempt to refresh the access token if it's missing or expired
     try {

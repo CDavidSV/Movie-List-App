@@ -22,9 +22,7 @@ const shortenNumber = (num: number) => {
     return shortenedNumStr;
 };
 
-const getSavedItems = (films: any[], callback: Function) => {
-    const ids = films.map(film => film.id).join(',');
-
+const getSavedItems = (films: any[], ids: string[], callback: Function) => {
     // Check first if the user is logged in
     if (!isLoggedIn()) return callback(films);
 
@@ -37,9 +35,8 @@ const getSavedItems = (films: any[], callback: Function) => {
             }
         });
         callback(films);
-    }).catch((err) => {
-        console.error(err)
-        callback(films)
+    }).catch(() => {
+        callback(films);
     });
 }
 

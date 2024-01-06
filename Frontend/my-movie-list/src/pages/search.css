@@ -1,9 +1,11 @@
 .search-bar {
     display: flex;
     justify-content: center;
-    background-color: var(--tertiary-background-color);
+    background-color: #1a1a1a;
     width: 100%;
     padding: 15px 20%;
+    position: fixed;
+    z-index: 2;
 }
 
 .search-results-container {
@@ -25,4 +27,8 @@
     justify-content: center;
     align-items: center;
     height: 5vh;
+}
+
+.results-container {
+    padding-top: 130px;
 }

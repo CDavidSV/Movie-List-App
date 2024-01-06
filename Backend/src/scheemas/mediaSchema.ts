@@ -5,7 +5,7 @@ const MediaSchema = new Schema({
     title: { type: String, required: true },
     type: { type: String, required: true },
     description: { type: String, required: true },
-    release_date: { type: Date, required: true },
+    release_date: { type: String, required: true },
     runtime: { type: Number, required: false },
     episode_count: { type: Number, required: false },
     season_count: { type: Number, required: false },

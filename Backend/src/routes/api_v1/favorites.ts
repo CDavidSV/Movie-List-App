@@ -5,6 +5,7 @@ import Media from "../../Models/Media";
 import saveMovie from "../../util/mediaHandler";
 import { validateJsonBody } from "../../util/validateJson";
 import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../util/lexorank";
+import { sendResponse } from "../../util/apiHandler";
 
 const getFavorites = async (req: express.Request, res: express.Response) => {
     const page = parseInt(req.query.page as string) || 1;
@@ -41,17 +42,17 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
             }
         });
 
-        res.status(200).send({ status: "success", page, pages, favorites });
+        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { page, pages, favorites } })
     }).catch((err) => {
         console.error(err);
-        res.status(500).send({ status: "error", message: "Error fetching favorites" });
+        sendResponse(res, { status: 500, message: "Error fetching favorites" });
     });
 };
 
 const addFavorite = async (req: express.Request, res: express.Response) => {
     const media_id = req.query.media_id;
 
-    if (!media_id) return res.status(400).send({ status: "error", message: "Invalid media id" });
+    if (!media_id) return sendResponse(res, { status: 400, message: "Invalid media id" });
 
     try {
         // Validate id and get the latest favorite saved
@@ -60,23 +61,23 @@ const addFavorite = async (req: express.Request, res: express.Response) => {
             favoritesSchema.findOne({ user_id: req.user!.id }).sort({ rank: -1 }),
         ]);
 
-        if (!mediaData) return res.status(404).send({ status: "error", message: "Media not found" });
+        if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
 
         // Calculate the new rank for the new favorite.
         const newRank = lastFavorite ? getNextLexoRank(lastFavorite.rank) : getNextLexoRank();
 
         // Create a new favorite if it doesn't exist.
-        await favoritesSchema.updateOne(
+        const favorite = await favoritesSchema.updateOne(
             { user_id: req.user!.id, media_id: mediaData.id.toString() },
             { $setOnInsert: { date_added: new Date(), rank: newRank } },
             { upsert: true }
         );
-        res.status(201).send({ status: "success", message: "Favorite added" });
-        
+
+        sendResponse(res, { status: 201, message: "Favorite added", responsePayload: { id: favorite.upsertedId!._id.toString() } });
         saveMovie(mediaData as Media);
     } catch (err) {
         console.error(err);
-        res.status(500).send({ status: "error", message: "Error adding favorite" });
+        sendResponse(res, { status: 500, message: "Error adding favorite" });
     }
 };
 

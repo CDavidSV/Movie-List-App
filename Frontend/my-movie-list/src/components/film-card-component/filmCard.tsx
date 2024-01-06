@@ -7,12 +7,12 @@ import { shortenNumber } from '../../helpers/util.helpers';
 import { mml_api_protected } from '../../axios/mml_api_intances';
 import { isLoggedIn } from '../../helpers/session.helpers';
 
-export default function FilmCard({filmData}: {filmData: any}) {
+export default function FilmCard({filmData}: {filmData?: any}) {
     const hoverContentRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
     let [timeoutFunc, setTimeoutFunc] = React.useState<NodeJS.Timeout | null>(null);
-    let [isFavorite, setIsFavorite] = React.useState<boolean>(filmData.favoriteId ? true : false);
-    let [isWatchlisted, setIsWatchlisted] = React.useState<boolean>(filmData.watchlistId ? true : false);
+    let [isFavorite, setIsFavorite] = React.useState<boolean>(filmData && filmData.favoriteId ? true : false);
+    let [isWatchlisted, setIsWatchlisted] = React.useState<boolean>(filmData && filmData.watchlistId ? true : false);
 
     const activateHover = (e: React.MouseEvent<HTMLAnchorElement>) => {
         const target: HTMLAnchorElement = e.currentTarget;
@@ -44,7 +44,10 @@ export default function FilmCard({filmData}: {filmData: any}) {
         }
 
         setIsFavorite(true);
-        mml_api_protected.post(`api/v1/favorites/add?media_id=${filmData.id}`).catch(() => {
+        mml_api_protected.post(`api/v1/favorites/add?media_id=${filmData.id}`).then((res) => {
+            filmData.favoriteId = res.data.responseData.id;
+        })
+        .catch(() => {
             setIsFavorite(false);
         });
     }
@@ -67,38 +70,54 @@ export default function FilmCard({filmData}: {filmData: any}) {
             media_id: filmData.id.toString(),
             status: 5, // Plan to watch
             progress: 0
-        }).catch(() => {
+        }).then((res) => {
+            filmData.watchlistId = res.data.responseData.id;
+        })
+        .catch(() => {
             setIsWatchlisted(false);
         });
     }
 
     return (
-        <Link onMouseEnter={activateHover} onMouseLeave={deactivateHover} to={filmData.link} className="film-card">
-            <figure className="poster-image-figure">
-                <img loading="lazy" src={`${config.tmbdImageBaseUrl}${filmData.poster_url}`}/>
-            </figure>
-            <div className="card-info">
-                <h4>{filmData.title}</h4>
-                <p>{filmData.release_date}</p>
-            </div>
-            <div ref={hoverContentRef} className="card-hover-info" style={{backgroundImage: `url(${config.tmbdImageBaseUrl}${filmData.poster_url})`}}>
-                <div className="card-hover-info-content">
-                    <div>
-                        <h6>{filmData.title}</h6>
-                        <div className="card-hover-info-content-vote">
-                            <p>{filmData.vote_average.toFixed(1)}★</p>
-                            <p>({shortenNumber(filmData.votes)})</p>
-                        </div>
-                        <div className="card-hover-info-content-description">
-                            <p>{filmData.description}</p>
-                        </div>
-                    </div>
-                    <div className="card-hover-info-content-buttons">
-                        <span className="material-icons icon-btn" onClick={handleWatchlistClick}>{!isWatchlisted ? "bookmark_border" : "bookmark"}</span>
-                        <span className="material-icons icon-btn" onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>
+        <>
+            {!filmData ? (
+                <div className="film-card skeleton-loader">
+                    {/* Skeleton loader */}
+                    <div className="skeleton-poster"></div>
+                    <div className="skeleton-info">
+                        <div className="card-info skeleton-title"></div>
+                        <div className="skeleton-release-date"></div>
                     </div>
                 </div>
-            </div>
-        </Link>
+            ) : (
+                <Link onMouseEnter={activateHover} onMouseLeave={deactivateHover} to={filmData.link} className="film-card">
+                    <figure className="poster-image-figure">
+                        <img loading="lazy" src={config.tmbdImageBaseUrl + filmData.poster_url}/>
+                    </figure>
+                    <div className="card-info">
+                        <h4>{filmData.title}</h4>
+                        <p>{filmData.release_date}</p>
+                    </div>
+                    <div ref={hoverContentRef} className="card-hover-info" style={{backgroundImage: `url(${config.tmbdImageBaseUrl}${filmData.poster_url})`}}>
+                        <div className="card-hover-info-content">
+                            <div>
+                                <h6>{filmData.title}</h6>
+                                <div className="card-hover-info-content-vote">
+                                    <p>{filmData.vote_average.toFixed(1)}★</p>
+                                    <p>({shortenNumber(filmData.votes)})</p>
+                                </div>
+                                <div className="card-hover-info-content-description">
+                                    <p>{filmData.description}</p>
+                                </div>
+                            </div>
+                            <div className="card-hover-info-content-buttons">
+                                <span className="material-icons icon-btn" onClick={handleWatchlistClick}>{!isWatchlisted ? "bookmark_border" : "bookmark"}</span>
+                                <span className="material-icons icon-btn" onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>
+                            </div>
+                        </div>
+                    </div>
+                </Link>
+            )}
+        </>
     );
 }
