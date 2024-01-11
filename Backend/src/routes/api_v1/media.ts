@@ -1,8 +1,8 @@
 import express from 'express';
 import axios from 'axios';
 import { sendResponse } from '../../util/apiHandler';
+import config from '../../config/config';
 
-const tmdb_key = process.env.TMDB_API_KEY;
 const tmdb_access_token = process.env.TMDB_ACCESS_TOKEN;
 
 const getPopularMovies = async (req: express.Request, res: express.Response) => {
@@ -22,7 +22,9 @@ const getPopularMovies = async (req: express.Request, res: express.Response) => 
                 id: movie.id,
                 title: movie.title,
                 description: movie.overview,
-                poster_url: movie.poster_path,
+                poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                type: "movie",
                 release_date: movie.release_date,
                 vote_average: movie.vote_average,
                 votes: movie.vote_count
@@ -53,7 +55,9 @@ const getUpcomingMovies = async (req: express.Request, res: express.Response) =>
                 id: movie.id,
                 title: movie.title || movie.original_title,
                 description: movie.overview,
-                poster_url: movie.poster_path,
+                poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                type: "movie",
                 release_date: movie.release_date,
                 vote_average: movie.vote_average,
                 votes: movie.vote_count
@@ -84,7 +88,9 @@ const getTopRatedMovies = async (req: express.Request, res: express.Response) =>
                 id: movie.id,
                 title: movie.title,
                 description: movie.overview,
-                poster_url: movie.poster_path,
+                poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                type: "movie",
                 release_date: movie.release_date,
                 vote_average: movie.vote_average,
                 votes: movie.vote_count
@@ -115,7 +121,9 @@ const getNowPlayingMovies = async (req: express.Request, res: express.Response) 
                 id: movie.id,
                 title: movie.title,
                 description: movie.overview,
-                poster_url: movie.poster_path,
+                poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                type: "movie",
                 release_date: movie.release_date,
                 vote_average: movie.vote_average,
                 votes: movie.vote_count
@@ -136,8 +144,7 @@ const searchByTitle = async (req: express.Request, res: express.Response) => {
         sendResponse(res, { status: 400, message: "Missing query parameter" });
         return;
     }
-    const movieArray: any[] = [];
-    const showsArray: any[] = [];
+    const mediaArray: any[] = [];
 
     await axios({
         method: 'get',
@@ -149,12 +156,13 @@ const searchByTitle = async (req: express.Request, res: express.Response) => {
     }).then((response) => {
         response.data.results.forEach((movie: any) => {
             if (movie.poster_path && movie.title) {
-                movieArray.push({
+                mediaArray.push({
                     id: movie.id,
                     title: movie.title,
                     description: movie.overview,
-                    backdrop_url: movie.backdrop_path,
-                    poster_url: movie.poster_path,
+                    poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
+                    backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                    type: "movie",
                     release_date: movie.release_date,
                     vote_average: movie.vote_average,
                     votes: movie.vote_count
@@ -175,12 +183,13 @@ const searchByTitle = async (req: express.Request, res: express.Response) => {
     }).then((response) => {
         response.data.results.forEach((movie: any) => {
             if (movie.poster_path && movie.name) {
-                showsArray.push({
+                mediaArray.push({
                     id: movie.id,
                     title: movie.name,
                     description: movie.overview,
-                    backdrop_url: movie.backdrop_path,
-                    poster_url: movie.poster_path,
+                    poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
+                    backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                    type: "series",
                     release_date: movie.first_air_date,
                     vote_average: movie.vote_average,
                     votes: movie.vote_count
@@ -191,7 +200,7 @@ const searchByTitle = async (req: express.Request, res: express.Response) => {
         console.error(err);
     });
 
-    sendResponse(res, { status: 200, message: "Media fetched successfully", responsePayload: { movies: movieArray, shows: showsArray }});
+    sendResponse(res, { status: 200, message: "Media fetched successfully", responsePayload: { media: mediaArray }});
 };
 
 export { getPopularMovies, getUpcomingMovies, searchByTitle, getTopRatedMovies, getNowPlayingMovies };

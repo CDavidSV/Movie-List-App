@@ -30,8 +30,11 @@ const getSavedItems = (films: any[], ids: string[], callback: Function) => {
         const { responseData } = response.data;
         films.forEach((film) => {
             if (film.id in responseData) {
-                film.watchlistId = responseData[film.id].watchlist;
-                film.favoriteId = responseData[film.id].favorite;
+                film.inWatchlist = responseData[film.id].watchlist;
+                film.inFavorites = responseData[film.id].favorite;
+            } else {
+                film.inWatchlist = false;
+                film.inFavorites = false;
             }
         });
         callback(films);

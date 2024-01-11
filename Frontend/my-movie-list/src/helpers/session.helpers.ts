@@ -3,7 +3,7 @@ import { mml_api } from "../axios/mml_api_intances";
 interface SessionData {
     email: string;
     username: string;
-    expiresAt: number;
+    expiresIn: number;
     setAt: number;
 }
 
@@ -19,11 +19,11 @@ const getSessionData = () => {
     return JSON.parse(localStorage.getItem('sessionData')!) as SessionData;
 };
 
-const setSessionData = (email: string, username: string, expiresAt: number) => {
+const setSessionData = (email: string, username: string, expiresIn: number) => {
     const sessionData = {
         email,
         username,
-        expiresAt,
+        expiresIn,
         setAt: Date.now()
     } as SessionData;
 

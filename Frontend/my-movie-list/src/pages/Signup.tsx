@@ -47,7 +47,7 @@ export default function SignUp() {
         signUpData, 
         { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
         .then((response) => {
-            setSessionData(response.data.responseData.userEmail, response.data.responseData.username, response.data.responseData.expires_at);
+            setSessionData(response.data.responseData.userEmail, response.data.responseData.username, response.data.responseData.expiresIn);
 
             navigate("/");
         }).catch(((err) => {

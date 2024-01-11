@@ -9,8 +9,8 @@ const MediaSchema = new Schema({
     runtime: { type: Number, required: false },
     episode_count: { type: Number, required: false },
     season_count: { type: Number, required: false },
-    poster_url: { type: String, required: true },
-    backdrop_url: { type: String, required: true },
+    poster_url: { type: String, required: false },
+    backdrop_url: { type: String, required: false },
 });
 
 MediaSchema.index({ media_id: 1 });

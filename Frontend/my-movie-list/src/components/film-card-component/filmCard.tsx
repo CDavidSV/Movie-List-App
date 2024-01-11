@@ -1,4 +1,3 @@
-import config from '../../config/config';
 import { Link, useNavigate } from 'react-router-dom';
 import './filmCard.css';
 import { useRef } from 'react';
@@ -10,24 +9,15 @@ import { isLoggedIn } from '../../helpers/session.helpers';
 export default function FilmCard({filmData}: {filmData?: any}) {
     const hoverContentRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
-    let [timeoutFunc, setTimeoutFunc] = React.useState<NodeJS.Timeout | null>(null);
-    let [isFavorite, setIsFavorite] = React.useState<boolean>(filmData && filmData.favoriteId ? true : false);
-    let [isWatchlisted, setIsWatchlisted] = React.useState<boolean>(filmData && filmData.watchlistId ? true : false);
 
-    const activateHover = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        const target: HTMLAnchorElement = e.currentTarget;
-        
-        timeoutFunc = setTimeout(() => {            
-            target.classList.add("card-hovered");
-            hoverContentRef.current?.classList.add("active");
-        }, 200);
+    let [isFavorite, setIsFavorite] = React.useState<boolean>(filmData && filmData.inFavorites || false);
+    let [isWatchlisted, setIsWatchlisted] = React.useState<boolean>(filmData && filmData.inWatchlist || false);
 
-        setTimeoutFunc(timeoutFunc);
+    const activateHover = () => {         
+        hoverContentRef.current?.classList.add("active");
     }
 
-    const deactivateHover = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        if (timeoutFunc) clearTimeout(timeoutFunc);
-        e.currentTarget.classList.remove("card-hovered");
+    const deactivateHover = () => {
         hoverContentRef.current?.classList.remove("active");
     }
 
@@ -37,16 +27,14 @@ export default function FilmCard({filmData}: {filmData?: any}) {
 
         if (isFavorite) {
             setIsFavorite(false);
-            mml_api_protected.delete(`api/v1/favorites/remove?id=${filmData.favoriteId}`).catch(() => {
+            mml_api_protected.delete(`api/v1/favorites/remove?media_id=${filmData!.id}&type=${filmData!.type}`).catch(() => {
                 setIsFavorite(true);
             });
             return;
         }
 
         setIsFavorite(true);
-        mml_api_protected.post(`api/v1/favorites/add?media_id=${filmData.id}`).then((res) => {
-            filmData.favoriteId = res.data.responseData.id;
-        })
+        mml_api_protected.post(`api/v1/favorites/add?media_id=${filmData!.id}&type=${filmData!.type}`)
         .catch(() => {
             setIsFavorite(false);
         });
@@ -58,20 +46,18 @@ export default function FilmCard({filmData}: {filmData?: any}) {
 
         if (isWatchlisted) {
             setIsWatchlisted(false);
-            mml_api_protected.delete(`api/v1/watchlist/remove?id=${filmData.watchlistId}`).catch(() => {
+            mml_api_protected.delete(`api/v1/watchlist/remove?media_id=${filmData!.id}&type=${filmData!.type}`).catch(() => {
                 setIsWatchlisted(true);
             });
             return;
         }
 
-
         setIsWatchlisted(true);
         mml_api_protected.post(`api/v1/watchlist/update`, {
-            media_id: filmData.id.toString(),
+            media_id: filmData!.id.toString(),
             status: 5, // Plan to watch
-            progress: 0
-        }).then((res) => {
-            filmData.watchlistId = res.data.responseData.id;
+            progress: 0,
+            type: filmData!.type
         })
         .catch(() => {
             setIsWatchlisted(false);
@@ -92,13 +78,13 @@ export default function FilmCard({filmData}: {filmData?: any}) {
             ) : (
                 <Link onMouseEnter={activateHover} onMouseLeave={deactivateHover} to={filmData.link} className="film-card">
                     <figure className="poster-image-figure">
-                        <img loading="lazy" src={config.tmbdImageBaseUrl + filmData.poster_url}/>
+                        <img loading="lazy" src={filmData.poster_url}/>
                     </figure>
                     <div className="card-info">
                         <h4>{filmData.title}</h4>
                         <p>{filmData.release_date}</p>
                     </div>
-                    <div ref={hoverContentRef} className="card-hover-info" style={{backgroundImage: `url(${config.tmbdImageBaseUrl}${filmData.poster_url})`}}>
+                    <div ref={hoverContentRef} className="card-hover-info" style={{backgroundImage: `url(${filmData.poster_url})`}}>
                         <div className="card-hover-info-content">
                             <div>
                                 <h6>{filmData.title}</h6>
@@ -111,8 +97,11 @@ export default function FilmCard({filmData}: {filmData?: any}) {
                                 </div>
                             </div>
                             <div className="card-hover-info-content-buttons">
-                                <span className="material-icons icon-btn" onClick={handleWatchlistClick}>{!isWatchlisted ? "bookmark_border" : "bookmark"}</span>
-                                <span className="material-icons icon-btn" onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>
+                                {isLoggedIn() &&
+                                <>        
+                                    <span className="material-icons icon-btn" onClick={handleWatchlistClick}>{!isWatchlisted ? "bookmark_border" : "bookmark"}</span>
+                                    <span className="material-icons icon-btn" onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>
+                                </>}
                             </div>
                         </div>
                     </div>

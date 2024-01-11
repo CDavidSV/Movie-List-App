@@ -1,10 +1,11 @@
 import express from "express";
 import watchlistSchema from "../../scheemas/watchlistSchema";
 import { validateJsonBody } from "../../util/validateJson";
-import { findMediaById } from "../../util/TMDB";
-import Media from "../../Models/Media";
+import { findMediaById, isValidMediaType } from "../../util/TMDB";
+import Media from "../../Models/Movie";
 import saveMovie from "../../util/mediaHandler";
 import { sendResponse } from "../../util/apiHandler";
+import config from "../../config/config";
 
 const watchlistStatus = new Map([
     [0, "Not Started"],
@@ -26,28 +27,58 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
             }
         },
         {   
+            // TODO: Fetch the correct media type based on the watchlist type field
             $lookup: {
                 from: 'media',
                 localField: 'media_id',
                 foreignField: 'media_id',
                 as: 'media'
             }
+        },
+        {
+            $lookup: {
+                from: 'favorites',
+                let: { user_id: '$user_id', media_id: '$media_id' },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ['$user_id', '$$user_id'] },
+                                    { $eq: ['$media_id', '$$media_id'] }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                as: 'favorited'
+            }
         }
     ]).skip(skip).limit(500).then((result) => {
-        const watchlist = result.map(item => {
+        const watchlist = result.map((item) => {
+            if (item.media.length < 1) return {
+                id: item._id,
+                media_id: item.media_id,
+                date_added: item.date_added,
+                title: "Untitled",
+                description: "No description available",
+                poster_url: "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdrop_url: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                release_date: "NA",
+                runtime: 0,
+                favoorited: item.favoorited.length >= 1 ? true : false
+            };
             return {
                 id: item._id,
                 media_id: item.media_id,
-                status: watchlistStatus.get(item.status),
-                progress: item.progress,
-                rating: item.rating,
-                added_date: item.added_date,
-                updated_date: item.updated_date,
-                title: item.media.length >= 1 ? item.media[0].title : "Untitled",
-                description: item.media.length >= 1 ? item.media[0].description : "No description available",
-                poster_url: item.media.length >= 1 ? item.media[0].poster_url : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                release_date: item.media.length >= 1 ? item.media[0].release_date : "NA",
-                runtime: item.media.length >= 1 ? item.media[0].runtime : 0
+                date_added: item.date_added,
+                title: item.media[0].title,
+                description: item.media[0].description,
+                poster_url: item.media[0].poster_url ? `${config.tmbdImageBaseUrl}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdrop_url: item.media[0].backdrop_url ? `${config.tmbdImageBaseUrl}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                release_date: item.media[0].release_date ? item.media[0].release_date : "NA",
+                runtime: item.media[0].runtime ? item.media[0].runtime : 0,
+                favoorited: item.favoorited.length >= 1 ? true : false
             }
         });
 
@@ -59,28 +90,30 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
 };
 
 const updateWatchlist = async (req: express.Request, res: express.Response) => {
-    const { media_id, status, progress } = req.body;
+    const { media_id, status, progress, type } = req.body;
 
     const registerSchema = {
         media_id: { type: "string", required: true },
         status: { type: "number", required: true },
-        progress: { type: "number", required: true }
+        progress: { type: "number", required: true },
+        type: { type: "string", required: true },
     }
 
     const missingFields = validateJsonBody(req.body, registerSchema);
     if (!missingFields) return sendResponse(res, { status: 400, message: "Invalid request body" });
     if (status < 0 || status > 5) return sendResponse(res, { status: 400, message: "Invalid status" });
+    if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid type" });
     // Validate id and get the latest favorite saved
     try {
-        const mediaData = await findMediaById(media_id as string);
+        const mediaData = await findMediaById(media_id as string, type);
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
 
         // Save to database
-        const watchlistItem = await watchlistSchema.findOneAndUpdate({ user_id: req.user!.id, media_id }, { status, progress, updated_date: Date.now() }, { upsert: true, setDefaultsOnInsert: true, new: true });
+        const watchlistItem = await watchlistSchema.findOneAndUpdate({ user_id: req.user!.id, media_id, type: type  }, { status, progress, updated_date: Date.now(), type: type }, { upsert: true, setDefaultsOnInsert: true, new: true });
         
         sendResponse(res, { status: 200, message: "Added to watchlist", responsePayload: { id: watchlistItem?._id.toString() } });
 
-        saveMovie(mediaData as Media);
+        saveMovie(mediaData as Media, type);
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error adding to watchlist" });
@@ -88,16 +121,18 @@ const updateWatchlist = async (req: express.Request, res: express.Response) => {
 };
 
 const removeItemFromWatchlist = async (req: express.Request, res: express.Response) => {
-    const id = req.query.id;
+    const id = req.query.media_id;
+    const type = req.query.type;
 
-    if (!id) return res.status(400).send({ status: "error", message: "Invalid watchlist id" });
+    if (!id) return res.status(400).send({ status: "error", message: "Invalid media id" });
+    if (!type || !isValidMediaType(type as string)) return sendResponse(res, { status: 400, message: "Invalid type" });
 
     try {
-        await watchlistSchema.findByIdAndDelete(id as string);
-        res.status(200).send({ status: "success", message: "Removed from watchlist" });
+        await watchlistSchema.findOneAndDelete({ user_id: req.user!.id, media_id: id as string, type: type as string });
+        sendResponse(res, { status: 200, message: "Item removed from watchlist" });
     } catch (err) {
         console.error(err);
-        res.status(500).send({ status: "error", message: "Error removing item from watchlist" });
+        sendResponse(res, { status: 500, message: "Error removing item from watchlist" });
     }
 };
 

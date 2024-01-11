@@ -1,0 +1,109 @@
+.favorites-container {
+    width: 100%;
+}
+
+.list-card-container {
+    display: flex;
+    justify-content: flex-start;
+    align-content: center;
+    border-bottom: 2px solid rgb(25, 25, 25);
+    height: 150px;
+    padding: 15px 15px;
+    overflow: hidden;
+    user-select: none;
+}
+
+.list-card-container:hover {
+    background-color: rgb(25, 25, 25);
+    transition: 0.2s ease;
+    cursor: pointer;
+}
+
+.list-card-img-container {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
+.list-card-container img {
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    background-color: rgba(56, 56, 56, 0.1);
+    aspect-ratio: 16 / 9;
+}
+
+.list-card-content {
+    padding-left: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+}
+
+.list-card-content h4 {
+    margin: 8px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.list-card-content p {
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.no-favorites {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.remove-list-item-btn {
+    filter: brightness(0.5);
+}
+
+.remove-list-item-btn:hover {
+    filter: brightness(1);
+    color: red;
+}
+
+.list-drag {
+    display: flex;
+    padding-right: 15px;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+}
+
+.list-card-delete {
+    display: flex;
+    padding-left: 15px;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+@media screen and (max-width: 768px) {
+    .list-card-container img {
+        aspect-ratio: 2 / 3;
+    }
+
+    .list-card-content h4 {
+        font-size: 0.7rem;
+    }
+
+    .list-card-content p {
+        font-size: 0.6rem;
+    }
+}

@@ -11,13 +11,8 @@
     padding: 0.50vh;
     height: 100%;
     position: relative;
-    transition: 0.3s ease;
     min-height: 200px;
-}
-
-.film-card.card-hovered {
-    transform: scale(1.2);
-    z-index: 1;
+    scroll-snap-align: start;
 }
 
 .poster-image-figure {
@@ -76,7 +71,7 @@
     top: 0;
     z-index: -1;
     opacity: 0;
-    transition: 0.1s ease;
+    transition: 0.2s ease;
 }
 
 .card-hover-info::before {
@@ -229,5 +224,16 @@
 
     .card-hover-info-content-description p {
         -webkit-line-clamp: 4;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .film-card {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    .card-hover-info-content-description p {
+        -webkit-line-clamp: 3;
     }
 }

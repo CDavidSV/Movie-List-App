@@ -6,8 +6,7 @@ import { mml_api } from "../axios/mml_api_intances";
 import { getSavedItems } from "../helpers/util.helpers";
 
 export default function Browse() {
-    const [movies, setMovies] = useState<any[]>([]);
-    const [shows, setShows] = useState<any[]>([]);
+    const [media, setMedia] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [timeoutFunc, setTimeoutFunc] = useState<NodeJS.Timeout | null>(null);
     const cooldown = 400;
@@ -26,12 +25,10 @@ export default function Browse() {
 
         mml_api.get(`api/v1/media/search?title=${query}`).then((response) => {
             setLoading(false);
-            setMovies([]);
-            setShows([]);
+            setMedia([]);
             window.history.pushState({}, "", `/search?query=${query}`);
             
-            if (response.data.responseData.movies.length > 0) getSavedItems(response.data.responseData.movies, response.data.responseData.movies.map((film: any) => film.id).join(','), (movies: any) => setMovies(movies));
-            if (response.data.responseData.shows.length > 0) getSavedItems(response.data.responseData.shows, response.data.responseData.shows.map((film: any) => film.id).join(','), (shows: any) => setShows(shows));
+            if (response.data.responseData.media.length > 0) getSavedItems(response.data.responseData.media, response.data.responseData.media.map((media: any) => media.id).join(','), (media: any) => setMedia(media));
         });
     }
 
@@ -60,32 +57,42 @@ export default function Browse() {
                     onInputChange={(value: string) => querySearchCooldown(value)}
                 />
             </div>
-            <div className="results-container">
-                {loading && <div className="search-loader"><div className="spinning-loader"></div></div>}
-                {movies.length > 0 &&
-                    <div className="search-results">
-                        <h2>Movies</h2>
-                        <div className="search-results-container">  
-                            {movies.map((movie, index) => (
-                                <FilmCard 
-                                    key={index} 
-                                    filmData={movie}/>  
-                            ))}
+            <div className="content-wrapper">
+                <div className="results-container">
+                    <div className={loading ? "loader active" : "loader"}><div className="spinning-loader"></div></div>
+                    {media.length > 0 &&
+                        <div className="search-results">
+                            <h2>Movies</h2>
+                            <div className="search-results-container">  
+                                {media.map((movie, index) => {
+                                    if (movie.type === "movie") {
+                                        return (
+                                        <FilmCard 
+                                            key={index} 
+                                            filmData={movie}/>
+                                        )
+                                    }
+                                })}
+                            </div>
                         </div>
-                    </div>
-                }
-                {shows.length > 0 &&
-                    <div className="search-results">
-                        <h2>Shows</h2>
-                        <div className="search-results-container">  
-                            {shows.map((show, index) => (
-                                <FilmCard 
-                                    key={index} 
-                                    filmData={show}/>  
-                            ))}
+                    }
+                    {media.length > 0 &&
+                        <div className="search-results">
+                            <h2>Series</h2>
+                            <div className="search-results-container">  
+                                {media.map((show, index) => {
+                                    if (show.type === "series") {
+                                        return (
+                                        <FilmCard 
+                                            key={index} 
+                                            filmData={show}/>
+                                        )
+                                    }
+                                })}
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
             </div>
         </div>
     );

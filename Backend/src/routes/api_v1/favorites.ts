@@ -1,11 +1,12 @@
 import express from "express";
 import favoritesSchema from "../../scheemas/favoritesSchema";
-import { findMediaById } from "../../util/TMDB";
-import Media from "../../Models/Media";
+import { findMediaById, isValidMediaType } from "../../util/TMDB";
+import Media from "../../Models/Movie";
 import saveMovie from "../../util/mediaHandler";
 import { validateJsonBody } from "../../util/validateJson";
 import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../util/lexorank";
 import { sendResponse } from "../../util/apiHandler";
+import config from "../../config/config";
 
 const getFavorites = async (req: express.Request, res: express.Response) => {
     const page = parseInt(req.query.page as string) || 1;
@@ -21,24 +22,60 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
             }
         },
         {   
+            // TODO: Fetch the correct media type based on the favorites type field
             $lookup: {
                 from: 'media',
                 localField: 'media_id',
                 foreignField: 'media_id',
                 as: 'media'
             }
+        },
+        {
+            $lookup: {
+                from: 'watchlists',
+                let: { user_id: '$user_id', media_id: '$media_id' },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ['$user_id', '$$user_id'] },
+                                    { $eq: ['$media_id', '$$media_id'] }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                as: 'watchlisted'
+            }
         }
     ]).skip(skip).limit(500).sort({ rank: 1 }).then((response) => {
         const favorites = response.map((favorite) => {
+            if (favorite.media.length < 1) return {
+                id: favorite._id,
+                media_id: favorite.media_id,
+                type: favorite.type,
+                date_added: favorite.date_added,
+                title: "Untitled",
+                description: "No description available",
+                poster_url: "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdrop_url: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                release_date: "NA",
+                runtime: 0,
+                watchlisted: favorite.watchlisted.length >= 1 ? true : false
+            };
             return {
                 id: favorite._id,
                 media_id: favorite.media_id,
+                type: favorite.type,
                 date_added: favorite.date_added,
-                title: favorite.media.length >= 1 ? favorite.media[0].title : "Untitled",
-                description: favorite.media.length >= 1 ? favorite.media[0].description : "No description available",
-                poster_url: favorite.media.length >= 1 ? favorite.media[0].poster_url : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                release_date: favorite.media.length >= 1 ? favorite.media[0].release_date : "NA",
-                runtime: favorite.media.length >= 1 ? favorite.media[0].runtime : 0
+                title: favorite.media[0].title,
+                description: favorite.media[0].description,
+                poster_url: favorite.media[0].poster_url ? `${config.tmbdImageBaseUrl}${favorite.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdrop_url: favorite.media[0].backdrop_url ? `${config.tmbdImageBaseUrl}${favorite.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                release_date: favorite.media[0].release_date ? favorite.media[0].release_date : "NA",
+                runtime: favorite.media[0].runtime ? favorite.media[0].runtime : 0,
+                watchlisted: favorite.watchlisted.length >= 1 ? true : false
             }
         });
 
@@ -51,13 +88,15 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
 
 const addFavorite = async (req: express.Request, res: express.Response) => {
     const media_id = req.query.media_id;
+    const type = req.query.type;
 
     if (!media_id) return sendResponse(res, { status: 400, message: "Invalid media id" });
+    if (!type || !isValidMediaType(type as string)) return sendResponse(res, { status: 400, message: "Invalid type" });
 
     try {
         // Validate id and get the latest favorite saved
         const [mediaData, lastFavorite] = await Promise.all([
-            findMediaById(media_id as string),
+            findMediaById(media_id as string, type as string),
             favoritesSchema.findOne({ user_id: req.user!.id }).sort({ rank: -1 }),
         ]);
 
@@ -68,13 +107,13 @@ const addFavorite = async (req: express.Request, res: express.Response) => {
 
         // Create a new favorite if it doesn't exist.
         const favorite = await favoritesSchema.updateOne(
-            { user_id: req.user!.id, media_id: mediaData.id.toString() },
-            { $setOnInsert: { date_added: new Date(), rank: newRank } },
+            { user_id: req.user!.id, media_id: mediaData.id.toString(), type: type  },
+            { $setOnInsert: { date_added: new Date(), rank: newRank, type: type  } },
             { upsert: true }
         );
 
-        sendResponse(res, { status: 201, message: "Favorite added", responsePayload: { id: favorite.upsertedId!._id.toString() } });
-        saveMovie(mediaData as Media);
+        sendResponse(res, { status: 200, message: "Favorite added", responsePayload: { id: favorite.upsertedId!._id.toString() } });
+        saveMovie(mediaData as Media, type as string);
     } catch (err) {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error adding favorite" });
@@ -82,16 +121,18 @@ const addFavorite = async (req: express.Request, res: express.Response) => {
 };
 
 const removeFavorite = async (req: express.Request, res: express.Response) => {
-    const favorite_id = req.query.id;
+    const favorite_id = req.query.media_id;
+    const type = req.query.type;
 
-    if (!favorite_id) return res.status(400).send({ status: "error", message: "Invalid favorite id" });
+    if (!favorite_id) return res.status(400).send({ status: "error", message: "Invalid media id" });
+    if (!type || !isValidMediaType(type as string)) return sendResponse(res, { status: 400, message: "Invalid type" });
 
     // Remove favorite if it exists
-    favoritesSchema.findByIdAndDelete(favorite_id).then(() => {
-        res.status(200).send({ status: "success", message: "Favorite removed" });
+    favoritesSchema.findOneAndDelete({ user_id: req.user?.id, media_id: favorite_id, type: type }).then(() => {
+        sendResponse(res, { status: 200, message: "Favorite removed" });
     }).catch((err) => {
         console.error(err);
-        res.status(500).send({ status: "error", message: "Error removing favorite" });
+        sendResponse(res, { status: 500, message: "Error removing favorite" });
     });
 };
 

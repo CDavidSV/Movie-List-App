@@ -1,6 +1,6 @@
-export default class Media {
+export default class Movie {
     public adult: boolean;
-    public backdropPath: string;
+    public backdropPath: string | null;
     public genreIds: number[];
     public id: number;
     public originalLanguage: string;

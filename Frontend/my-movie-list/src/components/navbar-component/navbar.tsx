@@ -6,7 +6,7 @@ import defaultPfp from '../../assets/images/profile-default.png';
 import Logo from '../../assets/logos/mml_logo.svg?react';
 import LogoWithName from '../../assets/logos/mml_logo_with_name.svg?react';
 import onRouteChange from '../../hooks/onRouteChange';
-import { getSessionData, logOut, SessionData } from '../../helpers/session.helpers';
+import { getSessionData, isLoggedIn, logOut, SessionData } from '../../helpers/session.helpers';
 import './navbar.css';
 
 const genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
@@ -111,6 +111,10 @@ function ProfileDropdown() {
                         <span className="material-icons">bookmark_border</span>
                         Watchlist
                     </NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/favorites">
+                        <span className="material-icons">favorite_border</span>
+                        Favorites
+                    </NavLink>
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/my-lists">
                         <span className="material-icons">list</span>
                         My lists
@@ -182,10 +186,11 @@ export default function Navbar() {
                 <NavLink to="/search" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
                     <span className="material-icons">search</span>     
                 </NavLink>
-                <NavLink to="/watchlist" className={({ isActive }) => isActive ? "header-hoverable lists-icon selected " : "header-hoverable lists-icon"}>
-                    <span className="material-icons">bookmark_border</span>     
-                </NavLink>
-                
+                {isLoggedIn() && 
+                    <NavLink to="/watchlist" className={({ isActive }) => isActive ? "header-hoverable lists-icon selected " : "header-hoverable lists-icon"}>
+                        <span className="material-icons">bookmark_border</span>     
+                    </NavLink>
+                }
                 <ProfileDropdown/>
             </div>
         </header>

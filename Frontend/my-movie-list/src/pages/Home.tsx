@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { mml_api } from "../axios/mml_api_intances";
 import FilmSlider from "../components/film-slider-component/filmSlider";
 import { getSavedItems } from "../helpers/util.helpers";
+import "./home.css";
 
 export default function Home() {
     const [popularMovies, setPopularMovies] = useState<any[]>([]);
@@ -20,13 +21,15 @@ export default function Home() {
         mml_api.get("api/v1/media/movies/top-rated").then((response) => {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id).join(','), setTopRated);
         });
-    }), [])
+    }), []);
 
     return (
         <div className="content">
-            <FilmSlider title="Popular" filmArr={popularMovies}/> 
-            <FilmSlider title="Upcoming" filmArr={upcoming}/>
-            <FilmSlider title="Top Rated" filmArr={topRated}/>
+            <div className="sliders-container">
+                <FilmSlider title="Popular" filmArr={popularMovies}/> 
+                <FilmSlider title="Upcoming" filmArr={upcoming}/>
+                <FilmSlider title="Top Rated" filmArr={topRated}/>
+            </div>
         </div>
     );
 }
