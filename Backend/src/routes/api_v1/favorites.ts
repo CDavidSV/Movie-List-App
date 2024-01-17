@@ -139,6 +139,9 @@ const removeFavorite = async (req: express.Request, res: express.Response) => {
 const reorderFavorites = async (req: express.Request, res: express.Response) => {
     const { ref_id, target_id, position } = req.body;
 
+    // ref_id: The id of the reference favorite
+    // target_id: The id of the favorite moved to the new position
+    // position: The position of the target favorite relative to the reference favorite
     const reorderSchema = {
         ref_id: { type: "string", required: true },
         target_id: { type: "string", required: true },
@@ -172,7 +175,6 @@ const reorderFavorites = async (req: express.Request, res: express.Response) => 
                 } else {
                     newRank = calculateLexoRank(previousFavorite?.rank, reference.rank);
                 };
-                console.log(previousFavorite?.rank, reference.rank, newRank);
                 break;
             case "after":
                 // Find the next favorite from the reference favorite

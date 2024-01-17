@@ -41,6 +41,39 @@ const getSavedItems = (films: any[], ids: string[], callback: Function) => {
     }).catch(() => {
         callback(films);
     });
+};
+
+const setFavorite = async (id: string, type: string) => {
+    await mml_api_protected.post(`api/v1/favorites/add?media_id=${id}&type=${type}`);
+};
+
+const removeFavorite = async (id: string, type: string) => {
+    await mml_api_protected.delete(`api/v1/favorites/remove?media_id=${id}&type=${type}`);
+};
+
+const setWatchlist = async (id: string, type: string, status: number = 2, progress: number = 0) => {
+    await mml_api_protected.post(`api/v1/watchlist/update`, {
+        media_id: id.toString(),
+        status: status,
+        progress: progress,
+        type: type
+    });
+};
+
+const removeFromWatchlist = async (id: string, type: string) => {
+    await mml_api_protected.delete(`api/v1/watchlist/remove?media_id=${id}&type=${type}`);
 }
 
-export { shortenNumber, getSavedItems };
+const saveSelectedSearchResult = (name: string) => {
+    const searchResultHistory: { name: string, link: string }[] | undefined = JSON.parse(localStorage.getItem('searchResultsHistory')!);
+
+    if (!searchResultHistory) {
+        localStorage.setItem('searchResultsHistory', JSON.stringify([{ name, link: window.location.pathname }]));
+        return;
+    }
+
+    searchResultHistory.push({ name, link: window.location.pathname });
+    localStorage.setItem('searchResultsHistory', JSON.stringify(searchResultHistory));
+};
+
+export { shortenNumber, getSavedItems, setFavorite, removeFavorite, setWatchlist, removeFromWatchlist, saveSelectedSearchResult };

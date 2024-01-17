@@ -141,6 +141,12 @@
     width: 100%;
 }
 
+.card-anchor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 /* Loading State Styling with Animation */
 .film-card.loading {
     background-color: #f3f3f3;

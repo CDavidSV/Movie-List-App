@@ -8,12 +8,9 @@ import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 
 const watchlistStatus = new Map([
-    [0, "Not Started"],
-    [1, "Watching"],
-    [2, "Paused"],
-    [3, "Finished"],
-    [4, "Dropped"],
-    [5, "Plan to Watch"]
+    [0, "Watching"],
+    [1, "Finished"],
+    [2, "Plan to Watch"]
 ]);
 
 const getWatchlist = async (req: express.Request, res: express.Response) => {
@@ -91,7 +88,6 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
 
 const updateWatchlist = async (req: express.Request, res: express.Response) => {
     const { media_id, status, progress, type } = req.body;
-
     const registerSchema = {
         media_id: { type: "string", required: true },
         status: { type: "number", required: true },

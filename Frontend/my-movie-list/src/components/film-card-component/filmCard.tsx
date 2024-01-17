@@ -2,11 +2,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import './filmCard.css';
 import { useRef } from 'react';
 import React from 'react';
-import { shortenNumber } from '../../helpers/util.helpers';
-import { mml_api_protected } from '../../axios/mml_api_intances';
+import { shortenNumber, setFavorite, removeFavorite, setWatchlist, removeFromWatchlist } from '../../helpers/util.helpers';
 import { isLoggedIn } from '../../helpers/session.helpers';
 
-export default function FilmCard({filmData}: {filmData?: any}) {
+export default function FilmCard({ filmData, searchResult }: { filmData?: any, searchResult: boolean }) {
     const hoverContentRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
@@ -27,14 +26,14 @@ export default function FilmCard({filmData}: {filmData?: any}) {
 
         if (isFavorite) {
             setIsFavorite(false);
-            mml_api_protected.delete(`api/v1/favorites/remove?media_id=${filmData!.id}&type=${filmData!.type}`).catch(() => {
+            removeFavorite(filmData!.id, filmData!.type).catch(() => {
                 setIsFavorite(true);
             });
             return;
         }
 
         setIsFavorite(true);
-        mml_api_protected.post(`api/v1/favorites/add?media_id=${filmData!.id}&type=${filmData!.type}`)
+        setFavorite(filmData!.id, filmData!.type)
         .catch(() => {
             setIsFavorite(false);
         });
@@ -46,22 +45,25 @@ export default function FilmCard({filmData}: {filmData?: any}) {
 
         if (isWatchlisted) {
             setIsWatchlisted(false);
-            mml_api_protected.delete(`api/v1/watchlist/remove?media_id=${filmData!.id}&type=${filmData!.type}`).catch(() => {
+            removeFromWatchlist(filmData!.id, filmData!.type).catch(() => {
                 setIsWatchlisted(true);
             });
             return;
         }
 
         setIsWatchlisted(true);
-        mml_api_protected.post(`api/v1/watchlist/update`, {
-            media_id: filmData!.id.toString(),
-            status: 5, // Plan to watch
-            progress: 0,
-            type: filmData!.type
-        })
+        setWatchlist(filmData!.id, filmData!.type)
         .catch(() => {
             setIsWatchlisted(false);
         });
+    }
+
+    const handleFilmSelect = () => {
+        if (searchResult) {
+            
+        }
+
+        console.log("Film selected");
     }
 
     return (
@@ -76,16 +78,18 @@ export default function FilmCard({filmData}: {filmData?: any}) {
                     </div>
                 </div>
             ) : (
-                <Link onMouseEnter={activateHover} onMouseLeave={deactivateHover} to={filmData.link} className="film-card">
-                    <figure className="poster-image-figure">
-                        <img loading="lazy" src={filmData.poster_url}/>
-                    </figure>
-                    <div className="card-info">
-                        <h4>{filmData.title}</h4>
-                        <p>{filmData.release_date}</p>
-                    </div>
+                <div onMouseEnter={activateHover} onMouseLeave={deactivateHover} className="film-card">
+                    <Link to={filmData.link} onClick={handleFilmSelect} className="card-anchor">
+                        <figure className="poster-image-figure">
+                            <img loading="lazy" src={filmData.poster_url}/>
+                        </figure>
+                        <div className="card-info">
+                            <h4>{filmData.title}</h4>
+                            <p>{filmData.release_date}</p>
+                        </div>
+                    </Link>
                     <div ref={hoverContentRef} className="card-hover-info" style={{backgroundImage: `url(${filmData.poster_url})`}}>
-                        <div className="card-hover-info-content">
+                        <Link to={filmData.link} onClick={handleFilmSelect} className="card-hover-info-content">
                             <div>
                                 <h6>{filmData.title}</h6>
                                 <div className="card-hover-info-content-vote">
@@ -103,9 +107,9 @@ export default function FilmCard({filmData}: {filmData?: any}) {
                                     <span className="material-icons icon-btn" onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>
                                 </>}
                             </div>
-                        </div>
+                        </Link>
                     </div>
-                </Link>
+                </div>
             )}
         </>
     );

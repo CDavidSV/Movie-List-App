@@ -70,10 +70,11 @@ export default function FilmSlider (props: {filmArr: any[], title: string}) {
                 {props.filmArr.length > 0 ? props.filmArr.map((movie, index) => (
                     <FilmCard 
                         key={index} 
-                        filmData={movie}/>
+                        filmData={movie}
+                        searchResult={false}/>
                 )) : 
                     Array.from({length: 10}).map((_, index) => (
-                        <FilmCard key={`loading-${index}`} />
+                        <FilmCard key={`loading-${index}`} searchResult={false}/>
                     ))
                 }
             </div>

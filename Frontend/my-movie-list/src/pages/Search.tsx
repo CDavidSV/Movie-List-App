@@ -69,7 +69,8 @@ export default function Browse() {
                                         return (
                                         <FilmCard 
                                             key={index} 
-                                            filmData={movie}/>
+                                            filmData={movie}
+                                            searchResult={true}/>
                                         )
                                     }
                                 })}
@@ -83,9 +84,10 @@ export default function Browse() {
                                 {media.map((show, index) => {
                                     if (show.type === "series") {
                                         return (
-                                        <FilmCard 
-                                            key={index} 
-                                            filmData={show}/>
+                                            <FilmCard 
+                                                key={index} 
+                                                filmData={show}
+                                                searchResult={true}/>
                                         )
                                     }
                                 })}
