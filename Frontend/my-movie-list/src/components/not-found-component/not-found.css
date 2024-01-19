@@ -1,0 +1,19 @@
+.not-found {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: dotted 1px var(--secondary-background-color);
+    height: 100%;
+    width: 100%;
+    padding: 100px 20px;
+    text-align: center;
+}
+
+.not-found h3 {
+    margin: 5px 0;
+}
+
+.not-found p {
+    margin: 5px 0;
+}

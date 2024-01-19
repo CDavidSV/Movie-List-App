@@ -75,7 +75,7 @@ mml_api_protected.interceptors.response.use((response) => {
     return response;
 }, async (error) => {
     // If the error is unauthorized, or forbidden, then redirect to the login page
-    if (error.response.status !== 401 || error.response.status !== 403) return Promise.reject(error);
+    if (error.response.status !== 401 && error.response.status !== 403) return Promise.reject(error);
     clearSessionData();
     window.location.href = "/login";
 });

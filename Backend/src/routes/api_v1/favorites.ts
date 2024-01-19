@@ -22,11 +22,21 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
             }
         },
         {   
-            // TODO: Fetch the correct media type based on the favorites type field
             $lookup: {
                 from: 'media',
-                localField: 'media_id',
-                foreignField: 'media_id',
+                let: { media_id: '$media_id', type: '$type' },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ['$media_id', '$$media_id'] },
+                                    { $eq: ['$type', '$$type'] }
+                                ]
+                            }
+                        }
+                    }
+                ],
                 as: 'media'
             }
         },

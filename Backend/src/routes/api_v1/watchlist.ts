@@ -14,21 +14,35 @@ const watchlistStatus = new Map([
 ]);
 
 const getWatchlist = async (req: express.Request, res: express.Response) => {
+    const status = parseInt(req.query.status as string) || 0;
     const page = parseInt(req.query.page as string) || 1;
     const skip = isNaN(page) ? 0 : (page - 1) * 500;
+
+    if (status < 0 || status > 2) return sendResponse(res, { status: 400, message: "Invalid status" });
 
     watchlistSchema.aggregate([
         {
             $match: {
                 user_id: req.user?.id,
+                status: status
             }
         },
         {   
-            // TODO: Fetch the correct media type based on the watchlist type field
             $lookup: {
                 from: 'media',
-                localField: 'media_id',
-                foreignField: 'media_id',
+                let: { media_id: '$media_id', type: '$type' },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ['$media_id', '$$media_id'] },
+                                    { $eq: ['$type', '$$type'] }
+                                ]
+                            }
+                        }
+                    }
+                ],
                 as: 'media'
             }
         },
@@ -63,7 +77,10 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 backdrop_url: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 release_date: "NA",
                 runtime: 0,
-                favoorited: item.favoorited.length >= 1 ? true : false
+                favoorited: item.favorited.length >= 1 ? true : false,
+                status: watchlistStatus.get(item.status),
+                progress: item.progress,
+                total_progress: 0
             };
             return {
                 id: item._id,
@@ -75,7 +92,10 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 backdrop_url: item.media[0].backdrop_url ? `${config.tmbdImageBaseUrl}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 release_date: item.media[0].release_date ? item.media[0].release_date : "NA",
                 runtime: item.media[0].runtime ? item.media[0].runtime : 0,
-                favoorited: item.favoorited.length >= 1 ? true : false
+                favoorited: item.favorited.length >= 1 ? true : false,
+                status: watchlistStatus.get(item.status),
+                progress: item.progress,
+                total_progress: item.type === 'movie' ? 1 : item.media[0].episode_count
             }
         });
 

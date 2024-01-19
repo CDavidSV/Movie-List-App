@@ -11,7 +11,7 @@ import './navbar.css';
 
 const genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
 
-function useDropdown() {
+function useDropdown(onMenuStateChange: (isOpen: boolean) => void) {
     const [menuState, setMenuState] = useState(false);
     const node = useRef<HTMLDivElement>(null);
     
@@ -23,6 +23,10 @@ function useDropdown() {
 
         setMenuState(false);
     };
+
+    useEffect(() => {
+        onMenuStateChange(menuState);
+    }, [menuState]);
     
     // Hook to detect when the user clicks outside the dropdown menu
     useEffect(() => {
@@ -39,8 +43,8 @@ function useDropdown() {
     return { node, menuState, toggleMenu };
 }
 
-function GenresDropdown() {
-    const { node, menuState, toggleMenu } = useDropdown();
+function GenresDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpen: boolean) => void}) {
+    const { node, menuState, toggleMenu } = useDropdown(handleMenuStateChange);
 
     return (
         <div 
@@ -66,8 +70,8 @@ function GenresDropdown() {
     );
 }
 
-function ProfileDropdown() {
-    const { node, menuState, toggleMenu } = useDropdown();
+function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpen: boolean) => void}) {
+    const { node, menuState, toggleMenu } = useDropdown(handleMenuStateChange);
     const [sessionData, setSessionData] = useState<SessionData | null>(null);
 
     useEffect(() => {
@@ -154,45 +158,52 @@ function ProfileDropdown() {
 }
 
 export default function Navbar() {
-    const { node, menuState, toggleMenu } = useDropdown();
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const handleMenuStateChange = (isOpen: boolean) => {
+        setDropdownOpen(isOpen);
+    }
 
     return (
-        <header>
-            <div ref={node} className="header-section">
-                <div className="header-section" onClick={toggleMenu}>
-                    <div className="header-hoverable hamburger-btn">
-                        <span className="material-icons">menu</span>
+        <>
+            <div className={dropdownOpen ? "dropdown-select-cover active" : "dropdown-select-cover"}></div>
+            <header>
+                <div className="header-section">
+                    <div className="header-section">
+                        <div className="header-hoverable hamburger-btn">
+                            <span className="material-icons">menu</span>
+                        </div>
+                    </div>
+                    <NavLink to="/" className="logo-container"> 
+                        <LogoWithName className="logo-desktop"/>
+                        <Logo className="logo-mobile"/>
+                    </NavLink>
+                    <div className="header-pages">
+                        <NavLink to="/" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
+                            <p>Home</p>
+                        </NavLink>
+                        <NavLink to="/movies" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
+                            <p>Movies</p>
+                        </NavLink>
+                        <NavLink to="/shows" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
+                            <p>Shows</p>
+                        </NavLink>
+                        <GenresDropdown handleMenuStateChange={handleMenuStateChange}/>
                     </div>
                 </div>
-                <NavLink to="/" className="logo-container"> 
-                    <LogoWithName className="logo-desktop"/>
-                    <Logo className="logo-mobile"/>
-                </NavLink>
-                <div className={`header-pages${menuState ? " active-hamburger-menu" : ""}`}>
-                    <NavLink to="/" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
-                        <p>Home</p>
-                    </NavLink>
-                    <NavLink to="/movies" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
-                        <p>Movies</p>
-                    </NavLink>
-                    <NavLink to="/shows" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
-                        <p>Shows</p>
-                    </NavLink>
-                    <GenresDropdown/>
-                </div>
-            </div>
 
-            <div className="header-section">
-                <NavLink to="/search" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
-                    <span className="material-icons">search</span>     
-                </NavLink>
-                {isLoggedIn() && 
-                    <NavLink to="/watchlist" className={({ isActive }) => isActive ? "header-hoverable lists-icon selected " : "header-hoverable lists-icon"}>
-                        <span className="material-icons">bookmark_border</span>     
+                <div className="header-section">
+                    <NavLink to="/search" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
+                        <span className="material-icons">search</span>     
                     </NavLink>
-                }
-                <ProfileDropdown/>
-            </div>
-        </header>
+                    {isLoggedIn() && 
+                        <NavLink to="/watchlist" className={({ isActive }) => isActive ? "header-hoverable lists-icon selected " : "header-hoverable lists-icon"}>
+                            <span className="material-icons">bookmark_border</span>     
+                        </NavLink>
+                    }
+                    <ProfileDropdown handleMenuStateChange={handleMenuStateChange}/>
+                </div>
+            </header>
+        </>
     );
 }

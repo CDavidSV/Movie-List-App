@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import "./favorites.css";
 import { mml_api_protected } from "../axios/mml_api_intances";
 import { Link } from "react-router-dom";
 import { removeFromWatchlist, setWatchlist, removeFavorite } from "../helpers/util.helpers";
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DraggableStateSnapshot } from "react-beautiful-dnd";
+import "./favorites.css";
 
 function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: any, removeItem: Function, provided: DraggableProvided, snapshot: DraggableStateSnapshot}) {
     const [watchlisted, setWatchlisted] = useState<boolean>(filmData.watchlisted);
@@ -34,7 +34,7 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
     return (
         <div className={snapshot.isDragging ? "list-card-container dragging" : "list-card-container"}>
             <div className="list-drag" {...provided.dragHandleProps}>
-                <span className="material-icons">drag_indicator</span>
+                <span className="material-icons" >drag_indicator</span>
             </div>
             <Link to="/" className="list-card-main-container">
                 <figure className="list-card-img-container">
@@ -75,6 +75,7 @@ export default function Favorites() {
     }
 
     const handleOnDragEnd = (result: DropResult) => {
+        console.log(1);
         if (!result.destination || !result.source) return;
         const startIndex = result.source.index;
         const finalIndex = result.destination.index;
@@ -118,17 +119,17 @@ export default function Favorites() {
                     </div>
                     : <DragDropContext onDragEnd={handleOnDragEnd}>
                         <Droppable droppableId="favorites">
-                            {provided => (
+                            {(provided, snapshot) => (
                                 <div {...provided.droppableProps} ref={provided.innerRef}>
                                     {favorites.map((film, index) => (
                                         <Draggable key={film.id} draggableId={film.id} index={index}>
-                                            {(provided, snapshot) => (
-                                                <div {...provided.draggableProps} ref={provided.innerRef}>
+                                            {(providedDraggable, snapshotDraggable) => (
+                                                <div {...providedDraggable.draggableProps} ref={providedDraggable.innerRef} className={snapshot.isDraggingOver && !snapshotDraggable.isDragging ? "drag-over" : ""}>
                                                     <FilmListCard
-                                                    filmData={film} 
-                                                    removeItem={() => removeItemFromFavorites(index)} 
-                                                    provided={provided}
-                                                    snapshot={snapshot}/>
+                                                        filmData={film} 
+                                                        removeItem={() => removeItemFromFavorites(index)} 
+                                                        provided={providedDraggable}
+                                                        snapshot={snapshotDraggable}/>
                                                 </div>
                                             )}
                                         </Draggable>

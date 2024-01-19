@@ -60,7 +60,7 @@ export default function Browse() {
             <div className="content-wrapper">
                 <div className="results-container">
                     <div className={loading ? "loader active" : "loader"}><div className="spinning-loader"></div></div>
-                    {media.length > 0 &&
+                    {media.filter(movie => movie.type === "movie").length > 0 &&
                         <div className="search-results">
                             <h2>Movies</h2>
                             <div className="search-results-container">  
@@ -77,7 +77,7 @@ export default function Browse() {
                             </div>
                         </div>
                     }
-                    {media.length > 0 &&
+                    {media.filter(movie => movie.type === "series").length > 0 &&
                         <div className="search-results">
                             <h2>Series</h2>
                             <div className="search-results-container">  

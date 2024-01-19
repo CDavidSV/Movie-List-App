@@ -15,7 +15,7 @@ const History = lazy(() => import('./pages/History'));
 const MyProfile = lazy(() => import('./pages/MyProfile'));
 const Login = lazy(() => import('./pages/Login'));
 const SignUp = lazy(() => import('./pages/Signup'));
-const PageNotFound = lazy(() => import('./pages/NotFound'));
+const PageNotFound = lazy(() => import('./pages/PageNotFound'));
 const Favorites = lazy(() => import('./pages/Favorites'));
 
 function App() {
@@ -47,9 +47,9 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <>
+  <React.StrictMode>
     <BrowserRouter>
       <App/>
     </BrowserRouter>
-  </>,
+  </React.StrictMode>,
 )

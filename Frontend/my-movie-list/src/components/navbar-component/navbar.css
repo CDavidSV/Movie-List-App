@@ -75,7 +75,6 @@ header {
     flex-direction: row;
     justify-content: flex-end;
     height: 100%;
-    transition: 0.2s ease;
 }
 
 .nav-header {
@@ -118,6 +117,27 @@ header {
 
     width: 100vw;
     max-width: 400px;
+}
+
+.dropdown-select-cover {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    background: rgba(0, 0, 0, 0.5);
+    transition: 0.2s ease;
+    transition-delay: 0.1s;
+    
+    z-index: 99;
+}
+
+.dropdown-select-cover.active {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
 }
 
 .hamburger-menu {
@@ -269,36 +289,11 @@ header {
     }
 
     .header-pages {
-        top: 0;
-        left: 0;
-        background: var(--secondary-background-color);
-        pointer-events: none;
-        opacity: 0;
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        align-items: center;
-        height: 250px;
-        margin: 0;
-        width: 100vw;
-        max-width: 500px;
-        transform: translateY(9vh);
-    }
-
-    .header-pages .header-hoverable {
-        width: 100%;
-        padding: 0;
+        display: none;
     }
 
     .app-title {
         font-size: 1.2rem;
-    }
-
-    .header-pages.active-hamburger-menu {
-        pointer-events: all;
-        opacity: 1;
-        transform: translateY(var(--nav-height));
     }
 }
 

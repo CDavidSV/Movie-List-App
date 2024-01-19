@@ -23,6 +23,9 @@
 .list-card-container.dragging {
     background-color: rgb(25, 25, 25);
     z-index: 100;
+}
+
+.drag-over {
     pointer-events: none;
 }
 
@@ -103,6 +106,8 @@
     display: flex;
     padding-right: 15px;
     align-items: center;
+    height: 100%;
+    cursor: grab;
 }
 
 .list-card-delete {
