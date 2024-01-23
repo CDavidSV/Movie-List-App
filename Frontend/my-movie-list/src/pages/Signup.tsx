@@ -83,7 +83,7 @@ export default function SignUp() {
                         onInputChange={(value: string) => setSignUpData({...signUpData!, email: value})}
                         status={signUpErrors.emailError}/>
                     <InputField 
-                        type="username" 
+                        type="text" 
                         id="username" 
                         label="Username" 
                         required={true} 

@@ -38,6 +38,7 @@
 .icon-btn {
     color: var(--primary-color);
     transition: 0.2s ease;
+    cursor: pointer;
 }
 
 .icon-btn:hover {
@@ -260,7 +261,7 @@ button:disabled {
 }
 @keyframes l2 {to{transform: rotate(1turn)}}
 
-@media screen and (max-width: 480px) { 
+@media screen and (max-width: 480px) {
     .logo-mobile {
         display: flex;
     }

@@ -1,9 +1,5 @@
-import axios, { AxiosRequestConfig, InternalAxiosRequestConfig } from "axios";
+import axios from "axios";
 import { clearSessionData, getSessionData, setSessionData } from "../helpers/session.helpers";
-
-interface AxiosRequestConfigExtended extends AxiosRequestConfig {
-    _retry?: boolean;
-}  
 
 const mml_api_protected = axios.create({
     baseURL: "http://localhost:3000",
