@@ -107,8 +107,7 @@ export default function Media() {
     return (
         <div className="content">
             {mediaData && 
-                <div className="film-backdrop-container">
-                    <img className="film-backdrop" src={mediaData.backdropPath} alt="film-backdrop" />
+                <div className="film-backdrop-container" style={{backgroundImage: `url(${mediaData.backdropPath})`}}>
                     <div className="film-info-content">
                         <div className="film-poster-container">
                             <img className="film-poster" src={mediaData.posterPath} alt={mediaData.title || mediaData.name}/>
@@ -135,7 +134,7 @@ export default function Media() {
                                     status={mediaData.watchlist && mediaData.watchlist.status}/>
                             </div>
                             <h2 className="description-title">Description</h2>
-                            <p className="film-description">{mediaData.overview}</p>
+                            <p>{mediaData.overview}</p>
                         </div>
                     </div>
                 </div>
