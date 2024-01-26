@@ -11,5 +11,5 @@ const WatchlistSchema = new Schema({
     updated_date: { type: Date, required: true }
 });
 
-WatchlistSchema.index({ userId: 1, media_id: 1 }, { unique: true });
+WatchlistSchema.index({ user_id: 1, media_id: 1, type: 1 }, { unique: true });
 export default model("Watchlist", WatchlistSchema);

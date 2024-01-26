@@ -6,26 +6,35 @@ import Media from "../../Models/Movie";
 import saveMovie from "../../util/mediaHandler";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
+import Series from "../../Models/Series";
+import Movie from "../../Models/Movie";
 
 const watchlistStatus = new Map([
     [0, "Watching"],
-    [1, "Finished"],
-    [2, "Plan to Watch"]
+    [1, "Plan to Watch"],
+    [2, "Finished"]
 ]);
 
 const getWatchlist = async (req: express.Request, res: express.Response) => {
-    const status = parseInt(req.query.status as string) || 0;
+    const status = req.query.status ? parseInt(req.query.status as string) : 3;
     const page = parseInt(req.query.page as string) || 1;
-    const skip = isNaN(page) ? 0 : (page - 1) * 500;
 
-    if (status < 0 || status > 2) return sendResponse(res, { status: 400, message: "Invalid status" });
+    if (status < 0 || status > 3) return sendResponse(res, { status: 400, message: "Invalid status" });
 
+    let match: { user_id?: string, status?: number } = { user_id: req.user?.id, status: status };
+    let sort: any = { updated_date: -1 };
+    if (status === 3) { 
+        match = { user_id: req.user?.id }
+        sort = { status: 1, updated_date: -1 } 
+    };
+
+    const count = await watchlistSchema.countDocuments({ user_id: req.user?.id }).then((count) => count).catch((err) => 0);
+    let pages = Math.ceil(count / 500);
+    let skip = isNaN(page) ? 0 : (page - 1) * 500;
+    page > pages ? skip = 0 : skip = skip;
     watchlistSchema.aggregate([
         {
-            $match: {
-                user_id: req.user?.id,
-                status: status
-            }
+            $match: match
         },
         {   
             $lookup: {
@@ -49,14 +58,15 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
         {
             $lookup: {
                 from: 'favorites',
-                let: { user_id: '$user_id', media_id: '$media_id' },
+                let: { user_id: '$user_id', media_id: '$media_id', type: '$type'},
                 pipeline: [
                     {
                         $match: {
                             $expr: {
                                 $and: [
                                     { $eq: ['$user_id', '$$user_id'] },
-                                    { $eq: ['$media_id', '$$media_id'] }
+                                    { $eq: ['$media_id', '$$media_id'] },
+                                    { $eq: ['$type', '$$type'] }
                                 ]
                             }
                         }
@@ -65,7 +75,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 as: 'favorited'
             }
         }
-    ]).skip(skip).limit(500).then((result) => {
+    ]).skip(skip).limit(500).sort(sort).then((result) => {
         const watchlist = result.map((item) => {
             if (item.media.length < 1) return {
                 id: item._id,
@@ -77,7 +87,8 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 backdrop_url: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 release_date: "NA",
                 runtime: 0,
-                favoorited: item.favorited.length >= 1 ? true : false,
+                type: item.type,
+                favorited: item.favorited.length >= 1 ? true : false,
                 status: watchlistStatus.get(item.status),
                 progress: item.progress,
                 total_progress: 0
@@ -92,22 +103,39 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 backdrop_url: item.media[0].backdrop_url ? `${config.tmbdImageBaseUrl}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 release_date: item.media[0].release_date ? item.media[0].release_date : "NA",
                 runtime: item.media[0].runtime ? item.media[0].runtime : 0,
-                favoorited: item.favorited.length >= 1 ? true : false,
+                type: item.type,
+                favorited: item.favorited.length >= 1 ? true : false,
                 status: watchlistStatus.get(item.status),
                 progress: item.progress,
                 total_progress: item.type === 'movie' ? 1 : item.media[0].episode_count
             }
         });
 
-        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: watchlist });
+        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: { page, pages, watchlist } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching watchlist" });
     });
 };
 
+const getStatusOfWatchlistItem = async (req: express.Request, res: express.Response) => {
+    const { media_id, type } = req.query;
+
+    if (!media_id) return sendResponse(res, { status: 400, message: "Invalid media id" });
+
+    try {
+        const watchlistItem = await watchlistSchema.findOne({ user_id: req.user!.id, media_id: media_id as string, type: type as string });
+        if (!watchlistItem) return sendResponse(res, { status: 404, message: "Item not found" });
+
+        sendResponse(res, { status: 200, message: "Watchlist item found", responsePayload: { status: watchlistItem.status, progress: watchlistItem.progress } });
+    } catch (err) {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching watchlist item" });
+    }
+};
+
 const updateWatchlist = async (req: express.Request, res: express.Response) => {
-    const { media_id, status, progress, type } = req.body;
+    let { media_id, status, progress, type } = req.body;
     const registerSchema = {
         media_id: { type: "string", required: true },
         status: { type: "number", required: true },
@@ -119,15 +147,24 @@ const updateWatchlist = async (req: express.Request, res: express.Response) => {
     if (!missingFields) return sendResponse(res, { status: 400, message: "Invalid request body" });
     if (status < 0 || status > 5) return sendResponse(res, { status: 400, message: "Invalid status" });
     if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid type" });
+
     // Validate id and get the latest favorite saved
     try {
         const mediaData = await findMediaById(media_id as string, type);
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
+        
+        // Check progress
+        if (progress < 0) progress = 0;
+        if (mediaData instanceof Series && progress > mediaData.numberOfEpisodes) { 
+            progress = mediaData.numberOfEpisodes;
+        } else if (mediaData instanceof Movie && progress > 1) {
+            progress = 1;
+        }
 
         // Save to database
         const watchlistItem = await watchlistSchema.findOneAndUpdate({ user_id: req.user!.id, media_id, type: type  }, { status, progress, updated_date: Date.now(), type: type }, { upsert: true, setDefaultsOnInsert: true, new: true });
         
-        sendResponse(res, { status: 200, message: "Added to watchlist", responsePayload: { id: watchlistItem?._id.toString() } });
+        sendResponse(res, { status: 200, message: "Updated watchlist item", responsePayload: { id: watchlistItem?._id.toString() } });
 
         saveMovie(mediaData as Media, type);
     } catch (err) {
@@ -152,4 +189,4 @@ const removeItemFromWatchlist = async (req: express.Request, res: express.Respon
     }
 };
 
-export { getWatchlist, updateWatchlist, removeItemFromWatchlist };
+export { getWatchlist, updateWatchlist, removeItemFromWatchlist, getStatusOfWatchlistItem};

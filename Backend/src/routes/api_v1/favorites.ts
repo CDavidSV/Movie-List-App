@@ -43,14 +43,15 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
         {
             $lookup: {
                 from: 'watchlists',
-                let: { user_id: '$user_id', media_id: '$media_id' },
+                let: { user_id: '$user_id', media_id: '$media_id', type: '$type'},
                 pipeline: [
                     {
                         $match: {
                             $expr: {
                                 $and: [
                                     { $eq: ['$user_id', '$$user_id'] },
-                                    { $eq: ['$media_id', '$$media_id'] }
+                                    { $eq: ['$media_id', '$$media_id'] },
+                                    { $eq: ['$type', '$$type'] }
                                 ]
                             }
                         }
@@ -89,7 +90,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
             }
         });
 
-        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { page, pages, favorites } })
+        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { page, pages, favorites } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching favorites" });

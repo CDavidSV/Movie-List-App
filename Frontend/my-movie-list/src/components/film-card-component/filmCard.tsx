@@ -1,16 +1,13 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './filmCard.css';
 import { useRef } from 'react';
-import React from 'react';
-import { shortenNumber, setFavorite, removeFavorite, setWatchlist, removeFromWatchlist } from '../../helpers/util.helpers';
+import { shortenNumber, saveToHistory } from '../../helpers/util.helpers';
 import { isLoggedIn } from '../../helpers/session.helpers';
+import FavoriteButton from '../favorite-button-component/favorite-button';
+import WatchlistButton from '../watchlist-button-component/watchlist-button';
 
 export default function FilmCard({ filmData, searchResult }: { filmData?: any, searchResult: boolean }) {
     const hoverContentRef = useRef<HTMLDivElement>(null);
-    const navigate = useNavigate();
-
-    let [isFavorite, setIsFavorite] = React.useState<boolean>(filmData && filmData.inFavorites || false);
-    let [isWatchlisted, setIsWatchlisted] = React.useState<boolean>(filmData && filmData.inWatchlist || false);
 
     const activateHover = () => {         
         hoverContentRef.current?.classList.add("active");
@@ -18,52 +15,6 @@ export default function FilmCard({ filmData, searchResult }: { filmData?: any, s
 
     const deactivateHover = () => {
         hoverContentRef.current?.classList.remove("active");
-    }
-
-    const handleFavoriteClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (!isLoggedIn()) return navigate("/login");
-
-        if (isFavorite) {
-            setIsFavorite(false);
-            removeFavorite(filmData!.id, filmData!.type).catch(() => {
-                setIsFavorite(true);
-            });
-            return;
-        }
-
-        setIsFavorite(true);
-        setFavorite(filmData!.id, filmData!.type)
-        .catch(() => {
-            setIsFavorite(false);
-        });
-    }
-
-    const handleWatchlistClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (!isLoggedIn()) return navigate("/login");
-
-        if (isWatchlisted) {
-            setIsWatchlisted(false);
-            removeFromWatchlist(filmData!.id, filmData!.type).catch(() => {
-                setIsWatchlisted(true);
-            });
-            return;
-        }
-
-        setIsWatchlisted(true);
-        setWatchlist(filmData!.id, filmData!.type)
-        .catch(() => {
-            setIsWatchlisted(false);
-        });
-    }
-
-    const handleFilmSelect = () => {
-        if (searchResult) {
-            
-        }
-
-        console.log("Film selected");
     }
 
     return (
@@ -79,17 +30,17 @@ export default function FilmCard({ filmData, searchResult }: { filmData?: any, s
                 </div>
             ) : (
                 <div onMouseEnter={activateHover} onMouseLeave={deactivateHover} className="film-card">
-                    <Link to={filmData.link} onClick={handleFilmSelect} className="card-anchor">
+                    <div className="card-anchor">
                         <figure className="poster-image-figure">
-                            <img loading="lazy" src={filmData.poster_url}/>
+                            <img loading="lazy" src={filmData.poster_url} alt={filmData.title}/>
                         </figure>
                         <div className="card-info">
                             <h4>{filmData.title}</h4>
                             <p>{filmData.release_date}</p>
                         </div>
-                    </Link>
+                    </div>
                     <div ref={hoverContentRef} className="card-hover-info" style={{backgroundImage: `url(${filmData.poster_url})`}}>
-                        <Link to={filmData.link} onClick={handleFilmSelect} className="card-hover-info-content">
+                        <Link onClick={() => saveToHistory(filmData.title, filmData.id.toString(), filmData.type, searchResult)} to={`/media/${filmData.type}/${filmData.id}`} className="card-hover-info-content">
                             <div>
                                 <h6>{filmData.title}</h6>
                                 <div className="card-hover-info-content-vote">
@@ -102,9 +53,17 @@ export default function FilmCard({ filmData, searchResult }: { filmData?: any, s
                             </div>
                             <div className="card-hover-info-content-buttons">
                                 {isLoggedIn() &&
-                                <>        
-                                    <span className="material-icons icon-btn" onClick={handleWatchlistClick}>{!isWatchlisted ? "bookmark_border" : "bookmark"}</span>
-                                    <span className="material-icons icon-btn" onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>
+                                <>  
+                                    <WatchlistButton 
+                                        size='small'
+                                        isWatchlisted={filmData.inFavorites}
+                                        mediaId={filmData.id}
+                                        type={filmData.type}/>  
+                                    <FavoriteButton 
+                                        size='small'
+                                        isFavorite={filmData.inFavorites}
+                                        mediaId={filmData.id}
+                                        type={filmData.type}/>
                                 </>}
                             </div>
                         </Link>

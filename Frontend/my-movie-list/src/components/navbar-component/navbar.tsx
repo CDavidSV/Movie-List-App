@@ -119,10 +119,12 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
                         <span className="material-icons">favorite_border</span>
                         Favorites
                     </NavLink>
-                    <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/my-lists">
+                    {
+                    // TODO: Implement user lists
+                    /* <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/my-lists">
                         <span className="material-icons">list</span>
                         My lists
-                    </NavLink>
+                    </NavLink> */}
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/history">
                     <span className="material-icons">history</span>
                         History

@@ -2,36 +2,43 @@ import express from 'express';
 import axios from 'axios';
 import { sendResponse } from '../../util/apiHandler';
 import config from '../../config/config';
+import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle } from '../../util/TMDB';
+import watchlistSchema from '../../scheemas/watchlistSchema';
+import Movie from '../../Models/Movie';
+import favoritesSchema from '../../scheemas/favoritesSchema';
+import Series from '../../Models/Series';
 
 const tmdb_access_token = process.env.TMDB_ACCESS_TOKEN;
+
+interface MovieResponse extends Movie {
+    watchlist?: any;
+    favorites?: boolean;
+}
+
+interface SeriesResponse extends Series {
+    watchlist?: any;
+    favorites?: boolean;
+}
+
+interface CustomMediaResponse {
+    id: number;
+    title: string;
+    description: string;
+    poster_url: string;
+    backdrop_url: string;
+    type: string;
+    release_date: string;
+    vote_average: number;
+    votes: number;
+}
 
 const getPopularMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page || 1;
 
-    axios({
-        method: 'get',
-        url: `https://api.themoviedb.org/3/movie/popular?language=en-US&page=${page}`,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tmdb_access_token}`
-        }
-    }).then((response) => {
-        const movieArray: any[] = [];
-        response.data.results.forEach((movie: any) => {
-            movieArray.push({
-                id: movie.id,
-                title: movie.title,
-                description: movie.overview,
-                poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                type: "movie",
-                release_date: movie.release_date,
-                vote_average: movie.vote_average,
-                votes: movie.vote_count
-            });
-        });
+    fetchMedia("movie", "popular", page as number).then((response) => {
+        if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
-        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: movieArray });
+        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching movies" });
@@ -41,30 +48,10 @@ const getPopularMovies = async (req: express.Request, res: express.Response) => 
 const getUpcomingMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page || 1;
 
-    axios({
-        method: 'get',
-        url: `https://api.themoviedb.org/3/movie/upcoming?language=en-US&page=${page}`,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tmdb_access_token}`
-        }
-    }).then((response) => {
-        const movieArray: any[] = [];
-        response.data.results.forEach((movie: any) => {
-            movieArray.push({
-                id: movie.id,
-                title: movie.title || movie.original_title,
-                description: movie.overview,
-                poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                type: "movie",
-                release_date: movie.release_date,
-                vote_average: movie.vote_average,
-                votes: movie.vote_count
-            });
-        });
+    fetchMedia("movie", "upcoming", page as number).then((response) => {
+        if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
-        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: movieArray });
+        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching movies" });
@@ -74,30 +61,10 @@ const getUpcomingMovies = async (req: express.Request, res: express.Response) =>
 const getTopRatedMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page || 1;
 
-    axios({
-        method: 'get',
-        url: `https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=${page}`,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tmdb_access_token}`
-        }
-    }).then((response) => {
-        const movieArray: any[] = [];
-        response.data.results.forEach((movie: any) => {
-            movieArray.push({
-                id: movie.id,
-                title: movie.title,
-                description: movie.overview,
-                poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                type: "movie",
-                release_date: movie.release_date,
-                vote_average: movie.vote_average,
-                votes: movie.vote_count
-            });
-        });
+    fetchMedia("movie", "top_rated", page as number).then((response) => {
+        if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
-        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: movieArray });
+        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching movies" });
@@ -107,30 +74,10 @@ const getTopRatedMovies = async (req: express.Request, res: express.Response) =>
 const getNowPlayingMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page || 1;
 
-    axios({
-        method: 'get',
-        url: `https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=${page}`,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tmdb_access_token}`
-        }
-    }).then((response) => {
-        const movieArray: any[] = [];
-        response.data.results.forEach((movie: any) => {
-            movieArray.push({
-                id: movie.id,
-                title: movie.title,
-                description: movie.overview,
-                poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                type: "movie",
-                release_date: movie.release_date,
-                vote_average: movie.vote_average,
-                votes: movie.vote_count
-            });
-        });
+    fetchMedia("movie", "now_playing", page as number).then((response) => {
+        if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
-        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: movieArray });
+        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching movies" });
@@ -144,63 +91,50 @@ const searchByTitle = async (req: express.Request, res: express.Response) => {
         sendResponse(res, { status: 400, message: "Missing query parameter" });
         return;
     }
-    const mediaArray: any[] = [];
 
-    await axios({
-        method: 'get',
-        url: `https://api.themoviedb.org/3/search/movie?query=${title}&include_adult=false&language=en-US&page=1`,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tmdb_access_token}`
-        }
-    }).then((response) => {
-        response.data.results.forEach((movie: any) => {
-            if (movie.poster_path && movie.title) {
-                mediaArray.push({
-                    id: movie.id,
-                    title: movie.title,
-                    description: movie.overview,
-                    poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
-                    backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                    type: "movie",
-                    release_date: movie.release_date,
-                    vote_average: movie.vote_average,
-                    votes: movie.vote_count
-                });
-            };
-        });
+    findMediaByTitle(title as string).then((response) => {
+        if (!response) return sendResponse(res, { status: 500, message: "Error fetching media" });
+
+        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
     }).catch((err) => {
         console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching media" });
     });
-
-    await axios({
-        method: 'get',
-        url: `https://api.themoviedb.org/3/search/tv?query=${title}&include_adult=false&language=en-US&page=1`,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${tmdb_access_token}`
-        }
-    }).then((response) => {
-        response.data.results.forEach((movie: any) => {
-            if (movie.poster_path && movie.name) {
-                mediaArray.push({
-                    id: movie.id,
-                    title: movie.name,
-                    description: movie.overview,
-                    poster_url: `${config.tmbdImageBaseUrl}${movie.poster_path}` || "https://via.placeholder.com/300x450.png?text=No+Poster",
-                    backdrop_url: `${config.tmbdImageBaseUrl}${movie.backdrop_path}` || "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                    type: "series",
-                    release_date: movie.first_air_date,
-                    vote_average: movie.vote_average,
-                    votes: movie.vote_count
-                });
-            };
-        });
-    }).catch((err) => {
-        console.error(err);
-    });
-
-    sendResponse(res, { status: 200, message: "Media fetched successfully", responsePayload: { media: mediaArray }});
 };
 
-export { getPopularMovies, getUpcomingMovies, searchByTitle, getTopRatedMovies, getNowPlayingMovies };
+const getMediaById = async (req: express.Request, res: express.Response) => {
+    const { media_id, type, include } = req.query;
+
+    if (!media_id || !type) return sendResponse(res, { status: 400, message: "Missing query parameter" });
+    if (!isValidMediaType(type as string)) return sendResponse(res, { status: 400, message: "Invalid type" });
+    
+    try {
+        const mediaData: MovieResponse | SeriesResponse | null = await findMediaById(media_id as string, type as string);
+        if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
+
+        if (include === 'user_personal_lists' && req.user) {
+            const [ watchlistItem, favoritesItem ] = await Promise.all([
+                watchlistSchema.findOne({ user_id: req.user.id, media_id: mediaData.id, type }),
+                favoritesSchema.findOne({ user_id: req.user.id, media_id: mediaData.id, type })
+            ]);
+
+            mediaData.watchlist = null;
+            if (watchlistItem)  mediaData.watchlist = { 
+                id: watchlistItem._id, 
+                updated_date: watchlistItem.updated_date, 
+                progress: watchlistItem.progress,
+                status: watchlistItem.status,
+                totalProgress: mediaData instanceof Series ? mediaData.numberOfEpisodes : 1
+            };
+            
+            favoritesItem ? mediaData.favorites = true : mediaData.favorites = false;
+        }
+    
+        sendResponse(res, { status: 200, message: "Media fetched successfully", responsePayload: mediaData });
+    } catch (err) {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching media" });
+    }
+};
+
+export { getPopularMovies, getUpcomingMovies, searchByTitle, getTopRatedMovies, getNowPlayingMovies, getMediaById };

@@ -1,0 +1,27 @@
+.progress {
+    display: flex;
+    align-items: center;
+}
+
+.progress span {
+    margin: 0 10px;
+    font-weight: bold;
+}
+
+.progress-btn {
+    cursor: pointer;
+    color: white;
+    font-size: 22px;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+    user-select: none;
+}
+
+.progress-btn:hover {
+    background-color: var(--background-hover-color);
+}
+
+.progress-indicator {
+    font-size: 1rem;
+}

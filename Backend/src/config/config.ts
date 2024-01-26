@@ -15,6 +15,7 @@ interface Config {
     expiration1Hour: number
     allowedProdDomains?: string[],
     allowedDevDomains?: string[],
+    tmbdImageOriginalUrl: string,
     tmbdImageBaseUrl: string
 }
 
@@ -29,6 +30,7 @@ const config: Config = {
     domain: '.localhost',
     refreshTokenDomain: '.localhost',
     allowedDevDomains: ['http://localhost:5173'],
+    tmbdImageOriginalUrl: 'https://image.tmdb.org/t/p/original',
     tmbdImageBaseUrl: 'https://image.tmdb.org/t/p/w500',
 }
 

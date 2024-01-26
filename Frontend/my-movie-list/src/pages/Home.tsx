@@ -11,22 +11,22 @@ export default function Home() {
 
     useEffect((() => {
         mml_api.get("api/v1/media/movies/popular").then((response) => {
-            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id).join(','), setPopularMovies);
+            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), setPopularMovies);
         });
 
         mml_api.get("api/v1/media/movies/upcoming").then((response) => {
-            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id).join(','), setUpcoming);
+            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), setUpcoming);
         });
 
         mml_api.get("api/v1/media/movies/top-rated").then((response) => {
-            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id).join(','), setTopRated);
+            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), setTopRated);
         });
     }), []);
 
     return (
         <div className="content">
             <div className="sliders-container">
-                <FilmSlider title="Popular" filmArr={popularMovies}/> 
+                <FilmSlider title="Popular" filmArr={popularMovies}/>
                 <FilmSlider title="Upcoming" filmArr={upcoming}/>
                 <FilmSlider title="Top Rated" filmArr={topRated}/>
             </div>

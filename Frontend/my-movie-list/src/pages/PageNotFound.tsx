@@ -7,9 +7,9 @@ export default function PageNotFound() {
             <h2>Page Not Found</h2>
             <p>Nothing to see here. At least that's what I think anyway...</p>
             <Link to="/">
-            <button className="primary-button">
-                TAKE ME BACK
-            </button>
+                <button className="primary-button">
+                    TAKE ME BACK
+                </button>
             </Link>
         </div>
     </div>

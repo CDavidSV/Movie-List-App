@@ -8,6 +8,6 @@ const FavoritesSchema = new Schema({
     date_added: { type: Date, required: true }
 });
 
-FavoritesSchema.index({ user_id: 1, media_id: 1 }, { unique: true });
+FavoritesSchema.index({ user_id: 1, media_id: 1, type: 1 }, { unique: true });
 FavoritesSchema.index({ rank: "text" });
 export default model("Favorites", FavoritesSchema);

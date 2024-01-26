@@ -1,33 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { mml_api_protected } from "../axios/mml_api_intances";
 import { Link } from "react-router-dom";
-import { removeFromWatchlist, setWatchlist, removeFavorite } from "../helpers/util.helpers";
+import { removeFavorite } from "../helpers/util.helpers";
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DraggableStateSnapshot } from "react-beautiful-dnd";
 import "./favorites.css";
+import WatchlistButton from "../components/watchlist-button-component/watchlist-button";
 
 function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: any, removeItem: Function, provided: DraggableProvided, snapshot: DraggableStateSnapshot}) {
-    const [watchlisted, setWatchlisted] = useState<boolean>(filmData.watchlisted);
-    
     const removeFromFavorites = (e: React.MouseEvent) => {
         e.preventDefault();
         removeFavorite(filmData.media_id, filmData.type).then(() => {
             removeItem();
-        });
-    }
-
-    const handleWatchlistClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (watchlisted) {
-            setWatchlisted(false);
-            removeFromWatchlist(filmData.media_id, filmData.type).catch(() => {
-                setWatchlisted(true);
-            });
-            return;
-        }
-
-        setWatchlisted(true);
-        setWatchlist(filmData.media_id, filmData.type).catch(() => {
-            setWatchlisted(false);
         });
     }
 
@@ -36,18 +19,18 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
             <div className="list-drag" {...provided.dragHandleProps}>
                 <span className="material-icons" >drag_indicator</span>
             </div>
-            <Link to="/" className="list-card-main-container">
+            <Link to={`/media/${filmData.type}/${filmData.media_id}`} className="list-card-main-container">
                 <figure className="list-card-img-container">
                     <picture>
                         <source media="(max-width: 768px)" srcSet={filmData.poster_url} />
-                        <img loading="lazy" src={filmData.backdrop_url}/>
+                        <img loading="lazy" src={filmData.backdrop_url} alt={filmData.title}/>
                     </picture>
                 </figure>
                 <div className="list-card-content">
                     <h4>{filmData.title}</h4>
                     <p>{filmData.description}</p>
                     <div>
-                        <span className="material-icons icon-btn" onClick={handleWatchlistClick}>{watchlisted ? "bookmark" : "bookmark_border"}</span>
+                        <WatchlistButton size="" mediaId={filmData.media_id} type={filmData.type} isWatchlisted={filmData.watchlisted}/>
                     </div>
                 </div>
             </Link>
@@ -75,7 +58,6 @@ export default function Favorites() {
     }
 
     const handleOnDragEnd = (result: DropResult) => {
-        console.log(1);
         if (!result.destination || !result.source) return;
         const startIndex = result.source.index;
         const finalIndex = result.destination.index;

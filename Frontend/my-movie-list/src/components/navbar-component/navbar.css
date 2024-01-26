@@ -11,6 +11,7 @@ header {
     padding: 0 1rem;
     background-color: var(--secondary-background-color);
     user-select: none;
+    -webkit-user-select: none;
     z-index: 100;
 }
 

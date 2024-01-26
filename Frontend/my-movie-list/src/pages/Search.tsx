@@ -3,13 +3,29 @@ import InputField from "../components/inputField-component/inputField";
 import FilmCard from "../components/film-card-component/filmCard";
 import "./search.css";
 import { mml_api } from "../axios/mml_api_intances";
-import { getSavedItems } from "../helpers/util.helpers";
+import { getSavedItems, removeSearchResultHistoryItem, SearchResultItem } from "../helpers/util.helpers";
+import { getSearchResultsHistory } from "../helpers/util.helpers";
+import { Link } from "react-router-dom";
+
+function PrevSearchResultCard(props: { name: string, url: string, remove: React.MouseEventHandler }) {
+    return (
+        <div className="searched-media-card">
+            <Link to={props.url}>
+                <p>{props.name}</p>
+            </Link>
+            <div className="remove-searched-card" onClick={props.remove}>
+                <span className="material-icons">close</span>
+            </div>
+        </div>
+    );
+}
 
 export default function Browse() {
     const [media, setMedia] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [timeoutFunc, setTimeoutFunc] = useState<NodeJS.Timeout | null>(null);
     const cooldown = 400;
+    const [searchHistory, setSearchHistory] = useState<SearchResultItem[]>(getSearchResultsHistory());
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -28,7 +44,7 @@ export default function Browse() {
             setMedia([]);
             window.history.pushState({}, "", `/search?query=${query}`);
             
-            if (response.data.responseData.media.length > 0) getSavedItems(response.data.responseData.media, response.data.responseData.media.map((media: any) => media.id).join(','), (media: any) => setMedia(media));
+            if (response.data.responseData.length > 0) getSavedItems(response.data.responseData, response.data.responseData.map((media: any) => media.id), (media: any) => setMedia(media));
         });
     }
 
@@ -46,6 +62,12 @@ export default function Browse() {
         }, cooldown));
     }
 
+    const handlePrevSearchRemove = (index: number) => {
+        removeSearchResultHistoryItem(index);
+
+        setSearchHistory(getSearchResultsHistory());
+    }
+
     return (
         <div className="content">
             <div className="search-bar">
@@ -57,8 +79,18 @@ export default function Browse() {
                     onInputChange={(value: string) => querySearchCooldown(value)}
                 />
             </div>
-            <div className="content-wrapper">
-                <div className="results-container">
+            <div style={{paddingTop: "130px"}} className="content-wrapper">
+                {searchHistory.length > 0 &&
+                <div className="search-history-list">
+                    <h3>Recently Searched</h3>
+                    <div className="search-history-list-container">
+                        {searchHistory.map((item, index) => (
+                            <PrevSearchResultCard key={index} name={item.name} url={item.link} remove={() => handlePrevSearchRemove(index)}/>
+                        ))}
+                    </div>
+                </div>
+                }
+                <div>
                     <div className={loading ? "loader active" : "loader"}><div className="spinning-loader"></div></div>
                     {media.filter(movie => movie.type === "movie").length > 0 &&
                         <div className="search-results">

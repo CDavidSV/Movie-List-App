@@ -1,31 +1,92 @@
 import { useEffect, useState } from "react";
 import { mml_api_protected } from "../axios/mml_api_intances";
 import NotFound from "../components/not-found-component/not-found";
+import { removeFavorite, setFavorite, setWatchlist, removeFromWatchlist } from "../helpers/util.helpers";
 import "./watchlist.css";
+import { Link } from "react-router-dom";
+import WatchlistProgress from "../components/watchlist-progress-component/watchlist-progress";
+import FavoriteButton from "../components/favorite-button-component/favorite-button";
 
-function WatchlistItem(props: { title: string, progress: number, total_progress: number, backgrop: string, poster: string }) {
+interface WatchlistItemProps {
+    index: number,
+    title: string,
+    progress: number,
+    total_progress: number,
+    backgrop: string,
+    poster: string,
+    favorited: boolean,
+    status: string,
+    media_id: number,
+    id: string,
+    type: string
+    removeItemFromWatchlist: (id: string, type: string, index: number) => void
+}
+
+function WatchlistItem(props: WatchlistItemProps) {
+    const [status, setStatus] = useState<string>("plan-to-watch");
+    const [itemProgress, setItemProgress] = useState<{ progress: number, totalProgress: number }>({ progress: props.progress, totalProgress: props.total_progress });
+
+    useEffect(() => {
+        switch (props.status) {
+            case "watching":
+                setStatus("watching");
+                break;
+            case "Finished":
+                setStatus("finished");
+                break;
+            case "Plan to Watch":
+                setStatus("plan-to-watch");
+                break;
+            default:
+                setStatus("watching");
+                break;
+        }
+    }, []);
+
+    const updateProgress = (amount: number) => {
+        setStatus("watching");
+        const oldProgress = itemProgress.progress;
+
+        let status = 0;
+        if (itemProgress.progress + amount === itemProgress.totalProgress) {
+            setStatus("finished");
+            status = 2;
+        }
+
+        setItemProgress({ progress: itemProgress.progress + amount, totalProgress: itemProgress.totalProgress });
+        setWatchlist(props.media_id.toString(), props.type, status, itemProgress.progress + amount).catch(() => {
+            setItemProgress({ progress: oldProgress, totalProgress: itemProgress.totalProgress });
+        });
+    }
+
+    const handleRemove = (e: React.MouseEvent) => {
+        e.preventDefault();
+        props.removeItemFromWatchlist(props.id, props.type, props.index);
+    }
+
     return (
-        <div className="watchlist-item">
-        <picture className="">
-            <source media="(max-width: 768px)" srcSet={props.poster} />
-            <img src={props.backgrop} alt="Movie Backdrop"/>
-        </picture>
-        <div className="info">
-            <h3>{props.title}</h3>
-            <span className="icon-btn heart-icon material-icons">favorite_border</span>
-        </div>
+        <Link to={`/media/${props.type}/${props.id}`} className={`watchlist-item ${status}`}>
+            <picture className="">
+                <source media="(max-width: 768px)" srcSet={props.poster} />
+                <img src={props.backgrop} alt={props.title}/>
+            </picture>
+            <div className="info">
+                <h3>{props.title}</h3>
+                <FavoriteButton size="small" mediaId={props.id} type={props.type} isFavorite={props.favorited}/>
+            </div>
             <div className="actions desktop">
-                <div className="progress">
-                    <span className="watchlist-btn material-icons">remove</span>
-                    <span>{`${props.progress}/${props.total_progress}`}</span>
-                    <span className="watchlist-btn material-icons">add</span>
-                </div>
-                <span className="watchlist-btn trash-icon material-icons">delete_outline</span>
+                <WatchlistProgress
+                    mediaId={props.id}
+                    type={props.type}
+                    progressState={itemProgress}
+                    updateProgress={updateProgress}
+                    />
+                <span className="watchlist-btn trash-icon material-icons" onClick={handleRemove}>delete_outline</span>
             </div>
             <div className="actions mobile">
                 <span className="watchlist-btn trash-icon material-icons">edit</span>
             </div>
-        </div>
+        </Link>
     );
 }
 
@@ -39,9 +100,9 @@ function Tab({ title, isActive, onClick }: { title: string, isActive: boolean, o
 
 const tabsConfig = [
     { title: 'All', status: 3 },
-    { title: 'Plan to watch', status: 2 },
+    { title: 'Plan to watch', status: 1 },
     { title: 'Watching', status: 0 },
-    { title: 'Finished', status: 1 },
+    { title: 'Finished', status: 2 },
 ];
 
 export default function Watchlist() {
@@ -56,7 +117,7 @@ export default function Watchlist() {
         const status = tabsConfig[selectedTab].status;
         mml_api_protected.get(`api/v1/watchlist?page=1&status=${status}`).then((response) => {
             setLoading(false);
-            setWatchlist(response.data.responseData);
+            setWatchlist(response.data.responseData.watchlist);
         });
 
     }, [selectedTab]);
@@ -65,6 +126,13 @@ export default function Watchlist() {
         if (i === selectedTab) return;
 
         setSelectedTab(i);
+    }
+
+    const removeItemFromWatchlist = (id: string, type: string, index: number) => {
+        removeFromWatchlist(id, type).then(() => {
+            watchlist.splice(index, 1);
+            setWatchlist([...watchlist]);
+        });
     }
 
     return (
@@ -76,7 +144,7 @@ export default function Watchlist() {
             <div className="content-wrapper">
                 <div className="watchlist-section-header">
                     {tabsConfig.map((tab, index) => (
-                        <Tab title={tab.title} isActive={selectedTab === index} onClick={() => handleTabChange(index)}/>
+                        <Tab key={index} title={tab.title} isActive={selectedTab === index} onClick={() => handleTabChange(index)}/>
                     ))}
                 </div>
                 <div className="watchlist-container">
@@ -87,13 +155,21 @@ export default function Watchlist() {
                         <NotFound message="Find something you like and add it to your watchlist" />}
                     {watchlist.length > 0 && !loading &&
                         <div>
-                            {watchlist.map((media: any) => (
-                                <WatchlistItem 
+                            {watchlist.map((media: any, index) => (
+                                <WatchlistItem
+                                    key={media.id}
+                                    index={index}
                                     title={media.title}
                                     progress={media.progress} 
                                     total_progress={media.total_progress} 
                                     backgrop={media.backdrop_url}
-                                    poster={media.poster_url}/>
+                                    poster={media.poster_url}
+                                    favorited={media.favorited}
+                                    status={media.status}
+                                    media_id={media.media_id}
+                                    id={media.media_id.toString()}
+                                    type={media.type}
+                                    removeItemFromWatchlist={removeItemFromWatchlist}/>
                             ))}
                         </div>
                     }

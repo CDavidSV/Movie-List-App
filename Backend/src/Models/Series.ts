@@ -1,103 +1,46 @@
-interface Author {
-    id: number;
-    creditId: string;
-    name: string;
-    gender: number;
-    profilePath: string | null;
-}
-
-interface Genre {
-    id: number;
-    name: string;
-}
-
-interface Episode {
-    id: number;
-    name: string;
-    overview: string;
-    voteAverage: number;
-    voteCount: number;
-    airDate: string;
-    episodeNumber: number;
-    productionCode: string;
-    runtime: number;
-    seasonNumber: number;
-    showId: number;
-    stillPath: string | null;
-}
-
-interface Network {
-    id: number;
-    logoPath: string | null;
-    name: string;
-    originCountry: string;
-}
-
-interface ProductionCompany {
-    id: number;
-    logoPath: string | null;
-    name: string;
-    originCountry: string;
-}
-
-interface ProductionCountry {
-    iso31661: string;
-    name: string;
-}
-
-interface Season {
-    airDate: string;
-    episodeCount: number;
-    id: number;
-    name: string;
-    overview: string;
-    posterPath: string | null;
-    seasonNumber: number;
-    voteAverage: number;
-}
-
-interface Language {
-    english_name: string;
-    iso_639_1: string;
-    name: string;
-}
+import config from "../config/config";
+import { Author, Genre, Episode, Network, ProductionCompany, ProductionCountry, Season, Language, Image, Video, CastMember, CrewMember } from "./interfaces";
 
 export default class Series {
-    adult: boolean;
-    backdropPath: string | null;
-    createdBy: Author[];
-    episodeRunTime: number[];
-    firstAirDate: string;
-    genres: Genre[];
-    homepage: string;
-    id: number;
-    inProduction: boolean;
-    languages: string[];
-    lastEpisodeToAir: Episode;
-    name: string;
-    nextEpisodeToAir: string | null;
-    networks: Network[];
-    numberOfEpisodes: number;
-    numberOfSeasons: number;
-    originCountry: string[];
-    originalLanguage: string;
-    originalName: string;
-    overview: string;
-    popularity: number;
-    posterPath: string | null;
-    productionCompanies: ProductionCompany[];
-    productionCountries: ProductionCountry[];
-    seasons: Season[];
-    spokenLanguages: Language[];
-    status: string;
-    tagline: string;
-    type: string;
-    voteAverage: number;
-    voteCount: number;
+    public adult: boolean;
+    public backdropPath: string | null;
+    public createdBy: Author[];
+    public episodeRunTime: number[];
+    public firstAirDate: string;
+    public genres: Genre[];
+    public homepage: string;
+    public id: number;
+    public inProduction: boolean;
+    public languages: string[];
+    public lastEpisodeToAir: Episode;
+    public name: string;
+    public nextEpisodeToAir: string | null;
+    public networks: Network[];
+    public numberOfEpisodes: number;
+    public numberOfSeasons: number;
+    public originCountry: string[];
+    public originalLanguage: string;
+    public originalName: string;
+    public overview: string;
+    public popularity: number;
+    public posterPath: string | null;
+    public productionCompanies: ProductionCompany[];
+    public productionCountries: ProductionCountry[];
+    public seasons: Season[];
+    public spokenLanguages: Language[];
+    public status: string;
+    public tagline: string;
+    public type: string;
+    public voteAverage: number;
+    public voteCount: number;
+    public backdropImages: Image[];
+    public castMembers: CastMember[];
+    public crewMembers: CrewMember[];
+    public trailer: Video | null;
 
     constructor(mediajson: any) {
         this.adult = mediajson.adult;
-        this.backdropPath = mediajson.backdrop_path;
+        this.backdropPath = mediajson.backdrop_path ? `${config.tmbdImageOriginalUrl}${mediajson.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop";
         this.episodeRunTime = mediajson.episode_run_time;
         this.firstAirDate = mediajson.first_air_date;
         this.homepage = mediajson.homepage;
@@ -126,7 +69,7 @@ export default class Series {
         this.originalName = mediajson.original_name;
         this.overview = mediajson.overview;
         this.popularity = mediajson.popularity;
-        this.posterPath = mediajson.poster_path;
+        this.posterPath = mediajson.poster_path ? `${config.tmbdImageBaseUrl}${mediajson.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster";
         this.status = mediajson.status;
         this.tagline = mediajson.tagline;
         this.type = mediajson.type;
@@ -192,5 +135,48 @@ export default class Series {
         this.languages = mediajson.languages.map((language: string) => {
             return language;
         });
+        this.backdropImages = mediajson.images.backdrops.map((image: any) => {
+            return {
+                aspectRatio: image.aspect_ratio,
+                filePath: image.file_path,
+                height: image.height,
+                iso6391: image.iso_639_1,
+                voteAverage: image.vote_average,
+                voteCount: image.vote_count,
+                width: image.width
+            } as Image;
+        });
+        this.castMembers = mediajson.credits.cast.map((member: any) => {
+            return {
+                adult: member.adult,
+                gender: member.gender,
+                id: member.id,
+                knownForDepartment: member.known_for_department,
+                name: member.name,
+                originalName: member.original_name,
+                popularity: member.popularity,
+                profilePath: member.profile_path,
+                castId: member.cast_id,
+                character: member.character,
+                creditId: member.credit_id,
+                order: member.ordet
+            } as CastMember;
+        });
+        this.crewMembers = mediajson.credits.crew.map((memeber: any) => {
+            return {
+                adult: memeber.adult,
+                gender: memeber.gender,
+                id: memeber.id,
+                knownForDepartment: memeber.known_for_department,
+                name: memeber.name,
+                originalName: memeber.original_name,
+                popularity: memeber.popularity,
+                profilePath: memeber.profile_path,
+                creditId: memeber.credit_id,
+                department: memeber.department,
+                job: memeber.job
+            }
+        });
+        this.trailer = mediajson.videos.results.find((video: any) => video.type === 'Trailer') || null;
     }
 }

@@ -3,21 +3,31 @@ import { sendResponse } from "../../util/apiHandler";
 import watchlistSchema from "../../scheemas/watchlistSchema";
 import favoritesSchema from "../../scheemas/favoritesSchema";
 
-// TODO: Implement this directly when returning the media list
-const hasMedia = async (req: Request, res: Response) => {
-    const ids = req.query.ids as string;
-    if (!ids) return sendResponse(res, { status: 400, message: "Invalid request" });
+interface RequestMedia {
+    media_id: number;
+    type: string;
+}
 
-    const idList = ids.split(",");
+const hasMedia = async (req: Request, res: Response) => {
+    const reqMedia = req.body as unknown as RequestMedia[];
+    if (!reqMedia) return sendResponse(res, { status: 400, message: "Invalid request" });
+
+    // TODO: Validate the request body
+    // Validate the request body
+
 
     try {
-        const watchlist = await watchlistSchema.find({ user_id: req.user!.id, media_id: { $in: idList } });
-        const favorites = await favoritesSchema.find({ user_id: req.user!.id, media_id: { $in: idList } });
+        const idList = reqMedia.map((i) => i.media_id.toString());
+        const [watchlist, favorites] = await Promise.all([
+            watchlistSchema.find({ user_id: req.user!.id, media_id: { $in: idList } }),
+            favoritesSchema.find({ user_id: req.user!.id, media_id: { $in: idList } })
+        ]);
 
         const itemsInWatchlist = new Map<string, { favorite: boolean, watchlist: boolean }>();
-        for (let id of idList) {
-            const favoriteItem = favorites.find(item => item.media_id === id);
-            const watchlistItem = watchlist.find(item => item.media_id === id);
+        for (let media of reqMedia) {
+            // Check if the current media is in the user's watchlist or favorites based on the id of the media and its type
+            const favoriteItem = favorites.find(item => item.media_id === media.media_id.toString() && item.type === media.type);
+            const watchlistItem = watchlist.find(item => item.media_id === media.media_id.toString() && item.type === media.type);
             
             const status: { favorite: boolean, watchlist: boolean } = { favorite: false, watchlist: false };
             if (watchlistItem) {
@@ -26,7 +36,9 @@ const hasMedia = async (req: Request, res: Response) => {
             if (favoriteItem) {
                 status.favorite = true;
             }
-            itemsInWatchlist.set(id, status);
+
+            if (!status.favorite && !status.watchlist) continue;
+            itemsInWatchlist.set(media.media_id.toString(), status);
         }
         const itemsInWatchlistObject = Object.fromEntries(itemsInWatchlist);
         sendResponse(res, { status: 200, message: "Items fetched succcessfully", responsePayload: itemsInWatchlistObject });

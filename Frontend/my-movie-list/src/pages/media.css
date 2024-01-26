@@ -1,0 +1,119 @@
+.film-backdrop-container {
+    position: relative;
+    width: 100%;
+    height: 750px;
+    overflow: hidden;
+}
+
+.film-backdrop-container p {
+    margin: 0;
+    text-align: justify;
+}
+
+.film-backdrop-container .film-backdrop {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    opacity: 0.35;
+    background-color: var(--background-color);
+}
+
+.film-info-content {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: row;
+    padding: 10dvh 10vw;
+}
+
+.film-poster-container {
+    overflow: hidden;
+}
+
+.film-poster {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    background-color: var(--secondary-background-color);
+    background-size: cover;
+    border-radius: 20px;
+}
+
+.film-overview-info {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 0 30px 30px;
+    overflow: hidden;
+}
+
+.relevant-info {
+    display: flex;
+    flex-direction: row;
+    opacity: 0.7;
+    font-size: 1rem;
+    gap: 6px;
+}
+
+.series-info {
+    padding-top: 10px;
+    opacity: 0.7;
+}
+
+.film-title {
+    margin: 0;
+}
+
+.film-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 9;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+}
+
+.film-interaction {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.description-title {
+    margin-bottom: 0;
+}
+
+@media screen and (max-width: 840px) {
+    .film-backdrop-container {
+        height: 800px;
+    }
+}
+
+@media screen and (max-width: 540px) {
+    .film-backdrop-container {
+        height: 1400px;
+    }
+
+    .film-info-content {
+        flex-direction: column;
+        align-items: center;
+        padding: 10dvh 10vw;
+    }
+
+    .film-overview-info {
+        padding: 20px 0;
+    }
+
+    .film-poster {
+        max-height: 400px;
+    }
+
+    .film-description {
+        -webkit-line-clamp: 15;
+    }
+}

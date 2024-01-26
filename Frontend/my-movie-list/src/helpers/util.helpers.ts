@@ -1,6 +1,14 @@
 import { mml_api_protected } from "../axios/mml_api_intances";
 import { isLoggedIn } from "./session.helpers";
 
+interface SearchResultItem {
+    id: string;
+    name: string;
+    type: string;
+    link: string;
+    date_updated: Date;
+}
+
 const shortenNumber = (num: number) => {
     if (num < 1000) return num.toString();
 
@@ -26,7 +34,14 @@ const getSavedItems = (films: any[], ids: string[], callback: Function) => {
     // Check first if the user is logged in
     if (!isLoggedIn()) return callback(films);
 
-    mml_api_protected.get(`api/v1/user/hasMedia?ids=${ids}`).then((response) => {
+    const requestMedia = ids.map((id) => {
+        return {
+            media_id: id,
+            type: 'movie'
+        };
+    });
+
+    mml_api_protected.post('api/v1/user/inPersonalLists', requestMedia).then((response) => {
         const { responseData } = response.data;
         films.forEach((film) => {
             if (film.id in responseData) {
@@ -51,7 +66,7 @@ const removeFavorite = async (id: string, type: string) => {
     await mml_api_protected.delete(`api/v1/favorites/remove?media_id=${id}&type=${type}`);
 };
 
-const setWatchlist = async (id: string, type: string, status: number = 2, progress: number = 0) => {
+const setWatchlist = async (id: string, type: string, status: number = 1, progress: number = 0) => {
     await mml_api_protected.post(`api/v1/watchlist/update`, {
         media_id: id.toString(),
         status: status,
@@ -64,16 +79,92 @@ const removeFromWatchlist = async (id: string, type: string) => {
     await mml_api_protected.delete(`api/v1/watchlist/remove?media_id=${id}&type=${type}`);
 }
 
-const saveSelectedSearchResult = (name: string) => {
-    const searchResultHistory: { name: string, link: string }[] | undefined = JSON.parse(localStorage.getItem('searchResultsHistory')!);
+const saveSearchResult = (name: string, id: string, type: string,  url: string) => {
+    const searchResultHistory: SearchResultItem[] | undefined = JSON.parse(localStorage.getItem('searchResultsHistory')!);
 
+    // If not found, create a new one
     if (!searchResultHistory) {
-        localStorage.setItem('searchResultsHistory', JSON.stringify([{ name, link: window.location.pathname }]));
+        localStorage.setItem('searchResultsHistory', JSON.stringify([{ name, link: url, date_updated: new Date(), id, type} as SearchResultItem]));
         return;
     }
 
-    searchResultHistory.push({ name, link: window.location.pathname });
+    if (searchResultHistory.length >= 10) {
+        // Sort in descending order by date_updated and remove the oldest one
+        searchResultHistory.pop();
+    }
+    
+    const duplicate = searchResultHistory.findIndex((item) => item.id === id && item.type === type);
+    if (duplicate !== -1) {
+        const duplicateItem = searchResultHistory[duplicate];
+        duplicateItem.date_updated = new Date();
+        searchResultHistory[duplicate] = duplicateItem;
+
+        searchResultHistory.splice(duplicate, 1)
+        searchResultHistory.unshift(duplicateItem);
+        return localStorage.setItem('searchResultsHistory', JSON.stringify(searchResultHistory));
+    }
+
+    searchResultHistory.unshift({
+        name, link: url, date_updated: new Date(),
+        id,
+        type
+    });
     localStorage.setItem('searchResultsHistory', JSON.stringify(searchResultHistory));
 };
 
-export { shortenNumber, getSavedItems, setFavorite, removeFavorite, setWatchlist, removeFromWatchlist, saveSelectedSearchResult };
+const removeSearchResultHistoryItem = (index: number) => {
+    const searchResultHistory: SearchResultItem[] | undefined = JSON.parse(localStorage.getItem('searchResultsHistory')!);
+    if (!searchResultHistory) return;
+
+    searchResultHistory.splice(index, 1);
+    localStorage.setItem('searchResultsHistory', JSON.stringify(searchResultHistory));
+};
+
+const getSearchResultsHistory = () => {
+    const searchResultHistory: SearchResultItem[] | undefined = JSON.parse(localStorage.getItem('searchResultsHistory')!);
+    if (!searchResultHistory) return [];
+
+    return searchResultHistory;
+};
+
+const clearSearchResultsHistory = () => {
+    localStorage.removeItem('searchResultsHistory');
+};
+
+const saveToHistory = (title: string, id: string, type: string, searchResult: boolean = false) => {
+    if (searchResult) {
+        saveSearchResult(title, id, type, `/media/${type}/${id}`);
+    };
+
+    // Save the selected film to the users history
+    if (!isLoggedIn()) return;
+
+    mml_api_protected.post("api/v1/history/add", {
+        media_id: id,
+        type: type
+    });
+}
+
+const calculateMovieRuntime = (runtimeInMinutes: number) => {
+    const hours = Math.floor(runtimeInMinutes / 60);
+    const remainingMinutes = runtimeInMinutes % 60;
+
+    return `${hours}h ${remainingMinutes}m`;
+};
+
+export { 
+    shortenNumber, 
+    getSavedItems, 
+    setFavorite, 
+    removeFavorite, 
+    setWatchlist, 
+    removeFromWatchlist, 
+    saveSearchResult, 
+    getSearchResultsHistory, 
+    saveToHistory, 
+    removeSearchResultHistoryItem, 
+    clearSearchResultsHistory,
+    calculateMovieRuntime
+};
+
+export type { SearchResultItem };

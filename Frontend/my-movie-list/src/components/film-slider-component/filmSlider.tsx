@@ -11,11 +11,12 @@ export default function FilmSlider (props: {filmArr: any[], title: string}) {
         if (!slider.current) return;
 
         const sliderRect = slider.current.getBoundingClientRect();
-        const sliderChildren = slider.current.children;
+        const firstChild = slider.current.firstElementChild as HTMLDivElement;
+        const lastChild = slider.current.lastElementChild as HTMLDivElement;
 
         setButtonStates({
-            left: sliderChildren[0].getBoundingClientRect().left < sliderRect.left,
-            right: sliderChildren[sliderChildren.length - 1].getBoundingClientRect().right > sliderRect.right
+            left: firstChild.getBoundingClientRect().left < sliderRect.left,
+            right: lastChild.getBoundingClientRect().right > sliderRect.right
         });
 
         scrollTimeout.current = null;

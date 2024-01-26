@@ -19,6 +19,48 @@
     max-height: 500px;
 }
 
-.results-container {
-    padding-top: 130px;
+.search-history-list {
+    width: 100%;
+}
+
+.search-history-list-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.searched-media-card {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    background: #1a1a1a;
+}
+
+.searched-media-card p {
+    margin: 0;
+    padding: 5px;
+    font-size: 0.85rem;
+}
+
+.searched-media-card a:hover {
+    background: #0f0f0f79;
+}
+
+.remove-searched-card {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-left: 1px solid #2c2c2c;
+}
+
+.remove-searched-card:hover {
+    background: #0f0f0f79;
+}
+
+.remove-searched-card span {
+    padding: 5px;
+    font-size: 1.1rem;
 }
