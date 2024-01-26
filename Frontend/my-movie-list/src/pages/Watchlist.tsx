@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { mml_api_protected } from "../axios/mml_api_intances";
 import NotFound from "../components/not-found-component/not-found";
-import { removeFavorite, setFavorite, setWatchlist, removeFromWatchlist } from "../helpers/util.helpers";
+import { setWatchlist, removeFromWatchlist } from "../helpers/util.helpers";
 import "./watchlist.css";
 import { Link } from "react-router-dom";
 import WatchlistProgress from "../components/watchlist-progress-component/watchlist-progress";

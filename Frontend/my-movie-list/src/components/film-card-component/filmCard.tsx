@@ -56,7 +56,7 @@ export default function FilmCard({ filmData, searchResult }: { filmData?: any, s
                                 <>  
                                     <WatchlistButton 
                                         size='small'
-                                        isWatchlisted={filmData.inFavorites}
+                                        isWatchlisted={filmData.inWatchlist}
                                         mediaId={filmData.id}
                                         type={filmData.type}/>  
                                     <FavoriteButton 
