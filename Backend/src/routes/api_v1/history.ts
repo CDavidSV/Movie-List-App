@@ -4,7 +4,6 @@ import { validateJsonBody } from "../../util/validateJson";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
-import saveMovie from "../../util/mediaHandler";
 
 const getHistory = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
@@ -137,7 +136,6 @@ const addHistory = async (req: Request, res: Response) => {
         await historySchema.findOneAndUpdate({ user_id: req.user!.id, type: type, media_id: media_id }, { user_id: req.user!.id, type: type, media_id: media_id, date_updated: currDate }, { upsert: true, new: true });
 
         sendResponse(res, { status: 200, message: "History added" });
-        if (media) saveMovie(media, type);
     } catch (err) {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error adding history" });

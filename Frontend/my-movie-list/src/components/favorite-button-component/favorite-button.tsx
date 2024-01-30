@@ -1,9 +1,13 @@
 import { isLoggedIn } from "../../helpers/session.helpers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { removeFavorite, setFavorite } from "../../helpers/util.helpers";
 
 export default function FavoriteButton(props: { size: string, isFavorite: boolean, mediaId: string, type: string }) {
     const [isFavorite, setIsFavorite] = useState<boolean>(props.isFavorite);
+
+    useEffect(() => {
+        setIsFavorite(props.isFavorite);
+    }, [props.isFavorite]);
 
     const handleFavoriteClick = (e: React.MouseEvent) => {
         e.preventDefault();

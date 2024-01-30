@@ -17,6 +17,8 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    document.title = "Log In - My Movie List";
+
     const attemptLogin = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 

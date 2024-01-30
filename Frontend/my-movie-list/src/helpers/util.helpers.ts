@@ -41,7 +41,7 @@ const getSavedItems = (films: any[], ids: string[], callback: Function) => {
         };
     });
 
-    mml_api_protected.post('api/v1/user/inPersonalLists', requestMedia).then((response) => {
+    mml_api_protected.post('api/v1/user/in-personal-lists', requestMedia).then((response) => {
         const { responseData } = response.data;
         films.forEach((film) => {
             if (film.id in responseData) {
@@ -143,7 +143,7 @@ const saveToHistory = (title: string, id: string, type: string, searchResult: bo
         media_id: id,
         type: type
     });
-}
+};
 
 const calculateMovieRuntime = (runtimeInMinutes: number) => {
     const hours = Math.floor(runtimeInMinutes / 60);

@@ -1,16 +1,54 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { mml_api } from "../axios/mml_api_intances";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { mml_api_protected } from "../axios/mml_api_intances";
 import "./media.css";
 import { calculateMovieRuntime, setWatchlist } from "../helpers/util.helpers";
 import WatchlistProgress from "../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../components/favorite-button-component/favorite-button";
+import PersonCard from "../components/person-card-component/person-card";
+import { isLoggedIn } from "../helpers/session.helpers";
+import FilmSlider from "../components/film-slider-component/filmSlider";
+import { MediaDataContext } from "../contexts/FilmDataContext";
 
-// TODO : FIX THIS MONSTROSITY
-function WatchlistStatusHandler(props: { mediaId: string, type: string, watchlisted: boolean, progress: number, totalProgress: number, status: number }) {
-    const [watchlistStatus, setWatchlistStatus] = useState<number>(props.status); // 0 = watching, 1 = plan to watch, 2 = finished
-    const [itemProgress, setItemProgress] = useState<{ progress: number, totalProgress: number }>({ progress: props.progress, totalProgress: props.totalProgress });
-    const [isWatchlisted, setIsWatchlisted] = useState<boolean>(props.watchlisted);
+function SidebarSection(props: { title: string, children: React.ReactNode }) {
+    return (
+        <div className="sidebar-section">
+            <h5 className="title">{props.title}</h5>
+            {props.children}
+        </div>
+    );
+}
+
+function InteractiveMediaOptions(props: { mediaId: string, type: string, totalProgress: number }) {
+    const [watchlistStatus, setWatchlistStatus] = useState<number>(1); // 0 = watching, 1 = plan to watch, 2 = finished
+    const [itemProgress, setItemProgress] = useState<{ progress: number, totalProgress: number }>({ progress: 0, totalProgress: props.totalProgress });
+    const [isWatchlisted, setIsWatchlisted] = useState<boolean>(false);
+    const [inFavorites, setInFavorites] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!isLoggedIn()) return;
+
+        mml_api_protected.get(`/api/v1/user/status-in-personal-lists?media_id=${props.mediaId}&type=${props.type}`).then((response) => {
+            const responseData = response.data.responseData;
+            
+            if (responseData.watchlist) {
+                const status = responseData.watchlist.status;
+                const progress = responseData.watchlist.progress;
+                const totalProgress = responseData.watchlist.totalProgress;
+    
+                setWatchlistStatus(status);
+                setIsWatchlisted(true);
+                setItemProgress({ progress: progress, totalProgress: totalProgress });
+            }
+
+            if (responseData.favorite) {
+                setInFavorites(true);
+            }
+            setLoading(false);
+        });
+    }, []);
 
     const handleAddToWatchlist = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -41,10 +79,7 @@ function WatchlistStatusHandler(props: { mediaId: string, type: string, watchlis
         });
     }
 
-    const updateProgress = (amount: number) => {
-        const newProgress = itemProgress.progress + amount;
-        const currentProgress = itemProgress.progress;
-
+    const updateProgress = (newProgress: number) => {
         let status = 0;
         if (newProgress === itemProgress.totalProgress) {
             status = 2;
@@ -53,30 +88,35 @@ function WatchlistStatusHandler(props: { mediaId: string, type: string, watchlis
         setItemProgress({ ...itemProgress, progress: newProgress });
         setWatchlist(props.mediaId, props.type, status, newProgress).then(() => {
             setWatchlistStatus(status);
-        }).catch(() => {
-            setItemProgress({ ...itemProgress, progress: currentProgress });
         });
     }
 
     return (
-        <>  
-            {isWatchlisted ?
-                <>
-                    <select name="watchlist-status" value={watchlistStatus} onChange={handleStatusSelect}>
-                        <option value="0">Watching</option>
-                        <option value="1">Plan to Watch</option>
-                        <option value="2">Finished</option>
-                    </select>
-                    <WatchlistProgress 
-                        progressState={itemProgress}
-                        mediaId={props.mediaId}
-                        type={props.type}
-                        updateProgress={updateProgress}/>
-                </>    
+        <div className="film-interaction-container">
+            {isLoggedIn() ? 
+                <div className={loading ? "film-interaction disabled" : "film-interaction"}>
+                    <FavoriteButton size="medium" mediaId={props.mediaId} type={props.type} isFavorite={inFavorites}/>
+                    {isWatchlisted ?
+                        <>
+                            <select name="watchlist-status" value={watchlistStatus} onChange={handleStatusSelect}>
+                                <option value="0">Watching</option>
+                                <option value="1">Plan to Watch</option>
+                                <option value="2">Finished</option>
+                            </select>
+                            <WatchlistProgress 
+                                progressState={itemProgress}
+                                mediaId={props.mediaId}
+                                type={props.type}
+                                updateProgress={updateProgress}/>
+                        </>    
+                        :
+                        <button className="primary-button" onClick={handleAddToWatchlist}>Add to Watchlist</button>
+                    }
+                </div>
                 :
-                <button className="primary-button" onClick={handleAddToWatchlist}>Add to Watchlist</button>
+                <button className="primary-button" onClick={() => navigate("/signup")}>Sign Up to add to watchlist</button>
             }
-        </>
+        </div>
     );
 }
 
@@ -84,15 +124,20 @@ export default function Media() {
     let { type, id } = useParams<{ type: string, id: string }>();
     const [mediaData, setMediaData] = useState<any>(null);
     const [facts, setFacts] = useState<string>("");
+    const getMediaData = useContext(MediaDataContext);
+    const navigate = useNavigate();
 
-    if (!type || (type !== 'movie' && type !== 'series')) window.location.href = '/';
+    if (!type || !id || (type !== 'movie' && type !== 'series')) navigate("/");
 
     useEffect(() => {
         // Fetch media data based on type
-        mml_api.get(`/api/v1/media/fetch-by-id?media_id=${id}&type=${type}&include=user_personal_lists`).then((response) => {
-            console.log(response.data.responseData);
-            const mediaData = response.data.responseData;
-            setMediaData(response.data.responseData);
+        getMediaData(id as string, type as string).then((data) => {
+            console.log(data);
+            const mediaData = data;
+            setMediaData(data);
+
+            // Set the page title
+            document.title = `${mediaData.name || mediaData.title} - My Movie List`;
 
             let genres = "";
             let facts = "";
@@ -101,12 +146,16 @@ export default function Media() {
 
             if (type === 'movie') facts += ` • ${calculateMovieRuntime(mediaData.runtime)}`;
             setFacts(facts);
+
+            // Scroll to top of page
+            window.scrollTo(0, 0);
         });
-    }, []);
+    }, [navigate]);
 
     return (
         <div className="content">
             {mediaData && 
+            <>
                 <div className="film-backdrop-container" style={{backgroundImage: `url(${mediaData.backdropPath})`}}>
                     <div className="film-info-content">
                         <div className="film-poster-container">
@@ -123,21 +172,126 @@ export default function Media() {
                                     <p>{mediaData.numberOfEpisodes} Episodes</p>
                                 </div>
                             }
-                            <div className="film-interaction">
-                                <FavoriteButton size="medium" mediaId={mediaData.id} type={type as string} isFavorite={mediaData.favorites}/>
-                                <WatchlistStatusHandler 
-                                    mediaId={mediaData.id}
-                                    type={type as string}
-                                    progress={mediaData.watchlist ? mediaData.watchlist.progress : 0}
-                                    totalProgress={type === 'movie' ? 1 : mediaData.numberOfEpisodes}
-                                    watchlisted={mediaData.watchlist}
-                                    status={mediaData.watchlist && mediaData.watchlist.status}/>
-                            </div>
+                            <InteractiveMediaOptions
+                                key={`${mediaData.id}.${mediaData.type}`}
+                                mediaId={mediaData.id}
+                                type={type as string}
+                                totalProgress={type === 'movie' ? 1 : mediaData.numberOfEpisodes}
+                            />
                             <h2 className="description-title">Description</h2>
                             <p>{mediaData.overview}</p>
                         </div>
                     </div>
                 </div>
+                
+                <div className="film-content-wrapper">
+                    <div className="film-content-sidebar">
+                        <SidebarSection title="Original Title">
+                            <p>{mediaData.originalTitle || mediaData.originalName}</p>
+                        </SidebarSection>
+                        <SidebarSection title="Original Language">
+                            <p>{mediaData.originalLanguage}</p>
+                        </SidebarSection>
+                        <SidebarSection title="Genres">
+                            {mediaData.genres.map((genre: any) => <p key={genre.id}>{genre.name}</p>)}
+                        </SidebarSection>
+                        {mediaData.homepage &&
+                            <SidebarSection title="Homepage">
+                                <a href={mediaData.homepage} target="_blank">{mediaData.homepage}</a>
+                            </SidebarSection>
+                        }
+                        {type === 'movie' ? 
+                        <>
+                            <SidebarSection title="Release Date">
+                                <p>{mediaData.releaseDate}</p>
+                            </SidebarSection>
+                            <SidebarSection title="Runtime">
+                                <p>{calculateMovieRuntime(mediaData.runtime)}</p>
+                            </SidebarSection>
+                        </>
+                        : 
+                        <>
+                            <SidebarSection title="First Air Date">
+                                <p>{mediaData.firstAirDate}</p>
+                            </SidebarSection>
+                            <SidebarSection title="Last Air Date">
+                                <p>{mediaData.lastAirDate}</p>
+                            </SidebarSection>
+                            <SidebarSection title="Episodes">
+                                <p>{mediaData.numberOfEpisodes}</p>
+                            </SidebarSection>
+                            <SidebarSection title="Seasons">
+                                <p>{mediaData.numberOfSeasons}</p>
+                            </SidebarSection>
+                        </>}
+                        <SidebarSection title="Status">
+                            <p>{mediaData.status}</p>
+                        </SidebarSection>
+                        <SidebarSection title="Popularity">
+                            <p>{mediaData.popularity}</p>
+                        </SidebarSection>
+                        <SidebarSection title="Rating">
+                            <p>{mediaData.voteAverage}</p>
+                        </SidebarSection>
+                        <SidebarSection title="Production Countries">
+                            {mediaData.productionCountries.map((country: any) => <p key={country.iso31661}>{country.name}</p>)}
+                        </SidebarSection>
+                        <SidebarSection title="Production Companies">
+                            {mediaData.productionCompanies.map((company: any) => <p key={company.id}>{company.name}</p>)}
+                        </SidebarSection>
+                        <SidebarSection title="Source">
+                            <p>TMDB</p>
+                        </SidebarSection>
+                    </div>
+                    <div className="film-content-main">
+                        {mediaData.castMembers.length > 0 && 
+                            <>
+                                <h3>Cast</h3>
+                                <div className="credits-container">
+                                    {mediaData.castMembers.map((person: any) => 
+                                        <PersonCard 
+                                            key={`${person.id}.${person.character}`}
+                                            id={person.id}
+                                            name={person.name}
+                                            character={person.character}
+                                            profleUrl={person.profilePath}
+                                        />)}
+                                </div>
+                            </>}
+                        {mediaData.crewMembers.length > 0 &&
+                            <>
+                                <h3>Crew</h3>
+                                <div className="credits-container">
+                                    {mediaData.crewMembers.map((person: any) => 
+                                        <PersonCard 
+                                            key={`${person.id}.${person.job}`}
+                                            id={person.id}
+                                            name={person.name}
+                                            character={person.job}
+                                            profleUrl={person.profilePath}
+                                        />)}
+                                </div>
+                            </>}
+                        {mediaData.trailer && mediaData.trailer.site === "YouTube" &&
+                            <>
+                                <h3>Trailer</h3>
+                                <iframe className="youtube-video-container"
+                                    key={`${mediaData.trailer.key}`}
+                                    title={mediaData.trailer.name}
+                                    src={`https://www.youtube.com/embed/${mediaData.trailer.key}`}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    sandbox="allow-scripts allow-same-origin allow-presentation"
+                                    allowFullScreen
+                                    loading="lazy"/>
+                            </>}
+                        {mediaData.recommendations.length > 0 &&
+                            <>
+                                <h3>Recommended</h3>
+                                <FilmSlider key={`${mediaData.id}.${mediaData.type}`} filmArr={mediaData.recommendations}/>
+                            </>}
+                    </div>
+                </div>
+            </>
             }
         </div>
     );

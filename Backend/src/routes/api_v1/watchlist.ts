@@ -2,8 +2,6 @@ import express from "express";
 import watchlistSchema from "../../scheemas/watchlistSchema";
 import { validateJsonBody } from "../../util/validateJson";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
-import Media from "../../Models/Movie";
-import saveMovie from "../../util/mediaHandler";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 import Series from "../../Models/Series";
@@ -80,34 +78,34 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
             if (item.media.length < 1) return {
                 id: item._id,
                 media_id: item.media_id,
-                date_added: item.date_added,
+                dateAdded: item.date_added,
                 title: "Untitled",
                 description: "No description available",
-                poster_url: "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                release_date: "NA",
+                posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                releaseDate: "NA",
                 runtime: 0,
                 type: item.type,
                 favorited: item.favorited.length >= 1 ? true : false,
                 status: watchlistStatus.get(item.status),
                 progress: item.progress,
-                total_progress: 0
+                totalProgress: 0
             };
             return {
                 id: item._id,
                 media_id: item.media_id,
-                date_added: item.date_added,
+                dateAdded: item.date_added,
                 title: item.media[0].title,
                 description: item.media[0].description,
-                poster_url: item.media[0].poster_url ? `${config.tmbdImageBaseUrl}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: item.media[0].backdrop_url ? `${config.tmbdImageBaseUrl}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                release_date: item.media[0].release_date ? item.media[0].release_date : "NA",
+                posterUrl: item.media[0].poster_url ? `${config.tmbdImageBaseUrl}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: item.media[0].backdrop_url ? `${config.tmbdImageBaseUrl}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                releaseDate: item.media[0].release_date ? item.media[0].release_date : "NA",
                 runtime: item.media[0].runtime ? item.media[0].runtime : 0,
                 type: item.type,
                 favorited: item.favorited.length >= 1 ? true : false,
                 status: watchlistStatus.get(item.status),
                 progress: item.progress,
-                total_progress: item.type === 'movie' ? 1 : item.media[0].episode_count
+                totalProgress: item.type === 'movie' ? 1 : item.media[0].episode_count
             }
         });
 
@@ -116,22 +114,6 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching watchlist" });
     });
-};
-
-const getStatusOfWatchlistItem = async (req: express.Request, res: express.Response) => {
-    const { media_id, type } = req.query;
-
-    if (!media_id) return sendResponse(res, { status: 400, message: "Invalid media id" });
-
-    try {
-        const watchlistItem = await watchlistSchema.findOne({ user_id: req.user!.id, media_id: media_id as string, type: type as string });
-        if (!watchlistItem) return sendResponse(res, { status: 404, message: "Item not found" });
-
-        sendResponse(res, { status: 200, message: "Watchlist item found", responsePayload: { status: watchlistItem.status, progress: watchlistItem.progress } });
-    } catch (err) {
-        console.error(err);
-        sendResponse(res, { status: 500, message: "Error fetching watchlist item" });
-    }
 };
 
 const updateWatchlist = async (req: express.Request, res: express.Response) => {
@@ -165,8 +147,6 @@ const updateWatchlist = async (req: express.Request, res: express.Response) => {
         const watchlistItem = await watchlistSchema.findOneAndUpdate({ user_id: req.user!.id, media_id, type: type  }, { status, progress, updated_date: Date.now(), type: type }, { upsert: true, setDefaultsOnInsert: true, new: true });
         
         sendResponse(res, { status: 200, message: "Updated watchlist item", responsePayload: { id: watchlistItem?._id.toString() } });
-
-        saveMovie(mediaData as Media, type);
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error adding to watchlist" });
@@ -189,4 +169,4 @@ const removeItemFromWatchlist = async (req: express.Request, res: express.Respon
     }
 };
 
-export { getWatchlist, updateWatchlist, removeItemFromWatchlist, getStatusOfWatchlistItem};
+export { getWatchlist, updateWatchlist, removeItemFromWatchlist};

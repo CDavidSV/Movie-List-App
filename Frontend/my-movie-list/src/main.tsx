@@ -4,6 +4,7 @@ import { Route, BrowserRouter, Routes, useLocation, matchPath } from 'react-rout
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
+import MediaDataProvider from './contexts/FilmDataContext';
 
 const Home = lazy(() => import('./pages/Home'));
 const Movies = lazy(() => import('./pages/Movies'));
@@ -69,9 +70,11 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App/>
-    </BrowserRouter>
-  </React.StrictMode>,
+  <>
+    <MediaDataProvider>
+      <BrowserRouter>
+        <App/>
+      </BrowserRouter>
+    </MediaDataProvider>
+  </>,
 )

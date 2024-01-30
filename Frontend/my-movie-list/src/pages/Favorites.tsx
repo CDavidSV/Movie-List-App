@@ -22,8 +22,8 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
             <Link to={`/media/${filmData.type}/${filmData.media_id}`} className="list-card-main-container">
                 <figure className="list-card-img-container">
                     <picture>
-                        <source media="(max-width: 768px)" srcSet={filmData.poster_url} />
-                        <img loading="lazy" src={filmData.backdrop_url} alt={filmData.title}/>
+                        <source media="(max-width: 768px)" srcSet={filmData.posterUrl} />
+                        <img loading="lazy" src={filmData.backdropUrl} alt={filmData.title}/>
                     </picture>
                 </figure>
                 <div className="list-card-content">
@@ -46,6 +46,8 @@ export default function Favorites() {
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
+        document.title = "Favorites - My Movie List";
+
         mml_api_protected.get("api/v1/favorites").then((res) => {
             setFavorites(res.data.responseData.favorites);
             setLoading(false);

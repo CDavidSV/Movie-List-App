@@ -1,8 +1,6 @@
 import express from "express";
 import favoritesSchema from "../../scheemas/favoritesSchema";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
-import Media from "../../Models/Movie";
-import saveMovie from "../../util/mediaHandler";
 import { validateJsonBody } from "../../util/validateJson";
 import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../util/lexorank";
 import { sendResponse } from "../../util/apiHandler";
@@ -66,12 +64,12 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 id: favorite._id,
                 media_id: favorite.media_id,
                 type: favorite.type,
-                date_added: favorite.date_added,
+                dateAdded: favorite.date_added,
                 title: "Untitled",
                 description: "No description available",
-                poster_url: "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                release_date: "NA",
+                posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                releaseDate: "NA",
                 runtime: 0,
                 watchlisted: favorite.watchlisted.length >= 1 ? true : false
             };
@@ -79,12 +77,12 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 id: favorite._id,
                 media_id: favorite.media_id,
                 type: favorite.type,
-                date_added: favorite.date_added,
+                dateAded: favorite.date_added,
                 title: favorite.media[0].title,
                 description: favorite.media[0].description,
-                poster_url: favorite.media[0].poster_url ? `${config.tmbdImageBaseUrl}${favorite.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: favorite.media[0].backdrop_url ? `${config.tmbdImageBaseUrl}${favorite.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                release_date: favorite.media[0].release_date ? favorite.media[0].release_date : "NA",
+                posterUrl: favorite.media[0].poster_url ? `${config.tmbdImageBaseUrl}${favorite.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: favorite.media[0].backdrop_url ? `${config.tmbdImageBaseUrl}${favorite.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                releaseDate: favorite.media[0].release_date ? favorite.media[0].release_date : "NA",
                 runtime: favorite.media[0].runtime ? favorite.media[0].runtime : 0,
                 watchlisted: favorite.watchlisted.length >= 1 ? true : false
             }
@@ -117,14 +115,13 @@ const addFavorite = async (req: express.Request, res: express.Response) => {
         const newRank = lastFavorite ? getNextLexoRank(lastFavorite.rank) : getNextLexoRank();
 
         // Create a new favorite if it doesn't exist.
-        const favorite = await favoritesSchema.updateOne(
+        const favorite = await favoritesSchema.findOneAndUpdate(
             { user_id: req.user!.id, media_id: mediaData.id.toString(), type: type  },
             { $setOnInsert: { date_added: new Date(), rank: newRank, type: type  } },
-            { upsert: true }
+            { upsert: true, new: true }
         );
 
-        sendResponse(res, { status: 200, message: "Favorite added", responsePayload: { id: favorite.upsertedId!._id.toString() } });
-        saveMovie(mediaData as Media, type as string);
+        sendResponse(res, { status: 200, message: "Favorite added", responsePayload: { id: favorite._id.toString() } });
     } catch (err) {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error adding favorite" });

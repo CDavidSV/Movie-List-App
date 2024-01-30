@@ -2,6 +2,7 @@ import axios from 'axios';
 import Movie from '../Models/Movie';
 import Series from '../Models/Series';
 import config from '../config/config';
+import saveMovie from './mediaHandler';
 
 const tmdb_token = process.env.TMDB_ACCESS_TOKEN;
 
@@ -9,13 +10,29 @@ interface CustomMediaResponse {
     id: number;
     title: string;
     description: string;
-    poster_url: string;
-    backdrop_url: string;
+    posterUrl: string;
+    backdropUrl: string;
     type: string;
-    release_date: string;
-    vote_average: number;
+    releaseDate: string;
+    voteAverage: number;
     votes: number;
 }
+
+const makeRequest = async (url: string) => {
+    return await axios({
+        method: 'get',
+        url: url,
+        headers: {
+            "Authorization": "Bearer " + tmdb_token,
+            "Content-Type": "application/json"
+        }
+    }).then((response) => {
+        return response.data;
+    }).catch((err) => {
+        console.error(err);
+        return null;
+    })
+};
 
 /**
  * 
@@ -42,13 +59,13 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
                     id: item.id,
                     title: item.title,
                     description: item.overview,
-                    poster_url: item.poster_path ? `${config.tmbdImageBaseUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                    backdrop_url: item.backdrop_path ? `${config.tmbdImageOriginalUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                    posterUrl: item.poster_path ? `${config.tmbdImageBaseUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                    backdropUrl: item.backdrop_path ? `${config.tmbdImageOriginalUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                     type: "movie",
-                    release_date: item.release_date,
-                    vote_average: item.vote_average,
+                    releaseDate: item.release_date,
+                    voteAverage: item.vote_average,
                     votes: item.vote_count
-                }
+                } as CustomMediaResponse
             });
 
             return media;
@@ -60,13 +77,13 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
                 id: item.id,
                 title: item.name,
                 description: item.overview,
-                poster_url: item.poster_path ? `${config.tmbdImageBaseUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: item.backdrop_path ? `${config.tmbdImageOriginalUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: item.poster_path ? `${config.tmbdImageBaseUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: item.backdrop_path ? `${config.tmbdImageOriginalUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "series",
-                release_date: item.first_air_date, // release_date is first_air_date for series
-                vote_average: item.vote_average,
+                releaseDate: item.first_air_date, // release_date is first_air_date for series
+                voteAverage: item.vote_average,
                 votes: item.vote_count
-            }
+            } as CustomMediaResponse
         });
         return media;
 
@@ -102,11 +119,11 @@ const findMediaByTitle = async (title: string) => {
                 id: movie.id,
                 title: movie.title,
                 description: movie.overview,
-                poster_url: movie.poster_path ? `${config.tmbdImageBaseUrl}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: movie.backdrop_path ? `${config.tmbdImageOriginalUrl}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: movie.poster_path ? `${config.tmbdImageBaseUrl}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: movie.backdrop_path ? `${config.tmbdImageOriginalUrl}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "movie",
-                release_date: movie.release_date,
-                vote_average: movie.vote_average,
+                releaseDate: movie.release_date,
+                voteAverage: movie.vote_average,
                 votes: movie.vote_count
             });
         };
@@ -117,11 +134,11 @@ const findMediaByTitle = async (title: string) => {
                 id: movie.id,
                 title: movie.name,
                 description: movie.overview,
-                poster_url: movie.poster_path ? `${config.tmbdImageBaseUrl}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: movie.backdrop_path ? `${config.tmbdImageOriginalUrl}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: movie.poster_path ? `${config.tmbdImageBaseUrl}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: movie.backdrop_path ? `${config.tmbdImageOriginalUrl}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "series",
-                release_date: movie.first_air_date,
-                vote_average: movie.vote_average,
+                releaseDate: movie.first_air_date,
+                voteAverage: movie.vote_average,
                 votes: movie.vote_count
             });
         };
@@ -136,27 +153,29 @@ const findMediaByTitle = async (title: string) => {
  * @param type type of the media (movie | series)
  * @returns Movie | Series | null
  */
-const findMediaById = async (id: string, type: string): Promise<Movie | Series | null> => {
+const findMediaById = async (id: string, type: string, append?: string[]): Promise<Movie | Series | null> => {
+    let appendString = "";
+    if (append) {
+        const validAppendStrings = ["videos", "credits", "recommendations"];
+        const filteredAppendStrings = append.filter((str: string) => validAppendStrings.includes(str));
+        appendString = filteredAppendStrings.length > 0 ? `?append_to_response=${filteredAppendStrings.join(",")}` : "";
+    }
+
     try {
         if (type === "movie") {
-            const response = await axios({
-                method: 'get',
-                url: `https://api.themoviedb.org/3/movie/${id}?append_to_response=videos,images,credits&language=en-US`,
-                headers: {
-                    Authorization: "Bearer " + tmdb_token
-                }
-            });
-            return new Movie(response.data);
-        } else if (type === "series") {
-            const response = await axios({
-                method: 'get',
-                url: `https://api.themoviedb.org/3/tv/${id}?append_to_response=videos,images,credits&language=en-US`,
-                headers:{
-                    Authorization: "Bearer " + tmdb_token
-                }
-            });
+            const data = await makeRequest(`https://api.themoviedb.org/3/movie/${id}${appendString}&language=en-US`);
+            if (!data) return null;
 
-            return new Series(response.data);
+            const movie = new Movie(data);
+            saveMovie(movie, type);
+            return movie;
+        } else if (type === "series") {
+            const data = await makeRequest(`https://api.themoviedb.org/3/tv/${id}${appendString}&language=en-US`);
+            if (!data) return null;
+
+            const series = new Series(data);
+            saveMovie(series, type);
+            return series;
         } else {
             return null;
         }

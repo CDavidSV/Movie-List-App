@@ -43,20 +43,17 @@ function WatchlistItem(props: WatchlistItemProps) {
         }
     }, []);
 
-    const updateProgress = (amount: number) => {
+    const updateProgress = (newProgress: number) => {
         setStatus("watching");
-        const oldProgress = itemProgress.progress;
 
         let status = 0;
-        if (itemProgress.progress + amount === itemProgress.totalProgress) {
+        if (newProgress === itemProgress.totalProgress) {
             setStatus("finished");
             status = 2;
         }
 
-        setItemProgress({ progress: itemProgress.progress + amount, totalProgress: itemProgress.totalProgress });
-        setWatchlist(props.media_id.toString(), props.type, status, itemProgress.progress + amount).catch(() => {
-            setItemProgress({ progress: oldProgress, totalProgress: itemProgress.totalProgress });
-        });
+        setItemProgress({ progress: newProgress, totalProgress: itemProgress.totalProgress });
+        setWatchlist(props.media_id.toString(), props.type, status, newProgress);
     }
 
     const handleRemove = (e: React.MouseEvent) => {
@@ -65,15 +62,17 @@ function WatchlistItem(props: WatchlistItemProps) {
     }
 
     return (
-        <Link to={`/media/${props.type}/${props.id}`} className={`watchlist-item ${status}`}>
-            <picture className="">
-                <source media="(max-width: 768px)" srcSet={props.poster} />
-                <img src={props.backgrop} alt={props.title}/>
-            </picture>
-            <div className="info">
-                <h3>{props.title}</h3>
-                <FavoriteButton size="small" mediaId={props.id} type={props.type} isFavorite={props.favorited}/>
-            </div>
+        <div className={`watchlist-item ${status}`}>
+            <Link to={`/media/${props.type}/${props.id}`}>
+                <picture className="">
+                    <source media="(max-width: 768px)" srcSet={props.poster} />
+                    <img src={props.backgrop} alt={props.title}/>
+                </picture>
+                <div className="info">
+                    <h3>{props.title}</h3>
+                    <FavoriteButton size="small" mediaId={props.id} type={props.type} isFavorite={props.favorited}/>
+                </div>
+            </Link>
             <div className="actions desktop">
                 <WatchlistProgress
                     mediaId={props.id}
@@ -86,7 +85,7 @@ function WatchlistItem(props: WatchlistItemProps) {
             <div className="actions mobile">
                 <span className="watchlist-btn trash-icon material-icons">edit</span>
             </div>
-        </Link>
+        </div>
     );
 }
 
@@ -111,6 +110,7 @@ export default function Watchlist() {
     const [watchlist, setWatchlist] = useState<any[]>([]);
 
     useEffect(() => {
+        document.title = "Watchlist - My Movie List";
         if (selectedTab > tabsConfig.length - 1) return;
 
         setLoading(true);
@@ -148,7 +148,7 @@ export default function Watchlist() {
                     ))}
                 </div>
                 <div className="watchlist-container">
-                    <div className={loading ? "loader active" : "loader"}>
+                    <div style={{marginTop: "150px"}} className={loading ? "loader active" : "loader"}>
                         <div className="spinning-loader"></div>
                     </div>
                     {watchlist.length < 1 && !loading &&
@@ -161,9 +161,9 @@ export default function Watchlist() {
                                     index={index}
                                     title={media.title}
                                     progress={media.progress} 
-                                    total_progress={media.total_progress} 
-                                    backgrop={media.backdrop_url}
-                                    poster={media.poster_url}
+                                    total_progress={media.totalProgress} 
+                                    backgrop={media.backdropUrl}
+                                    poster={media.posterUrl}
                                     favorited={media.favorited}
                                     status={media.status}
                                     media_id={media.media_id}

@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 
 export default function PageNotFound() {
+    document.title = "Page Not Found - My Movie List";
+
     return <div>
         <div className="page-flex">
             <h1 style={{fontSize: '74px', margin: '20px 0 0 0'}}>404</h1>

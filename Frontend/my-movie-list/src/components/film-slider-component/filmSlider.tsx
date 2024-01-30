@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import FilmCard from '../film-card-component/filmCard';
 import './filmSlider.css';
+import FilmCardSkeleton from '../film-card-skeleton-component/film-card-skeleton';
 
-export default function FilmSlider (props: {filmArr: any[], title: string}) {
+export default function FilmSlider (props: {filmArr: any[], title?: string}) {
     const slider = useRef<HTMLDivElement>(null);
     const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
     const [buttonStates, setButtonStates] = useState({ left: false, right: false });
@@ -36,14 +37,17 @@ export default function FilmSlider (props: {filmArr: any[], title: string}) {
     const changePage = (direction: string) => {
         if (!slider.current) return;
 
+        const style = window.getComputedStyle(slider.current);
+        const paddingHorizontal = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+
         if (direction === 'right') {
             slider.current.scrollBy({
-                left: slider.current.clientWidth,
+                left: slider.current.clientWidth - paddingHorizontal,
                 behavior: 'smooth'
             });
         } else if (direction === 'left') {
             slider.current.scrollBy({
-                left: -slider.current.clientWidth,
+                left: -slider.current.clientWidth + paddingHorizontal,
                 behavior: 'smooth'
             });
         }
@@ -51,9 +55,11 @@ export default function FilmSlider (props: {filmArr: any[], title: string}) {
 
     return (
     <>
-        <div className="slider-header">
-            <h1>{props.title}</h1>
-        </div>
+        {props.title && 
+            <div className="slider-header">
+                <h1>{props.title}</h1>
+            </div>
+        }
         <div className="slider-container">
             <div className="button-wrapper">
                 <button className={`slider-button slider-button-left${!buttonStates.left ? ' disabled' : ''}`}  onClick={() => changePage('left')}>
@@ -68,14 +74,25 @@ export default function FilmSlider (props: {filmArr: any[], title: string}) {
                 </button>
             </div> 
             <div ref={slider} className="slider">
-                {props.filmArr.length > 0 ? props.filmArr.map((movie, index) => (
+                {props.filmArr.length > 0 ? props.filmArr.map((movie) => (
                     <FilmCard 
-                        key={index} 
-                        filmData={movie}
+                        key={`${movie.id}.${movie.type}`} 
+                        filmData={{
+                            id: movie.id,
+                            type: movie.type,
+                            posterUrl: movie.posterUrl,
+                            title: movie.title,
+                            releaseDate: movie.releaseDate || movie.firstAirDate,
+                            voteAverage: movie.voteAverage,
+                            votes: movie.votes,
+                            description: movie.description         
+                        }}
+                        inWatchlist={movie.inWatchlist}
+                        inFavorites={movie.inFavorites}
                         searchResult={false}/>
                 )) : 
                     Array.from({length: 10}).map((_, index) => (
-                        <FilmCard key={`loading-${index}`} searchResult={false}/>
+                        <FilmCardSkeleton key={index}/>
                     ))
                 }
             </div>

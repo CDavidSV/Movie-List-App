@@ -1,5 +1,5 @@
 import config from "../config/config";
-import { Author, Genre, Episode, Network, ProductionCompany, ProductionCountry, Season, Language, Image, Video, CastMember, CrewMember } from "./interfaces";
+import { Author, Genre, Episode, Network, ProductionCompany, ProductionCountry, Season, Language, Video, CastMember, CrewMember, Recomendation } from "./interfaces";
 
 export default class Series {
     public adult: boolean;
@@ -33,10 +33,10 @@ export default class Series {
     public type: string;
     public voteAverage: number;
     public voteCount: number;
-    public backdropImages: Image[];
-    public castMembers: CastMember[];
-    public crewMembers: CrewMember[];
-    public trailer: Video | null;
+    public castMembers?: CastMember[];
+    public crewMembers?: CrewMember[];
+    public trailer?: Video | null;
+    public recommendations?: Recomendation[];
 
     constructor(mediajson: any) {
         this.adult = mediajson.adult;
@@ -135,18 +135,7 @@ export default class Series {
         this.languages = mediajson.languages.map((language: string) => {
             return language;
         });
-        this.backdropImages = mediajson.images.backdrops.map((image: any) => {
-            return {
-                aspectRatio: image.aspect_ratio,
-                filePath: image.file_path,
-                height: image.height,
-                iso6391: image.iso_639_1,
-                voteAverage: image.vote_average,
-                voteCount: image.vote_count,
-                width: image.width
-            } as Image;
-        });
-        this.castMembers = mediajson.credits.cast.map((member: any) => {
+        this.castMembers = mediajson.credits && mediajson.credits.cast.slice(0, 10).map((member: any) => {
             return {
                 adult: member.adult,
                 gender: member.gender,
@@ -155,28 +144,48 @@ export default class Series {
                 name: member.name,
                 originalName: member.original_name,
                 popularity: member.popularity,
-                profilePath: member.profile_path,
+                profilePath: member.profile_path ? `${config.tmbdImageBaseUrl}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
                 castId: member.cast_id,
                 character: member.character,
                 creditId: member.credit_id,
                 order: member.ordet
             } as CastMember;
         });
-        this.crewMembers = mediajson.credits.crew.map((memeber: any) => {
+        this.crewMembers = mediajson.credits && mediajson.credits.crew.map((member: any) => {
             return {
-                adult: memeber.adult,
-                gender: memeber.gender,
-                id: memeber.id,
-                knownForDepartment: memeber.known_for_department,
-                name: memeber.name,
-                originalName: memeber.original_name,
-                popularity: memeber.popularity,
-                profilePath: memeber.profile_path,
-                creditId: memeber.credit_id,
-                department: memeber.department,
-                job: memeber.job
+                adult: member.adult,
+                gender: member.gender,
+                id: member.id,
+                knownForDepartment: member.known_for_department,
+                name: member.name,
+                originalName: member.original_name,
+                popularity: member.popularity,
+                profilePath: member.profile_path ? `${config.tmbdImageBaseUrl}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+                creditId: member.credit_id,
+                department: member.department,
+                job: member.job
+            } as CrewMember;
+        }).reduce((acc: CrewMember[], cur: CrewMember) => {
+            if (acc.find((member: CrewMember) => member.department === cur.department)) {
+                return acc;
+            } else {
+                return [...acc, cur];
             }
+        }, []);
+        this.trailer = mediajson.videos && mediajson.videos.results.find((video: any) => video.type === 'Trailer') || null;
+
+        this.recommendations = mediajson.recommendations && mediajson.recommendations.results.slice(0, 30).map((media: any) => {
+            return {
+                id: media.id,
+                title: media.name,
+                description: media.overview,
+                posterUrl: media.poster_path ? `${config.tmbdImageBaseUrl}${media.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: media.backdrop_path ? `${config.tmbdImageOriginalUrl}${media.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                type: media.media_type === "tv" ? "series" : "movie",
+                releaseDate: media.first_air_date || media.release_date,
+                voteAverage: media.vote_average,
+                votes: media.vote_count
+            } as Recomendation;
         });
-        this.trailer = mediajson.videos.results.find((video: any) => video.type === 'Trailer') || null;
     }
 }

@@ -28,6 +28,8 @@ export default function Browse() {
     const [searchHistory, setSearchHistory] = useState<SearchResultItem[]>(getSearchResultsHistory());
 
     useEffect(() => {
+        document.title = "Search - My Movie List";
+
         const params = new URLSearchParams(window.location.search);
         const query = params.get("query");
 
@@ -96,12 +98,23 @@ export default function Browse() {
                         <div className="search-results">
                             <h2>Movies</h2>
                             <div className="search-results-container">  
-                                {media.map((movie, index) => {
+                                {media.map((movie) => {
                                     if (movie.type === "movie") {
                                         return (
-                                        <FilmCard 
-                                            key={index} 
-                                            filmData={movie}
+                                        <FilmCard
+                                            key={`${movie.id}.${movie.type}`}
+                                            filmData={{
+                                                id: movie.id,
+                                                type: movie.type,
+                                                posterUrl: movie.posterUrl,
+                                                title: movie.title,
+                                                description: movie.description,
+                                                releaseDate: movie.releaseDate,
+                                                voteAverage: movie.voteAverage,
+                                                votes: movie.votes,
+                                            }}
+                                            inFavorites={movie.inFavorites}
+                                            inWatchlist={movie.inWatchlist}
                                             searchResult={true}/>
                                         )
                                     }
@@ -113,13 +126,25 @@ export default function Browse() {
                         <div className="search-results">
                             <h2>Series</h2>
                             <div className="search-results-container">  
-                                {media.map((show, index) => {
+                                {media.map((show) => {
                                     if (show.type === "series") {
                                         return (
                                             <FilmCard 
-                                                key={index} 
-                                                filmData={show}
-                                                searchResult={true}/>
+                                                key={`${show.id}.${show.type}`}
+                                                filmData={{
+                                                    id: show.id,
+                                                    type: show.type,
+                                                    posterUrl: show.posterUrl,
+                                                    title: show.title,
+                                                    description: show.description,
+                                                    releaseDate: show.releaseDate,
+                                                    voteAverage: show.voteAverage,
+                                                    votes: show.votes,
+                                                }}
+                                                inFavorites={show.inFavorites}
+                                                inWatchlist={show.inWatchlist}
+                                                searchResult={true}
+                                            />
                                         )
                                     }
                                 })}

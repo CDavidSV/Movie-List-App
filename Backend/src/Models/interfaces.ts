@@ -126,6 +126,20 @@ interface CrewMember {
     job: string;
 }
 
+interface Recomendation {
+    id: number;
+    title: string;
+    description: string;
+    posterUrl: string;
+    backdropUrl: string;
+    type: string;
+    releaseDate: string;
+    voteAverage: number;
+    votes: number;
+    numberOfSeasons?: number;
+    numberOfEpisodes?: number;
+}
+
 export { 
     User,
     APIResponse,
@@ -140,5 +154,6 @@ export {
     Image,
     Video,
     CastMember,
-    CrewMember
+    CrewMember,
+    Recomendation
 };

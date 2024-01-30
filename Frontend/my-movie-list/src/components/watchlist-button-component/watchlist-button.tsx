@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { isLoggedIn } from "../../helpers/session.helpers";
 import { removeFromWatchlist, setWatchlist } from "../../helpers/util.helpers";
 
 export default function WatchlistButton(props: { size: string, isWatchlisted: boolean, mediaId: string, type: string }) {
     const [isWatchlisted, setIsWatchlisted] = useState<boolean>(props.isWatchlisted);
+
+    useEffect(() => {
+        setIsWatchlisted(props.isWatchlisted);
+    }, [props.isWatchlisted]);
 
     const handleWatchlistClick = (e: React.MouseEvent) => {
         e.preventDefault();

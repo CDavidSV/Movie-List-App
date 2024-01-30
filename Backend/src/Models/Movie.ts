@@ -1,4 +1,4 @@
-import { CastMember, CrewMember, Genre, Image, Language, ProductionCompany, ProductionCountry, Video } from "./interfaces";
+import { CastMember, CrewMember, Genre, Image, Language, ProductionCompany, ProductionCountry, Recomendation, Video } from "./interfaces";
 import config from "../config/config";
 
 export default class Movie {
@@ -25,10 +25,10 @@ export default class Movie {
     public voteAverage: number;
     public voteCount: number;
     public runtime: number;
-    public trailer: Video | null;
-    public backdropImages: Image[];
-    public castMembers: CastMember[];
-    public crewMembers: CrewMember[];
+    public trailer?: Video | null;
+    public castMembers?: CastMember[];
+    public crewMembers?: CrewMember[];
+    public recommendations?: Recomendation[];
 
     constructor(mediajson: any) {
         this.adult = mediajson.adult;
@@ -78,35 +78,9 @@ export default class Movie {
                 name: language.name
             } as Language;
         });
-        this.trailer = mediajson.videos.results.find((video: any) => video.type === 'Trailer') || null;
-        this.backdropImages = mediajson.images.backdrops.map((image: any) => {
-            return {
-                aspectRatio: image.aspect_ratio,
-                filePath: image.file_path,
-                height: image.height,
-                id: image.id,
-                iso6391: image.iso_639_1,
-                voteAverage: image.vote_average,
-                voteCount: image.vote_count,
-                width: image.width
-            } as Image;
-        });
-        this.crewMembers = mediajson.credits.crew.map((memeber: any) => {
-            return {
-                adult: memeber.adult,
-                gender: memeber.gender,
-                id: memeber.id,
-                knownForDepartment: memeber.known_for_department,
-                name: memeber.name,
-                originalName: memeber.original_name,
-                popularity: memeber.popularity,
-                profilePath: memeber.profile_path,
-                creditId: memeber.credit_id,
-                department: memeber.department,
-                job: memeber.job
-            } as CrewMember;
-        });
-        this.castMembers = mediajson.credits.cast.map((member: any) => {
+        this.trailer = mediajson.videos && mediajson.videos.results.find((video: any) => video.type === 'Trailer') || null;
+
+        this.crewMembers = mediajson.credits && mediajson.credits.crew.map((member: any) => {
             return {
                 adult: member.adult,
                 gender: member.gender,
@@ -115,12 +89,47 @@ export default class Movie {
                 name: member.name,
                 originalName: member.original_name,
                 popularity: member.popularity,
-                profilePath: member.profile_path,
+                profilePath: member.profile_path ? `${config.tmbdImageBaseUrl}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+                creditId: member.credit_id,
+                department: member.department,
+                job: member.job
+            } as CrewMember;
+        }).reduce((acc: CrewMember[], cur: CrewMember) => {
+            if (acc.find((member: CrewMember) => member.department === cur.department)) {
+                return acc;
+            } else {
+                return [...acc, cur];
+            }
+        }, []);
+        this.castMembers = mediajson.credits && mediajson.credits.cast.slice(0, 10).map((member: any) => {
+            return {
+                adult: member.adult,
+                gender: member.gender,
+                id: member.id,
+                knownForDepartment: member.known_for_department,
+                name: member.name,
+                originalName: member.original_name,
+                popularity: member.popularity,
+                profilePath: member.profile_path ? `${config.tmbdImageBaseUrl}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
                 castId: member.cast_id,
                 character: member.character,
                 creditId: member.credit_id,
                 order: member.order
             } as CastMember;
+        });
+
+        this.recommendations = mediajson.recommendations && mediajson.recommendations.results.slice(0, 30).map((media: any) => {
+            return {
+                id: media.id,
+                title: media.title,
+                description: media.overview,
+                posterUrl: media.poster_path ? `${config.tmbdImageBaseUrl}${media.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: media.backdrop_path ? `${config.tmbdImageOriginalUrl}${media.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                type: media.media_type === "tv" ? "series" : "movie",
+                releaseDate: media.release_date || media.first_air_date,
+                voteAverage: media.vote_average,
+                votes: media.vote_count
+            } as Recomendation;
         });
     }
 }

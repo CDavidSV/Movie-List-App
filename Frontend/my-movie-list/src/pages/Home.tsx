@@ -10,6 +10,8 @@ export default function Home() {
     const [topRated, setTopRated] = useState<any[]>([]);
 
     useEffect((() => {
+        document.title = "My Movie List";
+
         mml_api.get("api/v1/media/movies/popular").then((response) => {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), setPopularMovies);
         });

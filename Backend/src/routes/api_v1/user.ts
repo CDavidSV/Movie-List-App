@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { sendResponse } from "../../util/apiHandler";
 import watchlistSchema from "../../scheemas/watchlistSchema";
 import favoritesSchema from "../../scheemas/favoritesSchema";
+import { findMediaById, isValidMediaType } from "../../util/TMDB";
+import Series from "../../Models/Series";
 
 interface RequestMedia {
     media_id: number;
@@ -48,4 +50,42 @@ const hasMedia = async (req: Request, res: Response) => {
     }
 };
 
-export { hasMedia };
+const getStatusInPersonalLists = async (req: Request, res: Response) => {
+    const { media_id, type } = req.query;
+
+    if (!media_id) return sendResponse(res, { status: 400, message: "Invalid media id" });
+    if (!type || !isValidMediaType(type as string)) return sendResponse(res, { status: 400, message: "Invalid type" });
+
+    try {
+        const [watchlistItem, favoriteItem, mediaData] = await Promise.all([
+            watchlistSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }),
+            favoritesSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }),
+            findMediaById(media_id as string, type as string)
+        ]);
+
+        const status: any = { favorite: null, watchlist: null };
+        if (watchlistItem) {
+            status.watchlist = {
+                id: watchlistItem._id.toString(),
+                status: watchlistItem.status,
+                progress: watchlistItem.progress,
+                dateUpdated: watchlistItem.updated_date,
+                dateAdded: watchlistItem.added_date,
+                totalProgress: mediaData instanceof Series ? mediaData.numberOfEpisodes : 1
+            };
+        }
+        if (favoriteItem) {
+            status.favorite = {
+                id: favoriteItem._id.toString(),
+                dateAdded: favoriteItem.date_added,
+            };
+        }
+
+        sendResponse(res, { status: 200, message: "Status fetched succcessfully", responsePayload: status });
+    } catch (err) {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching status" });
+    }
+};
+
+export { hasMedia, getStatusInPersonalLists };

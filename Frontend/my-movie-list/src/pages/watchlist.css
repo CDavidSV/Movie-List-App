@@ -63,11 +63,21 @@
     align-items: center;
 }
 
+.watchlist-item a {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    flex: 1;
+}
+
 .watchlist-item img {
     max-width: 160px;
+    width: 160px;
     border-radius: 10px;
     margin-right: 10px;
     aspect-ratio: 16 / 9;
+    object-fit: cover;
 }
 
 .info {
@@ -96,6 +106,7 @@
     padding: 5px;
     border-radius: 50%;
     transition: background-color 0.3s;
+    cursor: pointer;
 }
 
 .watchlist-btn:hover {
@@ -103,11 +114,11 @@
 }
 
 .heart-icon, .trash-icon {
-    margin-top: 5px; /* Adjust the vertical alignment */
+    margin-top: 5px;
 }
 
 .watchlist-item.watching {
-    border-left: 5px solid #f1c40f;
+    border-left: 5px solid var(--primary-color);
 }
 
 .watchlist-item.finished {
@@ -115,7 +126,7 @@
 }
 
 .watchlist-item.plan-to-watch {
-    border-left: 5px solid #3498db;
+    border-left: 5px solid #858585;
 }
 
 @media screen and (max-width: 768px) {

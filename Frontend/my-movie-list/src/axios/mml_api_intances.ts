@@ -29,7 +29,7 @@ const processQueue = (error: any) => {
 mml_api_protected.interceptors.request.use(async (config) => {
     // Validate the users current session
     const sessionData = getSessionData();
-    if (!sessionData) return Promise.reject("No session data found");
+    if (!sessionData) return config;
 
     const expiresIn = sessionData.expiresIn;
     const now = Date.now();
@@ -71,6 +71,7 @@ mml_api_protected.interceptors.response.use((response) => {
     return response;
 }, async (error) => {
     // If the error is unauthorized, or forbidden, then redirect to the login page
+    console.error("Error in request: ", error);
     if (error.response.status !== 401 && error.response.status !== 403) return Promise.reject(error);
     clearSessionData();
     window.location.href = "/login";

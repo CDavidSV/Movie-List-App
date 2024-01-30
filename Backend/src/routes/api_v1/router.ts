@@ -2,11 +2,11 @@ import express from "express";
 
 // Routes
 import { addFavorite, getFavorites, removeFavorite, reorderFavorites } from "./favorites";
-import { getStatusOfWatchlistItem, getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchlist";
+import { getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchlist";
 import { getHistory, addHistory, removeHistory, clearHistory } from "./history";
 import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle } from "./media";
 import requireUser from "../../middlewares/requireUser";
-import { hasMedia } from "./user";
+import { hasMedia, getStatusInPersonalLists } from "./user";
 
 const router: express.Router = express.Router();
 
@@ -20,7 +20,6 @@ router.post("/favorites/reorder", requireUser, reorderFavorites);
 router.get("/watchlist", requireUser, getWatchlist);
 router.post("/watchlist/update", requireUser, updateWatchlist);
 router.delete("/watchlist/remove", requireUser, removeItemFromWatchlist);
-router.get("/watchlist/status-of-watchlist-item", requireUser, getStatusOfWatchlistItem);
 
 // List routes
 router.post('list/create', requireUser, () => { });
@@ -32,7 +31,8 @@ router.post('list/:id/reorder', requireUser, () => { });
 // User routes
 router.get("/me", requireUser, () => { });
 router.get("/user", requireUser, () => { });
-router.post("/user/inPersonalLists", requireUser, hasMedia);
+router.post("/user/in-personal-lists", requireUser, hasMedia);
+router.get("/user/status-in-personal-lists", getStatusInPersonalLists);
 router.post("/user/change-profile-picture", requireUser, () => { });
 router.post("/user/update", requireUser, () => { });
 router.post("/user/password-update", requireUser, () => { });
