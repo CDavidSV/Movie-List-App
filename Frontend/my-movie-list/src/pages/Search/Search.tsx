@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import InputField from "../components/inputField-component/inputField";
-import FilmCard from "../components/film-card-component/filmCard";
+import InputField from "../../components/inputField-component/inputField";
+import FilmCard from "../../components/film-card-component/filmCard";
 import "./search.css";
-import { mml_api } from "../axios/mml_api_intances";
-import { getSavedItems, removeSearchResultHistoryItem, SearchResultItem } from "../helpers/util.helpers";
-import { getSearchResultsHistory } from "../helpers/util.helpers";
+import { mml_api } from "../../axios/mml_api_intances";
+import { getSavedItems, removeSearchResultHistoryItem, SearchResultItem } from "../../helpers/util.helpers";
+import { getSearchResultsHistory } from "../../helpers/util.helpers";
 import { Link } from "react-router-dom";
 
 function PrevSearchResultCard(props: { name: string, url: string, remove: React.MouseEventHandler }) {

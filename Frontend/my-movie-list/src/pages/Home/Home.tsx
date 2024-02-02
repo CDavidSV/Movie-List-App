@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { mml_api } from "../axios/mml_api_intances";
-import FilmSlider from "../components/film-slider-component/filmSlider";
-import { getSavedItems } from "../helpers/util.helpers";
+import { mml_api } from "../../axios/mml_api_intances";
+import FilmSlider from "../../components/film-slider-component/filmSlider";
+import { getSavedItems } from "../../helpers/util.helpers";
 import "./home.css";
 
 export default function Home() {

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { mml_api_protected } from "../axios/mml_api_intances";
-import NotFound from "../components/not-found-component/not-found";
-import { setWatchlist, removeFromWatchlist } from "../helpers/util.helpers";
+import { mml_api_protected } from "../../axios/mml_api_intances";
+import NotFound from "../../components/not-found-component/not-found";
+import { setWatchlist, removeFromWatchlist } from "../../helpers/util.helpers";
 import "./watchlist.css";
 import { Link } from "react-router-dom";
-import WatchlistProgress from "../components/watchlist-progress-component/watchlist-progress";
-import FavoriteButton from "../components/favorite-button-component/favorite-button";
+import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
+import FavoriteButton from "../../components/favorite-button-component/favorite-button";
+import Modal from "../../components/modal-component/modal";
+import axios, { CancelTokenSource } from "axios";
 
 interface WatchlistItemProps {
     index: number,
@@ -25,6 +27,7 @@ interface WatchlistItemProps {
 function WatchlistItem(props: WatchlistItemProps) {
     const [status, setStatus] = useState<string>("plan-to-watch");
     const [itemProgress, setItemProgress] = useState<{ progress: number, totalProgress: number }>({ progress: props.progress, totalProgress: props.total_progress });
+    const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
 
     useEffect(() => {
         switch (props.status) {
@@ -56,13 +59,22 @@ function WatchlistItem(props: WatchlistItemProps) {
         setWatchlist(props.media_id.toString(), props.type, status, newProgress);
     }
 
-    const handleRemove = (e: React.MouseEvent) => {
-        e.preventDefault();
+    const handleRemove = () => {
         props.removeItemFromWatchlist(props.id, props.type, props.index);
+        setDeleteModalOpen(false);
     }
 
     return (
         <div className={`watchlist-item ${status}`}>
+            <Modal open={deleteModalOpen} onClose={() => {setDeleteModalOpen(false)}}>
+                <div>
+                    <h3 style={{textAlign: "center"}}>Delete {props.title} from your watchlist?</h3>
+                    <div className="modal-buttons">
+                        <button className="button" onClick={() => setDeleteModalOpen(false)}>No</button>
+                        <button className="button primary" onClick={handleRemove}>Yes</button>
+                    </div>
+                </div>
+            </Modal>
             <Link to={`/media/${props.type}/${props.id}`}>
                 <picture className="">
                     <source media="(max-width: 768px)" srcSet={props.poster} />
@@ -80,11 +92,12 @@ function WatchlistItem(props: WatchlistItemProps) {
                     progressState={itemProgress}
                     updateProgress={updateProgress}
                     />
-                <span className="watchlist-btn trash-icon material-icons" onClick={handleRemove}>delete_outline</span>
+                
             </div>
             <div className="actions mobile">
                 <span className="watchlist-btn trash-icon material-icons">edit</span>
             </div>
+            <span className="watchlist-btn trash-icon material-icons" onClick={() => setDeleteModalOpen(true)}>delete_outline</span>
         </div>
     );
 }
@@ -108,14 +121,24 @@ export default function Watchlist() {
     const [selectedTab, setSelectedTab] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [watchlist, setWatchlist] = useState<any[]>([]);
+    const [source, setSource] = useState<CancelTokenSource | null>(null);
 
     useEffect(() => {
         document.title = "Watchlist - My Movie List";
         if (selectedTab > tabsConfig.length - 1) return;
 
+        if (source) source.cancel();
+
+        // Create a new CancelToken
+        const cancelToken = axios.CancelToken;
+        const newSource = cancelToken.source();
+        setSource(newSource);
+
         setLoading(true);
         const status = tabsConfig[selectedTab].status;
-        mml_api_protected.get(`api/v1/watchlist?page=1&status=${status}`).then((response) => {
+        mml_api_protected.get(`api/v1/watchlist?page=1&status=${status}`, {
+            cancelToken: newSource.token
+        }).then((response) => {
             setLoading(false);
             setWatchlist(response.data.responseData.watchlist);
         });

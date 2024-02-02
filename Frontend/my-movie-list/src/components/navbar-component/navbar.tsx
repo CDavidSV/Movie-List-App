@@ -163,7 +163,6 @@ export default function Navbar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const handleMenuStateChange = (isOpen: boolean) => {
-        document.body.style.overflow = isOpen ? "hidden" : "auto";
         setDropdownOpen(isOpen);
     }
 

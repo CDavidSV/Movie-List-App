@@ -15,8 +15,9 @@ interface Config {
     expiration1Hour: number
     allowedProdDomains?: string[],
     allowedDevDomains?: string[],
-    tmbdImageOriginalUrl: string,
-    tmbdImageBaseUrl: string
+    tmbdFullBackdropUrl: string,
+    tmdbSmallBackdropUrl?: string,
+    tmdbPosterUrl?: string,
 }
 
 // Local config options.
@@ -30,8 +31,9 @@ const config: Config = {
     domain: '.localhost',
     refreshTokenDomain: '.localhost',
     allowedDevDomains: ['http://localhost:5173'],
-    tmbdImageOriginalUrl: 'https://image.tmdb.org/t/p/original',
-    tmbdImageBaseUrl: 'https://image.tmdb.org/t/p/w500',
+    tmdbSmallBackdropUrl: 'https://image.tmdb.org/t/p/w780',
+    tmbdFullBackdropUrl: 'https://image.tmdb.org/t/p/original',
+    tmdbPosterUrl: 'https://image.tmdb.org/t/p/w500'
 }
 
 export default config;

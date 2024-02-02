@@ -1,8 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
-import InputField from '../components/inputField-component/inputField';
+import InputField from '../../components/inputField-component/inputField';
 import { useState } from 'react';
-import { mml_api } from '../axios/mml_api_intances';
-import { setSessionData } from '../helpers/session.helpers';
+import { mml_api } from '../../axios/mml_api_intances';
+import { setSessionData } from '../../helpers/session.helpers';
 
 interface SignUpData {
     username: string;
@@ -78,14 +78,14 @@ export default function SignUp() {
                     <h1 style={{textAlign: "center"}}>Sign Up</h1>
                     {errorMessage && <p className="error-text">{errorMessage}</p>}
                     <InputField 
-                        type="email" 
+                        type="username" 
                         id="email" 
                         label="Email" 
                         required={true} 
                         onInputChange={(value: string) => setSignUpData({...signUpData!, email: value})}
                         status={signUpErrors.emailError}/>
                     <InputField 
-                        type="text" 
+                        type="username" 
                         id="username" 
                         label="Username" 
                         required={true} 
@@ -106,7 +106,7 @@ export default function SignUp() {
                         onInputChange={(value: string) => setSignUpData({...signUpData!, passwordConfirm: value})}
                         status={signUpErrors.passwordError}/>
                     
-                    <button className="primary-button" disabled={loading}>
+                    <button className="button primary" disabled={loading}>
                         {!loading && "Sign Up"}
                         {loading && <span className="spinning-loader"></span>}
                     </button>

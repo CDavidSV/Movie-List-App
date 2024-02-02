@@ -184,17 +184,37 @@ select {
 }
 
 button {
-    background: var(--primary-color);
     text-decoration: none;
     border: none;
 }
 
-.primary-button:hover:enabled,
-.primary-button:focus:enabled {
+.button {
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.6rem 2rem;
+    margin: 0;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: center;
+    transition: ease 0.2s;
+    height: 35px;
+    min-width: 90px;
+    color: var(--text-color);
+    background-color: #313233;
+}
+
+.button:hover {
+    background-color: #29292b;
+}
+
+.button.primary:hover:enabled,
+.button.primary:focus:enabled {
     background: var(--tertiary-color);
 }
 
-.primary-button:active:enabled {
+.button.primary:active:enabled {
     background: var(--tertiary-color);
     transform: scale(0.90);
 }
@@ -204,19 +224,14 @@ button:disabled {
     filter: brightness(0.5);
 }
 
-.primary-button {
-    border-radius: 5px;
+.button.primary {
+    background: var(--primary-color);
+}
+
+.modal-buttons {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0.6rem 2rem;
-    margin: 0;
-    color: var(--text-color);
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-align: center;
-    transition: ease 0.2s;
-    height: 35px;
+    justify-content: space-around;
+    gap: 5px;
 }
 
 .login-container {

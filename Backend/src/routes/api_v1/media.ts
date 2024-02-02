@@ -5,6 +5,7 @@ import watchlistSchema from '../../scheemas/watchlistSchema';
 import Movie from '../../Models/Movie';
 import favoritesSchema from '../../scheemas/favoritesSchema';
 import Series from '../../Models/Series';
+import config from '../../config/config';
 
 interface MovieResponse extends Movie {
     watchlist?: any;
@@ -95,6 +96,10 @@ const getMediaById = async (req: express.Request, res: express.Response) => {
     try {
         const mediaData: MovieResponse | SeriesResponse | null = await findMediaById(media_id as string, type as string, ['videos', 'credits', 'recommendations']);
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
+
+        // Replace poster and backdrop paths with full URLs.
+        mediaData.posterPath ? mediaData.posterPath = `${config.tmdbPosterUrl}${mediaData.posterPath}` : "https://via.placeholder.com/300x450.png?text=No+Poster";
+        mediaData.backdropPath ? mediaData.backdropPath = `${config.tmbdFullBackdropUrl}${mediaData.backdropPath}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop";
     
         sendResponse(res, { status: 200, message: "Media fetched successfully", responsePayload: mediaData });
     } catch (err) {

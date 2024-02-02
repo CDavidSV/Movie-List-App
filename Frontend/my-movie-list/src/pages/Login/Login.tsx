@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import InputField from '../components/inputField-component/inputField';
-import { mml_api } from '../axios/mml_api_intances';
+import InputField from '../../components/inputField-component/inputField';
+import { mml_api } from '../../axios/mml_api_intances';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { setSessionData } from '../helpers/session.helpers';
+import { setSessionData } from '../../helpers/session.helpers';
 
 interface LoginData {
     username: string;
@@ -61,7 +61,7 @@ export default function Login() {
                             status={loginError}/>
                         <Link to="/reset-password"><p className="forgot-password">Forgot Password</p></Link>
                     </div>
-                    <button className="primary-button" disabled={loading}>
+                    <button className="button primary" disabled={loading}>
                         {!loading && "Log In"}
                         {loading && <span className="spinning-loader"></span>}
                     </button>

@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { mml_api_protected } from "../axios/mml_api_intances";
+import { mml_api_protected } from "../../axios/mml_api_intances";
 import { Link } from "react-router-dom";
-import { removeFavorite } from "../helpers/util.helpers";
+import { removeFavorite } from "../../helpers/util.helpers";
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DraggableStateSnapshot } from "react-beautiful-dnd";
+import WatchlistButton from "../../components/watchlist-button-component/watchlist-button";
+import Modal from "../../components/modal-component/modal";
 import "./favorites.css";
-import WatchlistButton from "../components/watchlist-button-component/watchlist-button";
 
 function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: any, removeItem: Function, provided: DraggableProvided, snapshot: DraggableStateSnapshot}) {
+    const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    
     const removeFromFavorites = (e: React.MouseEvent) => {
         e.preventDefault();
+
+        setDeleteModalOpen(false);
         removeFavorite(filmData.media_id, filmData.type).then(() => {
             removeItem();
         });
@@ -16,6 +21,15 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
 
     return (
         <div className={snapshot.isDragging ? "list-card-container dragging" : "list-card-container"}>
+            <Modal open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
+                <div>
+                    <h3 style={{textAlign: "center"}}>Delete {filmData.title} from your favorites?</h3>
+                    <div className="modal-buttons">
+                        <button className="button" onClick={() => setDeleteModalOpen(false)}>No</button>
+                        <button className="button primary" onClick={removeFromFavorites}>Yes</button>
+                    </div>
+                </div>
+            </Modal>
             <div className="list-drag" {...provided.dragHandleProps}>
                 <span className="material-icons" >drag_indicator</span>
             </div>
@@ -35,7 +49,7 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
                 </div>
             </Link>
             <div className="list-card-delete">
-                <span className="material-icons remove-list-item-btn" onClick={removeFromFavorites}>delete_outline</span>
+                <span className="material-icons remove-list-item-btn" onClick={() => setDeleteModalOpen(true)}>delete_outline</span>
             </div>
         </div>
     );
@@ -96,7 +110,7 @@ export default function Favorites() {
                     <div className="no-favorites">
                         <p style={{textAlign: "center", filter: "brightness(0.6)"}}>You have no favorites</p>
                         <Link to="/">
-                            <button className="primary-button">
+                            <button className="button primary">
                                 Go to Home Feed
                             </button>
                         </Link>

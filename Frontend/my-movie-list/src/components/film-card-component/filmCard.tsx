@@ -31,13 +31,17 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
         hoverContentRef.current?.classList.add("active");
     }
 
-    const deactivateHover = () => {
+    const deactivateHover = (e: React.MouseEvent) => {
+        if (e.currentTarget.contains(e.relatedTarget as Node)) {
+            // If it is a child element, ignore the event
+            return;
+        }
         hoverContentRef.current?.classList.remove("active");
     }
 
     return (
-        <div onMouseEnter={activateHover} onMouseLeave={deactivateHover} className="film-card">
-            <div className="card-anchor">
+        <div onMouseEnter={activateHover} onMouseOut={deactivateHover} className="film-card">
+            <Link onClick={() => saveToHistory(filmData.title, filmData.id.toString(), filmData.type, searchResult)} to={`/media/${filmData.type}/${filmData.id}`} className="card-anchor">
                 <figure className="poster-image-figure">
                     <img loading="lazy" src={filmData.posterUrl} alt={filmData.title}/>
                 </figure>
@@ -45,35 +49,36 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
                     <h4>{filmData.title}</h4>
                     <p>{filmData.releaseDate}</p>
                 </div>
-            </div>
+            </Link>
             <div ref={hoverContentRef} className="card-hover-info" style={{backgroundImage: `url(${filmData.posterUrl})`}}>
-                <Link onClick={() => saveToHistory(filmData.title, filmData.id.toString(), filmData.type, searchResult)} to={`/media/${filmData.type}/${filmData.id}`} className="card-hover-info-content">
+                <div className="card-hover-info-content">
+                    <Link
+                        className="media-link" 
+                        onClick={() => saveToHistory(filmData.title, filmData.id.toString(), filmData.type, searchResult)} 
+                        to={`/media/${filmData.type}/${filmData.id}`}/>
                     <div>
                         <h6>{filmData.title}</h6>
                         <div className="card-hover-info-content-vote">
-                            <p>{filmData.voteAverage.toFixed(1)}★</p>
-                            <p>({shortenNumber(filmData.votes)})</p>
+                            <p>{filmData.voteAverage ? filmData.voteAverage.toFixed(1) : 0}★</p>
+                            <p>({filmData.votes ? shortenNumber(filmData.votes) : 0})</p>
                         </div>
                         <div className="card-hover-info-content-description">
                             <p>{filmData.description}</p>
                         </div>
                     </div>
                     <div className="card-hover-info-content-buttons">
-                        {isLoggedIn() &&
-                        <>  
-                            <WatchlistButton 
-                                size='small'
-                                isWatchlisted={inWatchlist}
-                                mediaId={filmData.id.toString()}
-                                type={filmData.type}/>  
-                            <FavoriteButton 
-                                size='small'
-                                isFavorite={inFavorites}
-                                mediaId={filmData.id.toString()}
-                                type={filmData.type}/>
-                        </>}
+                        <WatchlistButton 
+                            size='small'
+                            isWatchlisted={inWatchlist}
+                            mediaId={filmData.id.toString()}
+                            type={filmData.type}/>  
+                        <FavoriteButton 
+                            size='small'
+                            isFavorite={inFavorites}
+                            mediaId={filmData.id.toString()}
+                            type={filmData.type}/>
                     </div>
-                </Link>
+                </div>
             </div>
         </div>
     );

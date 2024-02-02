@@ -5,21 +5,22 @@ import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
 import MediaDataProvider from './contexts/FilmDataContext';
+import "./index.css";
 
-const Home = lazy(() => import('./pages/Home'));
-const Movies = lazy(() => import('./pages/Movies'));
-const Shows = lazy(() => import('./pages/Shows'));
-const MyLists = lazy(() => import('./pages/MyLists'));
-const Genres = lazy(() => import('./pages/Genres'));
-const Search = lazy(() => import('./pages/Search'));
-const Watchlist = lazy(() => import('./pages/Watchlist'));
-const History = lazy(() => import('./pages/History'));
-const MyProfile = lazy(() => import('./pages/MyProfile'));
-const Login = lazy(() => import('./pages/Login'));
-const SignUp = lazy(() => import('./pages/Signup'));
-const PageNotFound = lazy(() => import('./pages/PageNotFound'));
-const Favorites = lazy(() => import('./pages/Favorites'));
-const Media = lazy(() => import('./pages/Media'));
+const Home = lazy(() => import('./pages/Home/Home'));
+const Movies = lazy(() => import('./pages/Movies/Movies'));
+const Shows = lazy(() => import('./pages/Shows/Shows'));
+const MyLists = lazy(() => import('./pages/MyLists/MyLists'));
+const Genres = lazy(() => import('./pages/Genres/Genres'));
+const Search = lazy(() => import('./pages/Search/Search'));
+const Watchlist = lazy(() => import('./pages/Watchlists/Watchlist'));
+const History = lazy(() => import('./pages/History/History'));
+const MyProfile = lazy(() => import('./pages/MyProfile/MyProfile'));
+const Login = lazy(() => import('./pages/Login/Login'));
+const SignUp = lazy(() => import('./pages/Signup/Signup'));
+const PageNotFound = lazy(() => import('./pages/PageNotFound/PageNotFound'));
+const Favorites = lazy(() => import('./pages/Favorites/Favorites'));
+const Media = lazy(() => import('./pages/Media/Media'));
 
 function App() {
   const location = useLocation();

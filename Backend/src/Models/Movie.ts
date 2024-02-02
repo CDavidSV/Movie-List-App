@@ -32,13 +32,13 @@ export default class Movie {
 
     constructor(mediajson: any) {
         this.adult = mediajson.adult;
-        this.backdropPath = mediajson.backdrop_path ? `${config.tmbdImageOriginalUrl}${mediajson.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop";
+        this.backdropPath = mediajson.backdrop_path;
         this.id = mediajson.id;
         this.originalLanguage = mediajson.original_language;
         this.originalTitle = mediajson.original_title;
         this.overview = mediajson.overview;
         this.popularity = mediajson.popularity;
-        this.posterPath = mediajson.poster_path ? `${config.tmbdImageBaseUrl}${mediajson.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster";
+        this.posterPath = mediajson.poster_path;
         this.releaseDate = mediajson.release_date;
         this.title = mediajson.title;
         this.video = mediajson.video;
@@ -89,7 +89,7 @@ export default class Movie {
                 name: member.name,
                 originalName: member.original_name,
                 popularity: member.popularity,
-                profilePath: member.profile_path ? `${config.tmbdImageBaseUrl}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+                profilePath: member.profile_path ? `${config.tmdbPosterUrl}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
                 creditId: member.credit_id,
                 department: member.department,
                 job: member.job
@@ -110,7 +110,7 @@ export default class Movie {
                 name: member.name,
                 originalName: member.original_name,
                 popularity: member.popularity,
-                profilePath: member.profile_path ? `${config.tmbdImageBaseUrl}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+                profilePath: member.profile_path ? `${config.tmdbPosterUrl}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
                 castId: member.cast_id,
                 character: member.character,
                 creditId: member.credit_id,
@@ -123,8 +123,8 @@ export default class Movie {
                 id: media.id,
                 title: media.title,
                 description: media.overview,
-                posterUrl: media.poster_path ? `${config.tmbdImageBaseUrl}${media.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: media.backdrop_path ? `${config.tmbdImageOriginalUrl}${media.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: media.poster_path ? `${config.tmdbPosterUrl}${media.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: media.backdrop_path ? `${config.tmbdFullBackdropUrl}${media.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: media.media_type === "tv" ? "series" : "movie",
                 releaseDate: media.release_date || media.first_air_date,
                 voteAverage: media.vote_average,

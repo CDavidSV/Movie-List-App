@@ -97,8 +97,8 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 dateAdded: item.date_added,
                 title: item.media[0].title,
                 description: item.media[0].description,
-                posterUrl: item.media[0].poster_url ? `${config.tmbdImageBaseUrl}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: item.media[0].backdrop_url ? `${config.tmbdImageBaseUrl}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: item.media[0].poster_url ? `${config.tmdbPosterUrl}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: item.media[0].backdrop_url ? `${config.tmdbSmallBackdropUrl}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 releaseDate: item.media[0].release_date ? item.media[0].release_date : "NA",
                 runtime: item.media[0].runtime ? item.media[0].runtime : 0,
                 type: item.type,
@@ -122,7 +122,7 @@ const updateWatchlist = async (req: express.Request, res: express.Response) => {
         media_id: { type: "string", required: true },
         status: { type: "number", required: true },
         progress: { type: "number", required: true },
-        type: { type: "string", required: true },
+        type: { type: "string", required: true }
     }
 
     const missingFields = validateJsonBody(req.body, registerSchema);

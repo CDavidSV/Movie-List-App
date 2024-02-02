@@ -1,14 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { mml_api_protected } from "../axios/mml_api_intances";
+import { mml_api_protected } from "../../axios/mml_api_intances";
 import "./media.css";
-import { calculateMovieRuntime, setWatchlist } from "../helpers/util.helpers";
-import WatchlistProgress from "../components/watchlist-progress-component/watchlist-progress";
-import FavoriteButton from "../components/favorite-button-component/favorite-button";
-import PersonCard from "../components/person-card-component/person-card";
-import { isLoggedIn } from "../helpers/session.helpers";
-import FilmSlider from "../components/film-slider-component/filmSlider";
-import { MediaDataContext } from "../contexts/FilmDataContext";
+import { calculateMovieRuntime, setWatchlist } from "../../helpers/util.helpers";
+import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
+import FavoriteButton from "../../components/favorite-button-component/favorite-button";
+import PersonCard from "../../components/person-card-component/person-card";
+import { isLoggedIn } from "../../helpers/session.helpers";
+import FilmSlider from "../../components/film-slider-component/filmSlider";
+import { MediaDataContext } from "../../contexts/FilmDataContext";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -110,11 +110,11 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
                                 updateProgress={updateProgress}/>
                         </>    
                         :
-                        <button className="primary-button" onClick={handleAddToWatchlist}>Add to Watchlist</button>
+                        <button className="button primary" onClick={handleAddToWatchlist}>Add to Watchlist</button>
                     }
                 </div>
                 :
-                <button className="primary-button" onClick={() => navigate("/signup")}>Sign Up to add to watchlist</button>
+                <button className="button primary" onClick={() => navigate("/signup")}>Sign Up to add to watchlist</button>
             }
         </div>
     );
@@ -165,6 +165,7 @@ export default function Media() {
                             <h2 className="film-title">{mediaData.name || mediaData.title}</h2>
                             <div className="relevant-info">
                                 <p>{facts}</p>
+                                <p>{mediaData.voteAverage} ({mediaData.voteCount} votes)</p>
                             </div>
                             {type === 'series' &&
                                 <div className="series-info">
