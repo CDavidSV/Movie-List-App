@@ -7,17 +7,14 @@ import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 
 const getFavorites = async (req: express.Request, res: express.Response) => {
-    const page = parseInt(req.query.page as string) || 1;
+    const last_id = req.query.last_id;
 
-    let skip = isNaN(page) ? 0 : (page - 1) * 500;
-    const count = await favoritesSchema.countDocuments({ user_id: req.user?.id }).then((count) => count).catch((err) => 0);
-    const pages = Math.ceil(count / 500);
-    page > pages ? skip = 0 : skip = skip;
+    let mongoQuery: any = { user_id: req.user?.id };
+    if (last_id) mongoQuery._id = { $lt: last_id };
+
     favoritesSchema.aggregate([
         {
-            $match: {
-                user_id: req.user?.id
-            }
+            $match: mongoQuery
         },
         {   
             $lookup: {
@@ -58,7 +55,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 as: 'watchlisted'
             }
         }
-    ]).skip(skip).limit(500).sort({ rank: 1 }).then((response) => {
+    ]).limit(100).sort({ rank: 1 }).then((response) => {
         const favorites = response.map((favorite) => {
             if (favorite.media.length < 1) return {
                 id: favorite._id,
@@ -88,7 +85,8 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
             }
         });
 
-        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { page, pages, favorites } });
+        const last_id = favorites.length > 0 ? favorites[favorites.length - 1].id : null;
+        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { last_id, favorites } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching favorites" });

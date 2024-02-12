@@ -136,7 +136,7 @@ export default function Watchlist() {
 
         setLoading(true);
         const status = tabsConfig[selectedTab].status;
-        mml_api_protected.get(`api/v1/watchlist?page=1&status=${status}`, {
+        mml_api_protected.get(`api/v1/watchlist?status=${status}`, {
             cancelToken: newSource.token
         }).then((response) => {
             setLoading(false);

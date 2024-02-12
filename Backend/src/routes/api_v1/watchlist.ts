@@ -15,21 +15,18 @@ const watchlistStatus = new Map([
 
 const getWatchlist = async (req: express.Request, res: express.Response) => {
     const status = req.query.status ? parseInt(req.query.status as string) : 3;
-    const page = parseInt(req.query.page as string) || 1;
+    const last_id = req.query.last_id;
 
-    if (status < 0 || status > 3) return sendResponse(res, { status: 400, message: "Invalid status" });
+    if (status < 0 || status > 3) return sendResponse(res, { status: 400, message: "Invalid status integer" });
 
-    let match: { user_id?: string, status?: number } = { user_id: req.user?.id, status: status };
+    let match: any = { user_id: req.user?.id, status: status };
     let sort: any = { updated_date: -1 };
     if (status === 3) { 
         match = { user_id: req.user?.id }
         sort = { status: 1, updated_date: -1 } 
     };
+    if (last_id) match._id = { $lt: last_id };
 
-    const count = await watchlistSchema.countDocuments({ user_id: req.user?.id }).then((count) => count).catch((err) => 0);
-    let pages = Math.ceil(count / 500);
-    let skip = isNaN(page) ? 0 : (page - 1) * 500;
-    page > pages ? skip = 0 : skip = skip;
     watchlistSchema.aggregate([
         {
             $match: match
@@ -73,7 +70,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 as: 'favorited'
             }
         }
-    ]).skip(skip).limit(500).sort(sort).then((result) => {
+    ]).limit(100).sort(sort).then((result) => {
         const watchlist = result.map((item) => {
             if (item.media.length < 1) return {
                 id: item._id,
@@ -109,7 +106,8 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
             }
         });
 
-        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: { page, pages, watchlist } });
+        const last_id = watchlist.length > 0 ? watchlist[watchlist.length - 1].id : null;
+        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: { last_id, watchlist } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching watchlist" });
