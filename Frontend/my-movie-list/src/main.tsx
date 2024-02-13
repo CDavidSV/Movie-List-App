@@ -9,7 +9,7 @@ import "./index.css";
 
 const Home = lazy(() => import('./pages/Home/Home'));
 const Movies = lazy(() => import('./pages/Movies/Movies'));
-const Shows = lazy(() => import('./pages/Shows/Shows'));
+const Series = lazy(() => import('./pages/Shows/Series'));
 const MyLists = lazy(() => import('./pages/MyLists/MyLists'));
 const Genres = lazy(() => import('./pages/Genres/Genres'));
 const Search = lazy(() => import('./pages/Search/Search'));
@@ -27,7 +27,7 @@ function App() {
   const showNavIn: string[] = [
     "/", 
     "/movies", 
-    "/shows", 
+    "/series", 
     "/my-lists", 
     "/genres/:genreName", 
     "/search", 
@@ -50,7 +50,7 @@ function App() {
           <Routes>
             <Route path="/" Component={Home}/>
             <Route path="/movies" Component={Movies}/>
-            <Route path="/shows" Component={Shows}/>
+            <Route path="/series" Component={Series}/>
             <Route path="/my-lists" Component={MyLists}/>
             <Route path="/genres/:genreName" Component={Genres}/>
             <Route path="/media/:type/:id" Component={Media}/>
@@ -71,11 +71,11 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <>
+  <React.StrictMode>
     <MediaDataProvider>
       <BrowserRouter>
         <App/>
       </BrowserRouter>
     </MediaDataProvider>
-  </>,
+  </React.StrictMode>,
 )

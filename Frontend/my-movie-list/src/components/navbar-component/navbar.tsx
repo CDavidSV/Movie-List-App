@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import defaultPfp from '../../assets/images/profile-default.png';
 import Logo from '../../assets/logos/mml_logo.svg?react';
 import LogoWithName from '../../assets/logos/mml_logo_with_name.svg?react';
-import onRouteChange from '../../hooks/onRouteChange';
+import useRouteChange from '../../hooks/useRouteChange';
 import { getSessionData, isLoggedIn, logOut, SessionData } from '../../helpers/session.helpers';
 import './navbar.css';
 
@@ -38,7 +38,7 @@ function useDropdown(onMenuStateChange: (isOpen: boolean) => void) {
     }, []);
 
     // Hook to detect when the user changes the route to close the dropdown menu
-    onRouteChange(() => setMenuState(false));
+    useRouteChange(() => setMenuState(false));
 
     return { node, menuState, toggleMenu };
 }
@@ -187,8 +187,8 @@ export default function Navbar() {
                         <NavLink to="/movies" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
                             <p>Movies</p>
                         </NavLink>
-                        <NavLink to="/shows" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
-                            <p>Shows</p>
+                        <NavLink to="/series" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
+                            <p>Series</p>
                         </NavLink>
                         <GenresDropdown handleMenuStateChange={handleMenuStateChange}/>
                     </div>

@@ -315,6 +315,12 @@ button:disabled {
     aspect-ratio: 16 / 9;
 }
 
+.movies-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
 .spinning-loader {
     height: 100%;
     aspect-ratio: 1;

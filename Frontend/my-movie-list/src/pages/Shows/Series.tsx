@@ -4,15 +4,15 @@ import { getSavedItems } from "../../helpers/util.helpers";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 
-export default function Movies() {
+export default function Series() {
     const [movies, setMovies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
 
-    const getMovies = (page: number) => {
+    const getShows = (page: number) => {
         setLoading(true);
 
-        mml_api.get(`api/v1/media/movies/popular?page=${page}`).then((response) => {
+        mml_api.get(`api/v1/media/series/popular?page=${page}`).then((response) => {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), (films: any) => {
                 setMovies([...movies, ...films]);
                 setLoading(false);
@@ -23,14 +23,14 @@ export default function Movies() {
     useInfiniteScroll(() => setPage(page + 1), loading);
 
     useEffect(() => {
-        getMovies(page);
+        getShows(page);
     }, [page]);
 
     return (
         <div className="content">
             <div className="page-title-container">
-                <span style={{fontSize: "2rem"}} className="material-icons icon">movie</span>
-                <h1>Movies</h1>
+                <span style={{fontSize: "2rem"}} className="material-icons icon">live_tv</span>
+                <h1>Series</h1>
             </div>
             <div className="content-wrapper">
                 <div className="movies-container">

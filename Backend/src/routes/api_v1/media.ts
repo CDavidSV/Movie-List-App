@@ -1,9 +1,7 @@
 import express from 'express';
 import { sendResponse } from '../../util/apiHandler';
 import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle } from '../../util/TMDB';
-import watchlistSchema from '../../scheemas/watchlistSchema';
 import Movie from '../../Models/Movie';
-import favoritesSchema from '../../scheemas/favoritesSchema';
 import Series from '../../Models/Series';
 import config from '../../config/config';
 
@@ -67,7 +65,20 @@ const getNowPlayingMovies = async (req: express.Request, res: express.Response) 
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching movies" });
     });
-}
+};
+
+const getPopularSeries = async (req: express.Request, res: express.Response) => {
+    const page = req.query.page || 1;
+
+    fetchMedia("tv", "popular", page as number).then((response) => {
+        if (!response) return sendResponse(res, { status: 500, message: "Error fetching shows" });
+
+        sendResponse(res, { status: 200, message: "Shows fetched successfully", responsePayload: response });
+    }).catch((err) => {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching shows" });
+    });
+};
 
 const searchByTitle = async (req: express.Request, res: express.Response) => {
     const title = req.query.title;
@@ -108,4 +119,12 @@ const getMediaById = async (req: express.Request, res: express.Response) => {
     }
 };
 
-export { getPopularMovies, getUpcomingMovies, searchByTitle, getTopRatedMovies, getNowPlayingMovies, getMediaById };
+export { 
+    getPopularMovies, 
+    getUpcomingMovies, 
+    searchByTitle, 
+    getTopRatedMovies, 
+    getNowPlayingMovies, 
+    getMediaById,
+    getPopularSeries
+};

@@ -40,7 +40,7 @@ const makeRequest = async (url: string) => {
  * @returns 
  */
 const fetchMedia  = async (type: string, url: string, page: number) => {
-    if (type !== "movie" && type !== "series") throw new Error("Invalid media type");
+    if (type !== "movie" && type !== "tv") throw new Error("Invalid media type");
 
     try {
         const response = await axios({
