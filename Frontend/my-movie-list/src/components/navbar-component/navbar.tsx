@@ -62,7 +62,7 @@ function GenresDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpen
             <div className={menuState ? "dropdown genre-dropdown select-active" : "dropdown genre-dropdown"}>
                 {genres.map((genre) => (
                     <li key={genre} className="menu-item">
-                        <NavLink className={({isActive}) => isActive ? "menu-item-title selected" : "menu-item-title"} to="/genres">{genre}</NavLink>
+                        <NavLink className={({isActive}) => isActive ? "menu-item-title selected" : "menu-item-title"} to={`/genres/${genre}`}>{genre}</NavLink>
                     </li>
                 ))}
             </div>

@@ -18,10 +18,10 @@ interface CustomMediaResponse {
     votes: number;
 }
 
-const makeRequest = async (url: string) => {
+const makeTMDBRequest = async (url: string) => {
     return await axios({
         method: 'get',
-        url: url,
+        url: `https://api.themoviedb.org/3/${url}`,
         headers: {
             "Authorization": "Bearer " + tmdb_token,
             "Content-Type": "application/json"
@@ -43,18 +43,11 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
     if (type !== "movie" && type !== "tv") throw new Error("Invalid media type");
 
     try {
-        const response = await axios({
-            method: 'get',
-            url: `https://api.themoviedb.org/3/${type}/${url}?language=en-US&page=${page}`,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${tmdb_token}`
-            }
-        });
+        const response = await makeTMDBRequest(`/${type}/${url}?language=en-US&page=${page}`);
         
         let media: CustomMediaResponse[] = [];
         if (type === "movie") {
-            media = response.data.results.map((item: any) => {
+            media = response.results.map((item: any) => {
                 return {
                     id: item.id,
                     title: item.title,
@@ -72,7 +65,7 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
         }
 
         // If the type is series
-        media = response.data.results.map((item: any) => {
+        media = response.results.map((item: any) => {
             return {
                 id: item.id,
                 title: item.name,
@@ -95,25 +88,11 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
 
 const findMediaByTitle = async (title: string) => {
     const [ moviesResponse, seriesResponse ] = await Promise.all([
-        axios({
-            method: 'get',
-            url: `https://api.themoviedb.org/3/search/movie?query=${title}&include_adult=false&language=en-US&page=1`,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${tmdb_token}`
-            }
-        }),
-        axios({
-            method: 'get',
-            url: `https://api.themoviedb.org/3/search/tv?query=${title}&include_adult=false&language=en-US&page=1`,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${tmdb_token}`
-            }
-        })
+        makeTMDBRequest(`/search/movie?query=${title}&include_adult=false&language=en-US&page=1`),
+        makeTMDBRequest(`/search/tv?query=${title}&include_adult=false&language=en-US&page=1`)
     ]);
     const media: CustomMediaResponse[] = [];
-    moviesResponse.data.results.forEach((movie: any) => {
+    moviesResponse.results.forEach((movie: any) => {
         if (movie.poster_path && movie.title) {
             media.push({
                 id: movie.id,
@@ -128,7 +107,7 @@ const findMediaByTitle = async (title: string) => {
             });
         };
     });
-    seriesResponse.data.results.forEach((movie: any) => {
+    seriesResponse.results.forEach((movie: any) => {
         if (movie.poster_path && movie.name) {
             media.push({
                 id: movie.id,
@@ -163,14 +142,14 @@ const findMediaById = async (id: string, type: string, append?: string[]): Promi
 
     try {
         if (type === "movie") {
-            const data = await makeRequest(`https://api.themoviedb.org/3/movie/${id}${appendString}&language=en-US`);
+            const data = await makeTMDBRequest(`/movie/${id}${appendString}&language=en-US`);
             if (!data) return null;
 
             const movie = new Movie(data);
             saveMovie(movie, type);
             return movie;
         } else if (type === "series") {
-            const data = await makeRequest(`https://api.themoviedb.org/3/tv/${id}${appendString}&language=en-US`);
+            const data = await makeTMDBRequest(`/tv/${id}${appendString}&language=en-US`);
             if (!data) return null;
 
             const series = new Series(data);
@@ -185,14 +164,42 @@ const findMediaById = async (id: string, type: string, append?: string[]): Promi
     }
 };
 
+const fetchMediaByGenre = async (type: string, genreId: number, page: number) => {
+    if (!isValidMediaType(type, true)) type = "movie"; // Default to movie if the type is invalid
+
+    const tmdbType = type === "series" ? "tv" : "movie";
+    try {
+        const response = await makeTMDBRequest(`/discover/${tmdbType}?with_genres=${genreId}&page=${page}&include_adult=false&include_video=false&language=en-US&sort_by=popularity.desc`);
+        if (!response) return null;
+
+        const media = response.results.map((item: any) => {
+            return {
+                id: item.id,
+                title: item.title || item.name,
+                description: item.overview,
+                posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                type: type,
+                releaseDate: item.release_date,
+                voteAverage: item.vote_average,
+                votes: item.vote_count
+            } as CustomMediaResponse
+        });
+
+        return media;
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+};
+
 /**
  * 
  * @param type Valid types are "movie" and "series"
  * @returns boolean value indicating whether the type is valid or not
  */
-const isValidMediaType = (type: string): boolean => {
-    if (type === "movie" || type === "series") return true;
-    return false;
+const isValidMediaType = (type: string, acceptBoth: boolean = false): boolean => {
+    return type === "movie" || type === "series" || (acceptBoth && type === 'both');
 }
 
-export { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle };
+export { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMediaByGenre };

@@ -9,6 +9,7 @@ import PersonCard from "../../components/person-card-component/person-card";
 import { isLoggedIn } from "../../helpers/session.helpers";
 import FilmSlider from "../../components/film-slider-component/filmSlider";
 import { MediaDataContext } from "../../contexts/FilmDataContext";
+import PageNotFound from "../PageNotFound/PageNotFound";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -127,8 +128,6 @@ export default function Media() {
     const getMediaData = useContext(MediaDataContext);
     const navigate = useNavigate();
 
-    if (!type || !id || (type !== 'movie' && type !== 'series')) navigate("/");
-
     useEffect(() => {
         // Fetch media data based on type
         getMediaData(id as string, type as string).then((data) => {
@@ -151,6 +150,8 @@ export default function Media() {
             window.scrollTo(0, 0);
         });
     }, [navigate]);
+
+    if (!type || !id || (type !== 'movie' && type !== 'series')) return <PageNotFound />;
 
     return (
         <div className="content">
