@@ -6,7 +6,7 @@ import { getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchl
 import { getHistory, addHistory, removeHistory, clearHistory } from "./history";
 import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMoviesByGenre } from "./media";
 import requireUser from "../../middlewares/requireUser";
-import { hasMedia, getStatusInPersonalLists } from "./user";
+import { hasMedia, getStatusInPersonalLists, getMeUserInfo } from "./user";
 
 const router: express.Router = express.Router();
 
@@ -29,7 +29,7 @@ router.delete('list/:id/remove', requireUser, () => { });
 router.post('list/:id/reorder', requireUser, () => { });
 
 // User routes
-router.get("/me", requireUser, () => { });
+router.get("/me", requireUser, getMeUserInfo);
 router.get("/user", requireUser, () => { });
 router.post("/user/in-personal-lists", requireUser, hasMedia);
 router.get("/user/status-in-personal-lists", getStatusInPersonalLists);

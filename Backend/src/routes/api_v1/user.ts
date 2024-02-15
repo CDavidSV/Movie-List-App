@@ -4,11 +4,34 @@ import watchlistSchema from "../../scheemas/watchlistSchema";
 import favoritesSchema from "../../scheemas/favoritesSchema";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import Series from "../../Models/Series";
+import userSchema from "../../scheemas/userSchema";
 
 interface RequestMedia {
     media_id: number;
     type: string;
 }
+
+const getMeUserInfo = async (req: Request, res: Response) => {
+    userSchema.findOne({ _id: req.user!.id }).then(user => {
+        if (!user) return sendResponse(res, { status: 404, message: "User not found" });
+
+        sendResponse(res, 
+            { 
+                status: 200, 
+                message: "User fetched successfully", 
+                responsePayload: {
+                    id: user._id,
+                    username: user.username,
+                    email: user.email,
+                    verified: user.verified
+                } 
+            }
+        );
+    }).catch(err => {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching user info" });
+    });
+};
 
 const hasMedia = async (req: Request, res: Response) => {
     const reqMedia = req.body as unknown as RequestMedia[];
@@ -16,7 +39,6 @@ const hasMedia = async (req: Request, res: Response) => {
 
     // TODO: Validate the request body
     // Validate the request body
-
 
     try {
         const idList = reqMedia.map((i) => i.media_id.toString());
@@ -90,4 +112,4 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
     }
 };
 
-export { hasMedia, getStatusInPersonalLists };
+export { hasMedia, getStatusInPersonalLists, getMeUserInfo };
