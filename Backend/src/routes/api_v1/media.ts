@@ -31,53 +31,37 @@ const getPopularMovies = async (req: express.Request, res: express.Response) => 
 const getUpcomingMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
 
-    fetchMedia("movie", "upcoming", page as number).then((response) => {
-        if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
+    const response = await fetchMedia("movie", "upcoming", page as number);
+    if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
-        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
-    }).catch((err) => {
-        console.error(err);
-        sendResponse(res, { status: 500, message: "Error fetching movies" });
-    });
+    sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
 };
 
 const getTopRatedMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
 
-    fetchMedia("movie", "top_rated", page as number).then((response) => {
-        if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
+    const response = await fetchMedia("movie", "top_rated", page as number);
+    if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
-        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
-    }).catch((err) => {
-        console.error(err);
-        sendResponse(res, { status: 500, message: "Error fetching movies" });
-    });
+    sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
 };
 
 const getNowPlayingMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
 
-    fetchMedia("movie", "now_playing", page as number).then((response) => {
-        if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
+    const response = await fetchMedia("movie", "now_playing", page as number);
+    if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
-        sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
-    }).catch((err) => {
-        console.error(err);
-        sendResponse(res, { status: 500, message: "Error fetching movies" });
-    });
+    sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
 };
 
 const getPopularSeries = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
 
-    fetchMedia("tv", "popular", page as number).then((response) => {
-        if (!response) return sendResponse(res, { status: 500, message: "Error fetching shows" });
+    const response = await fetchMedia("tv", "popular", page as number);
+    if (!response) return sendResponse(res, { status: 500, message: "Error fetching series" });
 
-        sendResponse(res, { status: 200, message: "Shows fetched successfully", responsePayload: response });
-    }).catch((err) => {
-        console.error(err);
-        sendResponse(res, { status: 500, message: "Error fetching shows" });
-    });
+    sendResponse(res, { status: 200, message: "Series fetched successfully", responsePayload: response });
 };
 
 const searchByTitle = async (req: express.Request, res: express.Response) => {

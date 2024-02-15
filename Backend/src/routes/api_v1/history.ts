@@ -6,17 +6,14 @@ import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 
 const getHistory = async (req: Request, res: Response) => {
-    const page = parseInt(req.query.page as string) || 1;
-    let skip = isNaN(page) ? 0 : (page - 1) * 500;
+    const last_id = req.query.last_id as string;
 
-    const count = await historySchema.countDocuments({ user_id: req.user?.id }).then((count) => count).catch((err) => 0);
-    const pages = Math.ceil(count / 500);
-    page > pages ? skip = 0 : skip = skip;
+    const matchStr: any = { user_id: req.user?.id };
+    if (last_id) matchStr._id = { $lt: last_id };
+
     historySchema.aggregate([
         {
-            $match: {
-                user_id: req.user?.id
-            }
+            $match: matchStr
         },
         {   
             $lookup: {
@@ -77,7 +74,7 @@ const getHistory = async (req: Request, res: Response) => {
                 as: 'favorited'
             }
         }
-    ]).skip(skip).limit(500).sort({ rank: 1 }).then((response) => {
+    ]).limit(100).sort({ rank: 1 }).then((response) => {
         const favorites = response.map((item) => {
             if (item.media.length < 1) return {
                 id: item._id,
@@ -109,7 +106,8 @@ const getHistory = async (req: Request, res: Response) => {
             }
         });
 
-        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { page, pages, favorites } })
+        const last_id = favorites.length > 0 ? favorites[favorites.length - 1].id : null;
+        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { last_id, favorites } })
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching favorites" });
