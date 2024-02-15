@@ -4,7 +4,7 @@ import express from "express";
 import { addFavorite, getFavorites, removeFavorite, reorderFavorites } from "./favorites";
 import { getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchlist";
 import { getHistory, addHistory, removeHistory, clearHistory } from "./history";
-import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMediaByGenre } from "./media";
+import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMoviesByGenre } from "./media";
 import requireUser from "../../middlewares/requireUser";
 import { hasMedia, getStatusInPersonalLists } from "./user";
 
@@ -47,7 +47,7 @@ router.get('/media/series/popular', getPopularSeries);
 router.get('/media/series/top-rated', () => { });
 router.get('/media/series/upcoming', () => { });
 router.get("/media/search", searchByTitle);
-router.get("/media/genres", getMediaByGenre);
+router.get("/media/movies/genres", getMoviesByGenre);
 
 // History routes
 router.get("/history", requireUser, getHistory);

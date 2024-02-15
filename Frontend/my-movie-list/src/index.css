@@ -321,6 +321,17 @@ button:disabled {
     flex-wrap: wrap;
 }
 
+.flex-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px 15px;
+    gap: 10px;
+}
+
 .spinning-loader {
     height: 100%;
     aspect-ratio: 1;

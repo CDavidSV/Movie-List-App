@@ -1,6 +1,6 @@
 import express from 'express';
 import { sendResponse } from '../../util/apiHandler';
-import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMediaByGenre } from '../../util/TMDB';
+import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre } from '../../util/TMDB';
 import Movie from '../../Models/Movie';
 import Series from '../../Models/Series';
 import config from '../../config/config';
@@ -119,18 +119,16 @@ const getMediaById = async (req: express.Request, res: express.Response) => {
     }
 };
 
-const getMediaByGenre = async (req: express.Request, res: express.Response) => {
+const getMoviesByGenre = async (req: express.Request, res: express.Response) => {
     const { name } = req.query;
-    let { type } = req.query;
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
 
-    if (!name || !type) return sendResponse(res, { status: 400, message: "Missing query parameters" });
-    if (!isValidMediaType(type as string)) return sendResponse(res, { status: 400, message: "Invalid type" });
+    if (!name) return sendResponse(res, { status: 400, message: "Missing query parameters" });
 
     // First get the genre id based on the type of media
     let genreObj;
     try {
-        const genreResponse = await makeTMDBRequest(`/genre/${type}/list`);
+        const genreResponse = await makeTMDBRequest(`/genre/movie/list`);
 
         genreObj = genreResponse.genres.find((genre: any) => {
             if (typeof name === 'string') {
@@ -146,7 +144,7 @@ const getMediaByGenre = async (req: express.Request, res: express.Response) => {
     const genreId = genreObj.id;
 
     // Get list of media by genre
-    const mediaResponse = await fetchMediaByGenre(type as string, genreId, page as number);
+    const mediaResponse = await fetchMoviesByGenre(genreId, page as number);
     if (!mediaResponse) return sendResponse(res, { status: 500, message: "Error fetching media" });
 
     sendResponse(res, { status: 200, message: "Media fetched successfully", responsePayload: mediaResponse });
@@ -160,5 +158,5 @@ export {
     getNowPlayingMovies, 
     getMediaById,
     getPopularSeries,
-    getMediaByGenre
+    getMoviesByGenre
 };

@@ -4,17 +4,21 @@ import PageNotFound from "../PageNotFound/PageNotFound";
 import { mml_api } from "../../axios/mml_api_intances";
 import { getSavedItems } from "../../helpers/util.helpers";
 import FilmCard from "../../components/film-card-component/filmCard";
+import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 
 export default function Genres() {
     const { genreName } = useParams<{ genreName: string }>();
     const [media, setMedia] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [page, setPage] = useState<number>(1);
     const navigate = useNavigate();
 
     useEffect(() => {
+        setPage(1);
         setMedia([]);
         setLoading(true);
-        mml_api.get(`api/v1/media/genres?name=${genreName}&type=movie`).then((response) => {
+        
+        mml_api.get(`api/v1/media/movies/genres?name=${genreName}`).then((response) => {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), (films: any) => {
                 setMedia(films);
                 setLoading(false);
@@ -22,9 +26,21 @@ export default function Genres() {
         });
     }, [navigate]);
 
-    const getMediaByGenre = (page: number) => {
-        
-    };
+
+    const getNextPage = () => {
+        const nextPage = page + 1;
+
+        setLoading(true);
+        mml_api.get(`api/v1/media/movies/genres?name=${genreName}&page=${nextPage}`).then((response) => {
+            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), (films: any) => {
+                setMedia([...media, ...films]);
+                setPage(nextPage);
+                setLoading(false);
+            });
+        });
+    }
+
+    useInfiniteScroll(() => getNextPage(), loading);
 
     if (!genreName) return <PageNotFound />;
 

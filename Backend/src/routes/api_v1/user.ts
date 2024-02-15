@@ -63,6 +63,8 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
             findMediaById(media_id as string, type as string)
         ]);
 
+        if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
+
         const status: any = { favorite: null, watchlist: null };
         if (watchlistItem) {
             status.watchlist = {

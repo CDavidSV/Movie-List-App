@@ -29,7 +29,7 @@ const makeTMDBRequest = async (url: string) => {
     }).then((response) => {
         return response.data;
     }).catch((err) => {
-        console.error(err);
+        console.error(`Failed to make TMDB request to ${url}:`.red, err);
         return null;
     })
 };
@@ -42,48 +42,43 @@ const makeTMDBRequest = async (url: string) => {
 const fetchMedia  = async (type: string, url: string, page: number) => {
     if (type !== "movie" && type !== "tv") throw new Error("Invalid media type");
 
-    try {
-        const response = await makeTMDBRequest(`/${type}/${url}?language=en-US&page=${page}`);
-        
-        let media: CustomMediaResponse[] = [];
-        if (type === "movie") {
-            media = response.results.map((item: any) => {
-                return {
-                    id: item.id,
-                    title: item.title,
-                    description: item.overview,
-                    posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                    backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                    type: "movie",
-                    releaseDate: item.release_date,
-                    voteAverage: item.vote_average,
-                    votes: item.vote_count
-                } as CustomMediaResponse
-            });
-
-            return media;
-        }
-
-        // If the type is series
+    const response = await makeTMDBRequest(`/${type}/${url}?language=en-US&page=${page}`);
+    if (!response) return null;
+    
+    let media: CustomMediaResponse[] = [];
+    if (type === "movie") {
         media = response.results.map((item: any) => {
             return {
                 id: item.id,
-                title: item.name,
+                title: item.title,
                 description: item.overview,
                 posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
                 backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                type: "series",
-                releaseDate: item.first_air_date, // release_date is first_air_date for series
+                type: "movie",
+                releaseDate: item.release_date,
                 voteAverage: item.vote_average,
                 votes: item.vote_count
             } as CustomMediaResponse
         });
-        return media;
 
-    } catch (err) {
-        console.error(err);
-        return null;
+        return media;
     }
+
+    // If the type is series
+    media = response.results.map((item: any) => {
+        return {
+            id: item.id,
+            title: item.name,
+            description: item.overview,
+            posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+            backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+            type: "series",
+            releaseDate: item.first_air_date, // release_date is first_air_date for series
+            voteAverage: item.vote_average,
+            votes: item.vote_count
+        } as CustomMediaResponse
+    });
+    return media;
 };
 
 const findMediaByTitle = async (title: string) => {
@@ -91,6 +86,8 @@ const findMediaByTitle = async (title: string) => {
         makeTMDBRequest(`/search/movie?query=${title}&include_adult=false&language=en-US&page=1`),
         makeTMDBRequest(`/search/tv?query=${title}&include_adult=false&language=en-US&page=1`)
     ]);
+    if (!moviesResponse || !seriesResponse) return null;
+
     const media: CustomMediaResponse[] = [];
     moviesResponse.results.forEach((movie: any) => {
         if (movie.poster_path && movie.title) {
@@ -140,57 +137,44 @@ const findMediaById = async (id: string, type: string, append?: string[]): Promi
         appendString = filteredAppendStrings.length > 0 ? `?append_to_response=${filteredAppendStrings.join(",")}` : "";
     }
 
-    try {
-        if (type === "movie") {
-            const data = await makeTMDBRequest(`/movie/${id}${appendString}&language=en-US`);
-            if (!data) return null;
+    if (type === "movie") {
+        const data = await makeTMDBRequest(`/movie/${id}${appendString}&language=en-US`);
+        if (!data) return null;
 
-            const movie = new Movie(data);
-            saveMovie(movie, type);
-            return movie;
-        } else if (type === "series") {
-            const data = await makeTMDBRequest(`/tv/${id}${appendString}&language=en-US`);
-            if (!data) return null;
+        const movie = new Movie(data);
+        saveMovie(movie, type);
+        return movie;
+    } else if (type === "series") {
+        const data = await makeTMDBRequest(`/tv/${id}${appendString}&language=en-US`);
+        if (!data) return null;
 
-            const series = new Series(data);
-            saveMovie(series, type);
-            return series;
-        } else {
-            return null;
-        }
-    } catch (err) {
-        console.error(err);
+        const series = new Series(data);
+        saveMovie(series, type);
+        return series;
+    } else {
         return null;
     }
 };
 
-const fetchMediaByGenre = async (type: string, genreId: number, page: number) => {
-    if (!isValidMediaType(type, true)) type = "movie"; // Default to movie if the type is invalid
+const fetchMoviesByGenre = async (genreId: number, page: number) => {
+    const response = await makeTMDBRequest(`/discover/movie?with_genres=${genreId}&page=${page}&include_adult=false&include_video=false&language=en-US&sort_by=popularity.desc`);
+    if (!response) return null;
 
-    const tmdbType = type === "series" ? "tv" : "movie";
-    try {
-        const response = await makeTMDBRequest(`/discover/${tmdbType}?with_genres=${genreId}&page=${page}&include_adult=false&include_video=false&language=en-US&sort_by=popularity.desc`);
-        if (!response) return null;
+    const media = response.results.map((item: any) => {
+        if (!item.poster_path || !item.title) return null;
+        return {
+            id: item.id,
+            title: item.title,
+            description: item.overview,
+            posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+            backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+            releaseDate: item.release_date,
+            voteAverage: item.vote_average,
+            votes: item.vote_count
+        } as CustomMediaResponse
+    });
 
-        const media = response.results.map((item: any) => {
-            return {
-                id: item.id,
-                title: item.title || item.name,
-                description: item.overview,
-                posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                type: type,
-                releaseDate: item.release_date,
-                voteAverage: item.vote_average,
-                votes: item.vote_count
-            } as CustomMediaResponse
-        });
-
-        return media;
-    } catch (err) {
-        console.error(err);
-        return null;
-    }
+    return media;
 };
 
 /**
@@ -202,4 +186,11 @@ const isValidMediaType = (type: string, acceptBoth: boolean = false): boolean =>
     return type === "movie" || type === "series" || (acceptBoth && type === 'both');
 }
 
-export { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMediaByGenre };
+export { 
+    findMediaById, 
+    isValidMediaType, 
+    fetchMedia, 
+    findMediaByTitle, 
+    makeTMDBRequest, 
+    fetchMoviesByGenre 
+};
