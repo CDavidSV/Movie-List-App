@@ -79,6 +79,8 @@ export default function Browse() {
                     required={false} 
                     label="Search"
                     onInputChange={(value: string) => querySearchCooldown(value)}
+                    clearButton={true}
+                    autofocus={true}
                 />
             </div>
             <div style={{paddingTop: "130px"}} className="content-wrapper">

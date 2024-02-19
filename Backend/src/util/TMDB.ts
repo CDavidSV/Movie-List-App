@@ -165,6 +165,7 @@ const fetchMoviesByGenre = async (genreId: number, page: number) => {
         return {
             id: item.id,
             title: item.title,
+            type: "movie",
             description: item.overview,
             posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
             backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",

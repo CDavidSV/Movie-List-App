@@ -6,10 +6,10 @@ import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 
 const getHistory = async (req: Request, res: Response) => {
-    const last_id = req.query.last_id as string;
+    const last_updated_date = new Date(Number(req.query.last_updated_date));
 
     const matchStr: any = { user_id: req.user?.id };
-    if (last_id) matchStr._id = { $lt: last_id };
+    if (last_updated_date && !isNaN(last_updated_date.getTime())) matchStr.date_updated = { $lt: last_updated_date };
 
     historySchema.aggregate([
         {
@@ -74,18 +74,18 @@ const getHistory = async (req: Request, res: Response) => {
                 as: 'favorited'
             }
         }
-    ]).limit(100).sort({ rank: 1 }).then((response) => {
-        const favorites = response.map((item) => {
+    ]).limit(100).sort({ date_updated: -1 }).then((response) => {
+        const history = response.map((item) => {
             if (item.media.length < 1) return {
                 id: item._id,
                 media_id: item.media_id,
                 type: item.type,
-                date_updated: item.date_updated,
+                dateUpdated: item.date_updated,
                 title: "Untitled",
                 description: "No description available",
-                poster_url: "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                release_date: "NA",
+                posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                releaseDate: "NA",
                 runtime: 0,
                 watchlisted: item.watchlisted.length >= 1 ? true : false,
                 favorited: item.favorited.length >= 1 ? true : false
@@ -94,23 +94,23 @@ const getHistory = async (req: Request, res: Response) => {
                 id: item._id,
                 media_id: item.media_id,
                 type: item.type,
-                date_updated: item.date_updated,
+                dateUpdated: item.date_updated,
                 title: item.media[0].title,
                 description: item.media[0].description,
-                poster_url: item.media[0].poster_url ? `${config.tmdbPosterUrl}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdrop_url: item.media[0].backdrop_url ? `${config.tmdbPosterUrl}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                release_date: item.media[0].release_date ? item.media[0].release_date : "NA",
+                posterUrl: item.media[0].poster_url ? `${config.tmdbPosterUrl}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: item.media[0].backdrop_url ? `${config.tmdbPosterUrl}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                releaseate: item.media[0].release_date ? item.media[0].release_date : "NA",
                 runtime: item.media[0].runtime ? item.media[0].runtime : 0,
                 watchlisted: item.watchlisted.length >= 1 ? true : false,
                 favorited: item.favorited.length >= 1 ? true : false
             }
         });
 
-        const last_id = favorites.length > 0 ? favorites[favorites.length - 1].id : null;
-        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { last_id, favorites } })
+        const lastUpdatedDate = history.length > 0 ? new Date(history[history.length - 1].dateUpdated).getTime() : null;
+        sendResponse(res, { status: 200, message: "History fetched", responsePayload: { lastUpdatedDate, history } });
     }).catch((err) => {
         console.error(err);
-        sendResponse(res, { status: 500, message: "Error fetching favorites" });
+        sendResponse(res, { status: 500, message: "Error fetching history list" });
     });
 };
 

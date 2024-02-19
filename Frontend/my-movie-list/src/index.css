@@ -328,7 +328,7 @@ button:disabled {
     flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
-    padding: 10px 15px;
+    padding: 10px 0;
     gap: 10px;
 }
 

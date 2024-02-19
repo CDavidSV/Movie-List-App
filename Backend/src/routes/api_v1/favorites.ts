@@ -86,7 +86,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
         });
 
         const last_id = favorites.length > 0 ? favorites[favorites.length - 1].id : null;
-        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { last_id, favorites } });
+        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { lastId: last_id, favorites } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching favorites" });

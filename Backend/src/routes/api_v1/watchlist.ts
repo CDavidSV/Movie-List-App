@@ -107,7 +107,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
         });
 
         const last_id = watchlist.length > 0 ? watchlist[watchlist.length - 1].id : null;
-        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: { last_id, watchlist } });
+        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: { lastId: last_id, watchlist } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching watchlist" });

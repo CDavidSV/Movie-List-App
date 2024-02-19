@@ -1,13 +1,13 @@
 import express from "express";
-import { User } from "../Models/interfaces";
-import UserSchema from "../scheemas/userSchema";
-import { validateJsonBody } from "../util/validateJson";
-import hashPassword from "../util/hashPassword";
-import { generateNewAccessToken, verifyToken } from "../util/jwt";
+import { User } from "../../Models/interfaces";
+import UserSchema from "../../scheemas/userSchema";
+import { validateJsonBody } from "../../util/validateJson";
+import hashPassword from "../../util/hashPassword";
+import { generateNewAccessToken, verifyToken } from "../../util/jwt";
 import SHA256 from "crypto-js/sha256";
-import { createSession, invalidateSession } from "../util/sessionHandler";
-import config from "../config/config";
-import { sendResponse } from "../util/apiHandler";
+import { createSession, invalidateSession } from "../../util/sessionHandler";
+import config from "../../config/config";
+import { sendResponse } from "../../util/apiHandler";
 
 const registerUser = async (req: express.Request, res: express.Response) => {
     const { username, password, email, favorite_genres } = req.body;
@@ -41,7 +41,8 @@ const registerUser = async (req: express.Request, res: express.Response) => {
                 favorite_genres, 
                 verified: false, 
                 password_hash: hashResult.hashedPassword, 
-                password_salt: hashResult.salt 
+                password_salt: hashResult.salt,
+                joined_at: new Date()
             });
         
         // Create session.

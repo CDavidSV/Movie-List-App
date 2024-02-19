@@ -2,15 +2,11 @@ import express from "express";
 
 // Routes
 import apiV1 from "./api_v1/router";
-import { loginUser, registerUser, revokeSession, refreshToken } from "./auth";
+import auth from "./auth/router";
 
 const router: express.Router = express.Router();
 
 router.use('/api/v1', apiV1);
-
-router.post('/auth/register', registerUser);
-router.post('/auth/login', loginUser);
-router.post('/auth/logout', revokeSession);
-router.post('/auth/token', refreshToken)
+router.use('/auth', auth);
 
 export default router;

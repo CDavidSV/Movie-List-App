@@ -3,8 +3,8 @@ import "./inputField.css";
 import React from "react";
 
 export default function InputField(
-    { type, id, required, label, onInputChange, status, value }: 
-    { type: string, id: string, required: boolean, label: string, onInputChange: Function, status?: string, value?: string }) {
+    { type, id, required, label, onInputChange, status, value, clearButton, autofocus }: 
+    { type: string, id: string, required: boolean, label: string, onInputChange: (value: string) => void , status?: string, value?: string, clearButton?: boolean, autofocus?: boolean }) {
     const [showPassword, setShowPassword] = useState(false);
     const inputRef = React.createRef<HTMLInputElement>();
     let autocomplete: string = "off";
@@ -41,8 +41,15 @@ export default function InputField(
                     { showPassword ? "visibility" : "visibility_off"}
                 </span>
             }
-            {type === "text" && <span onClick={clearinput} className="material-icons">close</span>}
-            <input ref={inputRef} onChange={inputChangeEvent} type={showPassword ? "text" : type} id={id} required={required} value={value} autoComplete={autocomplete}/>
+            {clearButton && <span onClick={clearinput} style={{userSelect: "none"}} className="material-icons">close</span>}
+            <input 
+            ref={inputRef} 
+            onChange={inputChangeEvent} 
+            type={showPassword ? "text" : type} 
+            id={id} required={required} 
+            value={value} 
+            autoComplete={autocomplete}
+            autoFocus={autofocus ? autofocus : false}/>
             <label htmlFor={id}>{label}</label>
         </div>
     );

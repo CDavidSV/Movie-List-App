@@ -12,7 +12,7 @@ const main = async () => {
     await connectMongoDB(MONGO_URI);
 
     server.listen(port, () => {
-        console.log(`Server listening at http://localhost:${port}`.green);
+        console.log(`Server listening at http://localhost:${port}`);
     });
 };
 

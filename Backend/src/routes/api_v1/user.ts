@@ -23,7 +23,10 @@ const getMeUserInfo = async (req: Request, res: Response) => {
                     id: user._id,
                     username: user.username,
                     email: user.email,
-                    verified: user.verified
+                    verified: user.verified,
+                    joinedAt: user.joined_at,
+                    profileUrl: user.profile_picture_url,
+                    bannerUrl: user.profile_banner_url,
                 } 
             }
         );
@@ -112,4 +115,10 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
     }
 };
 
-export { hasMedia, getStatusInPersonalLists, getMeUserInfo };
+const uploadProfilePicture = async (req: Request, res: Response) => {
+    if (!req.file) return sendResponse(res, { status: 400, message: "Invalid request. No image provided" });
+
+    sendResponse(res, { status: 200, message: "Profile picture uploaded successfully", responsePayload: { imageUrl: req.file.path } });
+};
+
+export { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture };

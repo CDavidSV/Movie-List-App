@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import './filmCard.css';
 import { useRef } from 'react';
 import { shortenNumber, saveToHistory } from '../../helpers/util.helpers';
-import { isLoggedIn } from '../../helpers/session.helpers';
 import FavoriteButton from '../favorite-button-component/favorite-button';
 import WatchlistButton from '../watchlist-button-component/watchlist-button';
 
@@ -12,8 +11,8 @@ interface FilmCardData {
     posterUrl: string;
     title: string;
     releaseDate: string;
-    voteAverage: number;
-    votes: number;
+    voteAverage?: number;
+    votes?: number;
     description: string;
 }
 
@@ -59,8 +58,12 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
                     <div>
                         <h6>{filmData.title}</h6>
                         <div className="card-hover-info-content-vote">
-                            <p>{filmData.voteAverage ? filmData.voteAverage.toFixed(1) : 0}★</p>
-                            <p>({filmData.votes ? shortenNumber(filmData.votes) : 0})</p>
+                            {filmData.voteAverage && filmData.votes &&
+                                <>
+                                    <p>{filmData.voteAverage.toFixed(1)}★</p>
+                                    <p>({shortenNumber(filmData.votes)})</p>
+                                </>
+                            }
                         </div>
                         <div className="card-hover-info-content-description">
                             <p>{filmData.description}</p>
