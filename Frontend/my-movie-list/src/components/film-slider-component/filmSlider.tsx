@@ -2,8 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import FilmCard from '../film-card-component/filmCard';
 import './filmSlider.css';
 import FilmCardSkeleton from '../film-card-skeleton-component/film-card-skeleton';
+import type { FilmCardProps } from '../film-card-component/filmCard';
 
-export default function FilmSlider (props: {filmArr: any[], title?: string}) {
+interface FilmSliderProps {
+    filmArr: FilmCardProps[];
+    title?: string;
+}
+
+export default function FilmSlider (props: FilmSliderProps) {
     const slider = useRef<HTMLDivElement>(null);
     const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
     const [buttonStates, setButtonStates] = useState({ left: false, right: false });
@@ -76,16 +82,16 @@ export default function FilmSlider (props: {filmArr: any[], title?: string}) {
             <div ref={slider} className="slider">
                 {props.filmArr.length > 0 ? props.filmArr.map((movie) => (
                     <FilmCard 
-                        key={`${movie.id}.${movie.type}`} 
+                        key={`${movie.filmData.id}.${movie.filmData.type}`} 
                         filmData={{
-                            id: movie.id,
-                            type: movie.type,
-                            posterUrl: movie.posterUrl,
-                            title: movie.title,
-                            releaseDate: movie.releaseDate || movie.firstAirDate,
-                            voteAverage: movie.voteAverage,
-                            votes: movie.votes,
-                            description: movie.description         
+                            id: movie.filmData.id,
+                            type: movie.filmData.type,
+                            posterUrl: movie.filmData.posterUrl,
+                            title: movie.filmData.title,
+                            releaseDate: movie.filmData.releaseDate,
+                            voteAverage: movie.filmData.voteAverage,
+                            votes: movie.filmData.votes,
+                            description: movie.filmData.description         
                         }}
                         inWatchlist={movie.inWatchlist}
                         inFavorites={movie.inFavorites}

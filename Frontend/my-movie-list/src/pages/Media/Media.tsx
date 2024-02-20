@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { mml_api_protected } from "../../axios/mml_api_intances";
 import "./media.css";
-import { calculateMovieRuntime, saveToHistory, setWatchlist } from "../../helpers/util.helpers";
+import { calculateMovieRuntime, getSavedItems, saveToHistory, setWatchlist } from "../../helpers/util.helpers";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
 import PersonCard from "../../components/person-card-component/person-card";
@@ -10,6 +10,7 @@ import { isLoggedIn } from "../../helpers/session.helpers";
 import FilmSlider from "../../components/film-slider-component/filmSlider";
 import { MediaDataContext } from "../../contexts/FilmDataContext";
 import PageNotFound from "../PageNotFound/PageNotFound";
+import { FilmCardData, FilmCardProps } from "../../components/film-card-component/filmCard";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -124,6 +125,7 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
 export default function Media() {
     let { type, id } = useParams<{ type: string, id: string }>();
     const [mediaData, setMediaData] = useState<any>(null);
+    const [recommendations, setRecommendations] = useState<FilmCardProps[]>([]);
     const [facts, setFacts] = useState<string>("");
     const getMediaData = useContext(MediaDataContext);
     const navigate = useNavigate();
@@ -131,9 +133,29 @@ export default function Media() {
     useEffect(() => {
         // Fetch media data based on type
         getMediaData(id as string, type as string).then((data) => {
-            console.log(data);
             const mediaData = data;
             setMediaData(data);
+
+            getSavedItems(mediaData.recommendations, mediaData.recommendations.map((film: any) => film.id), (films: any) => {
+                mediaData.recommendations = films.map((recommendation: any) => {
+                    return {
+                        filmData: {
+                            id: recommendation.id,
+                            type: recommendation.type,
+                            posterUrl: recommendation.posterUrl,
+                            title: recommendation.title,
+                            releaseDate: recommendation.releaseDate,
+                            voteAverage: recommendation.voteAverage,
+                            votes: recommendation.votes,
+                            description: recommendation.description
+                        } as FilmCardData,
+                        inWatchlist: recommendation.inWatchlist,
+                        inFavorites: recommendation.inFavorites,
+                        searchResult: false
+                    } as FilmCardProps;
+                });
+                setRecommendations(mediaData.recommendations);
+            });
 
             // Set the page title
             document.title = `${mediaData.name || mediaData.title} - My Movie List`;
@@ -291,7 +313,7 @@ export default function Media() {
                         {mediaData.recommendations.length > 0 &&
                             <>
                                 <h3>Recommended</h3>
-                                <FilmSlider key={`${mediaData.id}.${mediaData.type}`} filmArr={mediaData.recommendations}/>
+                                <FilmSlider key={`${mediaData.id}.${mediaData.type}`} filmArr={recommendations}/>
                             </>}
                     </div>
                 </div>

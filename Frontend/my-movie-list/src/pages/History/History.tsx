@@ -3,11 +3,13 @@ import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { mml_api_protected } from "../../axios/mml_api_intances";
 import NotFound from "../../components/not-found-component/not-found";
+import Modal from "../../components/modal-component/modal";
 
 export default function History() {
     const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [lastUpdatedDate, setLastUpdatedDate] = useState<string | null>(null);
+    const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
         document.title = "My Movie List - History";
@@ -35,17 +37,27 @@ export default function History() {
         mml_api_protected.delete('/api/v1/history/clear').then(() => {
             setHistory([]);
         });
+        setModalOpen(false);
     }
-
+ 
     return (
         <div className="content">
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+                <div>
+                    <h3 style={{textAlign: "center"}}>Are you sure you want to clear your history?</h3>
+                    <div className="modal-buttons">
+                        <button className="button" onClick={() => setModalOpen(false)}>Cancel</button>
+                        <button className="button primary" onClick={clearHistory}>Yes</button>
+                    </div>
+                </div>
+            </Modal>
             <div className="page-title-container">
                 <span style={{fontSize: "2rem"}} className="material-icons icon">history</span>
                 <h1>History</h1>
             </div>
             <div className="content-wrapper">
                 <div className="flex-container">
-                    <button className="button" onClick={clearHistory}>
+                    <button className="button" onClick={() => setModalOpen(true)}>
                         Clear History
                     </button>
                 </div>

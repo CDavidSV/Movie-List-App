@@ -30,7 +30,7 @@ const shortenNumber = (num: number) => {
     return shortenedNumStr;
 };
 
-const getSavedItems = (films: any[], ids: string[], callback: Function) => {
+const getSavedItems = (films: any[], ids: string[], callback: (films: any) => void) => {
     // Check first if the user is logged in
     if (!isLoggedIn()) return callback(films);
 

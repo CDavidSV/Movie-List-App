@@ -96,3 +96,5 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
         </div>
     );
 }
+
+export type { FilmCardData, FilmCardProps };
