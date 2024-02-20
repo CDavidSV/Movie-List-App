@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import './filmCard.css';
 import { useRef } from 'react';
-import { shortenNumber, saveToHistory } from '../../helpers/util.helpers';
+import { shortenNumber, saveSearchResult } from '../../helpers/util.helpers';
 import FavoriteButton from '../favorite-button-component/favorite-button';
 import WatchlistButton from '../watchlist-button-component/watchlist-button';
 
@@ -38,9 +38,18 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
         hoverContentRef.current?.classList.remove("active");
     }
 
+    const saveSearch = () => {
+        if (!searchResult) return;
+
+        saveSearchResult(filmData.title, filmData.id.toString(), filmData.type, `/media/${filmData.type}/${filmData.id}`)
+    }
+
     return (
         <div onMouseEnter={activateHover} onMouseOut={deactivateHover} className="film-card">
-            <Link onClick={() => saveToHistory(filmData.title, filmData.id.toString(), filmData.type, searchResult)} to={`/media/${filmData.type}/${filmData.id}`} className="card-anchor">
+            <Link 
+            onClick={saveSearch}
+            onAuxClick={saveSearch}
+            to={`/media/${filmData.type}/${filmData.id}`} className="card-anchor">
                 <figure className="poster-image-figure">
                     <img loading="lazy" src={filmData.posterUrl} alt={filmData.title}/>
                 </figure>
@@ -53,7 +62,8 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
                 <div className="card-hover-info-content">
                     <Link
                         className="media-link" 
-                        onClick={() => saveToHistory(filmData.title, filmData.id.toString(), filmData.type, searchResult)} 
+                        onClick={saveSearch}
+                        onAuxClick={saveSearch}
                         to={`/media/${filmData.type}/${filmData.id}`}/>
                     <div>
                         <h6>{filmData.title}</h6>

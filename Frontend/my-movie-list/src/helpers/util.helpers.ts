@@ -131,11 +131,7 @@ const clearSearchResultsHistory = () => {
     localStorage.removeItem('searchResultsHistory');
 };
 
-const saveToHistory = (title: string, id: string, type: string, searchResult: boolean = false) => {
-    if (searchResult) {
-        saveSearchResult(title, id, type, `/media/${type}/${id}`);
-    };
-
+const saveToHistory = (id: string, type: string) => {
     // Save the selected film to the users history
     if (!isLoggedIn()) return;
 

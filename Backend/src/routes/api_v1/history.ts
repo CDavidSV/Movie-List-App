@@ -15,6 +15,9 @@ const getHistory = async (req: Request, res: Response) => {
         {
             $match: matchStr
         },
+        {
+            $sort: { date_updated: -1 }
+        },
         {   
             $lookup: {
                 from: 'media',
@@ -74,7 +77,7 @@ const getHistory = async (req: Request, res: Response) => {
                 as: 'favorited'
             }
         }
-    ]).limit(100).sort({ date_updated: -1 }).then((response) => {
+    ]).limit(100).then((response) => {
         const history = response.map((item) => {
             if (item.media.length < 1) return {
                 id: item._id,

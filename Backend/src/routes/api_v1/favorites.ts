@@ -16,6 +16,9 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
         {
             $match: mongoQuery
         },
+        {
+            $sort: { rank: 1 }
+        },
         {   
             $lookup: {
                 from: 'media',
@@ -55,7 +58,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 as: 'watchlisted'
             }
         }
-    ]).limit(100).sort({ rank: 1 }).then((response) => {
+    ]).limit(100).then((response) => {
         const favorites = response.map((favorite) => {
             if (favorite.media.length < 1) return {
                 id: favorite._id,

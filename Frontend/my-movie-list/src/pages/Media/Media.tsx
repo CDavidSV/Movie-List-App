@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { mml_api_protected } from "../../axios/mml_api_intances";
 import "./media.css";
-import { calculateMovieRuntime, setWatchlist } from "../../helpers/util.helpers";
+import { calculateMovieRuntime, saveToHistory, setWatchlist } from "../../helpers/util.helpers";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
 import PersonCard from "../../components/person-card-component/person-card";
@@ -148,6 +148,8 @@ export default function Media() {
 
             // Scroll to top of page
             window.scrollTo(0, 0);
+
+            saveToHistory(mediaData.id.toString(), type as string);
         });
     }, [navigate]);
 
@@ -280,8 +282,8 @@ export default function Media() {
                                 <iframe className="youtube-video-container"
                                     key={`${mediaData.trailer.key}`}
                                     title={mediaData.trailer.name}
-                                    src={`https://www.youtube.com/embed/${mediaData.trailer.key}`}
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    src={`https://www.youtube.com/embed/${mediaData.trailer.key}?autoplay=0`}
+                                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                     sandbox="allow-scripts allow-same-origin allow-presentation"
                                     allowFullScreen
                                     loading="lazy"/>

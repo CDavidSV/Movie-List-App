@@ -31,6 +31,9 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
         {
             $match: match
         },
+        {
+            $sort: sort
+        },
         {   
             $lookup: {
                 from: 'media',
@@ -70,7 +73,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 as: 'favorited'
             }
         }
-    ]).limit(100).sort(sort).then((result) => {
+    ]).limit(100).then((result) => {
         const watchlist = result.map((item) => {
             if (item.media.length < 1) return {
                 id: item._id,
