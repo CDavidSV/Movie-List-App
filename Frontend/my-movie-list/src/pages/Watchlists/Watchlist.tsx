@@ -9,21 +9,6 @@ import FavoriteButton from "../../components/favorite-button-component/favorite-
 import Modal from "../../components/modal-component/modal";
 import axios, { CancelTokenSource } from "axios";
 
-interface WatchlistItemProps {
-    index: number,
-    title: string,
-    progress: number,
-    total_progress: number,
-    backgrop: string,
-    poster: string,
-    favorited: boolean,
-    status: string,
-    media_id: number,
-    id: string,
-    type: string
-    removeItemFromWatchlist: (id: string, type: string, index: number) => void
-}
-
 function WatchlistItem(props: WatchlistItemProps) {
     const [status, setStatus] = useState<string>("plan-to-watch");
     const [itemProgress, setItemProgress] = useState<{ progress: number, totalProgress: number }>({ progress: props.progress, totalProgress: props.total_progress });

@@ -4,19 +4,6 @@ import { useState } from 'react';
 import { mml_api } from '../../axios/mml_api_intances';
 import { setSessionData } from '../../helpers/session.helpers';
 
-interface SignUpData {
-    username: string;
-    email: string;
-    password: string;
-    passwordConfirm: string;
-}
-
-interface SignUpError {
-    usernameError: string;
-    emailError: string;
-    passwordError: string;
-}
-
 export default function SignUp() {
     const [signUpData, setSignUpData] = useState<SignUpData | null>(null);
     const [signUpErrors, setSignUpErrors] = useState<SignUpError>({ usernameError: '', emailError: '', passwordError: '' });

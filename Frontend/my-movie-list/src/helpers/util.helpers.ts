@@ -1,14 +1,6 @@
 import { mml_api_protected } from "../axios/mml_api_intances";
 import { isLoggedIn } from "./session.helpers";
 
-interface SearchResultItem {
-    id: string;
-    name: string;
-    type: string;
-    link: string;
-    date_updated: Date;
-}
-
 const shortenNumber = (num: number) => {
     if (num < 1000) return num.toString();
 
@@ -162,5 +154,3 @@ export {
     clearSearchResultsHistory,
     calculateMovieRuntime
 };
-
-export type { SearchResultItem };

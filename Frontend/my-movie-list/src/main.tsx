@@ -4,7 +4,7 @@ import { Route, BrowserRouter, Routes, useLocation, matchPath } from 'react-rout
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
-import MediaDataProvider from './contexts/FilmDataContext';
+import MediaDataProvider from './contexts/GlobalContext';
 import "./index.css";
 
 const Home = lazy(() => import('./pages/Home/Home'));

@@ -18,7 +18,7 @@ export default function Footer() {
                     <h4>My Movie List</h4>
                     <FooterLink text="Home" link="/"/>
                     <FooterLink text="Movies" link="/movies"/>
-                    <FooterLink text="Shows" link="/shows"/>
+                    <FooterLink text="Series" link="/series"/>
                 </div>
                 <div className="footer-section">
                     <h4>Account</h4>

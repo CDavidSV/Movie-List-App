@@ -8,9 +8,8 @@ import FavoriteButton from "../../components/favorite-button-component/favorite-
 import PersonCard from "../../components/person-card-component/person-card";
 import { isLoggedIn } from "../../helpers/session.helpers";
 import FilmSlider from "../../components/film-slider-component/filmSlider";
-import { MediaDataContext } from "../../contexts/FilmDataContext";
+import { GlobalContext } from "../../contexts/GlobalContext";
 import PageNotFound from "../PageNotFound/PageNotFound";
-import { FilmCardData, FilmCardProps } from "../../components/film-card-component/filmCard";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -127,7 +126,7 @@ export default function Media() {
     const [mediaData, setMediaData] = useState<any>(null);
     const [recommendations, setRecommendations] = useState<FilmCardProps[]>([]);
     const [facts, setFacts] = useState<string>("");
-    const getMediaData = useContext(MediaDataContext);
+    const getMediaData = useContext(GlobalContext).getMediaData;
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -137,7 +136,7 @@ export default function Media() {
             setMediaData(data);
 
             getSavedItems(mediaData.recommendations, mediaData.recommendations.map((film: any) => film.id), (films: any) => {
-                mediaData.recommendations = films.map((recommendation: any) => {
+                const recommendations = films.map((recommendation: any) => {
                     return {
                         filmData: {
                             id: recommendation.id,
@@ -154,7 +153,7 @@ export default function Media() {
                         searchResult: false
                     } as FilmCardProps;
                 });
-                setRecommendations(mediaData.recommendations);
+                setRecommendations(recommendations);
             });
 
             // Set the page title

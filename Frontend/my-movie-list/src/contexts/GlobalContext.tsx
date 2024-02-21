@@ -1,9 +1,15 @@
 import { createContext, useState } from "react";
 import { mml_api } from "../axios/mml_api_intances";
 
-export const MediaDataContext = createContext<(mediaId: string, type: string) => Promise<any>>(async () => {});
+interface GlobalContextProps {
+    getMediaData: (mediaId: string, type: string) => Promise<any>;
+}
 
-export default function MediaDataProvider({ children }: { children: React.ReactNode }) {
+export const GlobalContext = createContext<GlobalContextProps>({
+    getMediaData: async () => {},
+});
+
+export default function GlobalProvider({ children }: { children: React.ReactNode }) {
     const [mediaData, setMediaData] = useState(new Map<string, any>());
 
     const getMediaData = async (mediaId: string, type: string): Promise<any> => {
@@ -25,8 +31,10 @@ export default function MediaDataProvider({ children }: { children: React.ReactN
     };
 
     return (
-        <MediaDataContext.Provider value={getMediaData}>
+        <GlobalContext.Provider value={{
+            getMediaData,
+            }}>
             {children}
-        </MediaDataContext.Provider>
+        </GlobalContext.Provider>
     )
 }

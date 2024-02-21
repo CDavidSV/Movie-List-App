@@ -1,12 +1,5 @@
 import { mml_api } from "../axios/mml_api_intances";
 
-interface SessionData {
-    email: string;
-    username: string;
-    expiresIn: number;
-    setAt: number;
-}
-
 const isLoggedIn = () => {
     if (localStorage.getItem('sessionData')) {
         return true;
@@ -43,4 +36,3 @@ const logOut = () => {
 }
 
 export { isLoggedIn, getSessionData, setSessionData, logOut, clearSessionData };
-export type { SessionData };

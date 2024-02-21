@@ -2,12 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import FilmCard from '../film-card-component/filmCard';
 import './filmSlider.css';
 import FilmCardSkeleton from '../film-card-skeleton-component/film-card-skeleton';
-import type { FilmCardProps } from '../film-card-component/filmCard';
-
-interface FilmSliderProps {
-    filmArr: FilmCardProps[];
-    title?: string;
-}
 
 export default function FilmSlider (props: FilmSliderProps) {
     const slider = useRef<HTMLDivElement>(null);
@@ -91,7 +85,7 @@ export default function FilmSlider (props: FilmSliderProps) {
                             releaseDate: movie.filmData.releaseDate,
                             voteAverage: movie.filmData.voteAverage,
                             votes: movie.filmData.votes,
-                            description: movie.filmData.description         
+                            description: movie.filmData.description
                         }}
                         inWatchlist={movie.inWatchlist}
                         inFavorites={movie.inFavorites}

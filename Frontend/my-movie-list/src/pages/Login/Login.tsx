@@ -5,11 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { setSessionData } from '../../helpers/session.helpers';
 
-interface LoginData {
-    username: string;
-    password: string;
-}
-
 export default function Login() {
     const [loginData, setLoginData] = useState<LoginData | null>(null);
     const [loginError, setLoginError] = useState("");

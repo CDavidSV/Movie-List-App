@@ -1,12 +1,5 @@
 import "./person-card.css";
 
-interface PersonCardProps {
-    id: number;
-    name: string;
-    character: string;
-    profleUrl: string;
-}
-
 export default function PersonCard(props: PersonCardProps) {
     return (
         <div className="person-card">

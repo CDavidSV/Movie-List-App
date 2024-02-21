@@ -1,13 +1,6 @@
 import "./watchlist-progress.css";
 import { useEffect, useRef, useState } from "react";
 
-interface ProgressProps {
-    progressState: { progress: number, totalProgress: number },
-    mediaId: string,
-    type: string,
-    updateProgress: (newProgress: number) => void,
-}
-
 export default function WatchlistProgress(props: ProgressProps) {
     const inputChangeTimeout = useRef<NodeJS.Timeout | null>(null);
     const [progress, setProgress] = useState<string>(props.progressState.progress.toString());

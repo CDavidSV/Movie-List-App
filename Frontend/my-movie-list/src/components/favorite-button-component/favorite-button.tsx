@@ -1,13 +1,15 @@
 import { isLoggedIn } from "../../helpers/session.helpers";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { removeFavorite, setFavorite } from "../../helpers/util.helpers";
 import { useNavigate } from "react-router-dom";
 import Modal from "../modal-component/modal";
+import { PersonalListsContext } from "../../contexts/PersonalListsContext";
 
 export default function FavoriteButton(props: { size: string, isFavorite: boolean, mediaId: string, type: string }) {
     const [isFavorite, setIsFavorite] = useState<boolean>(props.isFavorite);
     const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
     const navigate = useNavigate();
+    const { handleFavoriteState } = useContext(PersonalListsContext);
 
     useEffect(() => {
         setIsFavorite(props.isFavorite);
@@ -23,15 +25,21 @@ export default function FavoriteButton(props: { size: string, isFavorite: boolea
 
         if (isFavorite) {
             setIsFavorite(false);
+            handleFavoriteState(props.mediaId, props.type, false);
+
             removeFavorite(props.mediaId, props.type).catch(() => {
+                handleFavoriteState(props.mediaId, props.type, true);
                 setIsFavorite(true);
             });
             return;
         }
 
         setIsFavorite(true);
+        handleFavoriteState(props.mediaId, props.type, true);
+
         setFavorite(props.mediaId, props.type)
         .catch(() => {
+            handleFavoriteState(props.mediaId, props.type, false);
             setIsFavorite(false);
         });
     }

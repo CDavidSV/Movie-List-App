@@ -1,30 +1,15 @@
 import { Link } from 'react-router-dom';
 import './filmCard.css';
-import { useRef } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { shortenNumber, saveSearchResult } from '../../helpers/util.helpers';
 import FavoriteButton from '../favorite-button-component/favorite-button';
 import WatchlistButton from '../watchlist-button-component/watchlist-button';
-
-interface FilmCardData {
-    id: number;
-    type: string;
-    posterUrl: string;
-    title: string;
-    releaseDate: string;
-    voteAverage?: number;
-    votes?: number;
-    description: string;
-}
-
-interface FilmCardProps {
-    filmData: FilmCardData;
-    inWatchlist: boolean;
-    inFavorites: boolean;
-    searchResult: boolean;
-}
+import { PersonalListsContext } from '../../contexts/PersonalListsContext';
 
 export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmData }: FilmCardProps) {
     const hoverContentRef = useRef<HTMLDivElement>(null);
+    const [personalListsState, setPersonalListsState] = useState<{ inWatchlist: boolean, inFavorites: boolean }>({ inWatchlist, inFavorites });
+    const { watchlistState, favoriteState } = useContext(PersonalListsContext);
 
     const activateHover = () => {         
         hoverContentRef.current?.classList.add("active");
@@ -43,6 +28,19 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
 
         saveSearchResult(filmData.title, filmData.id.toString(), filmData.type, `/media/${filmData.type}/${filmData.id}`)
     }
+
+    useEffect(() => {
+        const newWatchlistState = watchlistState.get(`${filmData.id}.${filmData.type}`);
+        const newFavoriteState = favoriteState.get(`${filmData.id}.${filmData.type}`);
+
+        if (newWatchlistState !== undefined) {
+            setPersonalListsState({ ...personalListsState, inWatchlist: newWatchlistState });
+        }
+
+        if (newFavoriteState !== undefined) {
+            setPersonalListsState({ ...personalListsState, inFavorites: newFavoriteState });
+        }
+    }, [watchlistState, favoriteState]);
 
     return (
         <div onMouseEnter={activateHover} onMouseOut={deactivateHover} className="film-card">
@@ -82,12 +80,12 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
                     <div className="card-hover-info-content-buttons">
                         <WatchlistButton 
                             size='small'
-                            isWatchlisted={inWatchlist}
+                            isWatchlisted={personalListsState.inWatchlist}
                             mediaId={filmData.id.toString()}
                             type={filmData.type}/>  
                         <FavoriteButton 
                             size='small'
-                            isFavorite={inFavorites}
+                            isFavorite={personalListsState.inFavorites}
                             mediaId={filmData.id.toString()}
                             type={filmData.type}/>
                     </div>
@@ -96,5 +94,3 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
         </div>
     );
 }
-
-export type { FilmCardData, FilmCardProps };
