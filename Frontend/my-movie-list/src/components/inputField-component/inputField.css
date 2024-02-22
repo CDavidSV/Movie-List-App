@@ -17,7 +17,7 @@
     transition: ease 0.3s;
 }
 
-input:focus ~ labelm, input:-webkit-autofill ~ label{
+input:focus ~ label, input:-webkit-autofill ~ label{
     left: 0;
     top: -5px;
     font-size: 0.7em;
