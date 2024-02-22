@@ -65,33 +65,37 @@ export default function SignUp() {
                     <h1 style={{textAlign: "center"}}>Sign Up</h1>
                     {errorMessage && <p className="error-text">{errorMessage}</p>}
                     <InputField 
-                        type="username" 
+                        type="email" 
                         id="email" 
                         label="Email" 
                         required={true} 
                         onInputChange={(value: string) => setSignUpData({...signUpData!, email: value})}
-                        status={signUpErrors.emailError}/>
+                        status={signUpErrors.emailError}
+                        autocomplete="off"/>
                     <InputField 
                         type="username" 
                         id="username" 
                         label="Username" 
                         required={true} 
                         onInputChange={(value: string) => setSignUpData({...signUpData!, username: value})}
-                        status={signUpErrors.usernameError}/>
+                        status={signUpErrors.usernameError}
+                        autocomplete="off"/>
                     <InputField 
                         type="password" 
                         id="password" 
                         label="Password" 
                         required={true} 
                         onInputChange={(value: string) => setSignUpData({...signUpData!, password: value})}
-                        status={signUpErrors.passwordError}/>
+                        status={signUpErrors.passwordError}
+                        autocomplete="new-password"/>
                     <InputField 
                         type="password" 
                         id="password-confirm" 
                         label="Confirm Password" 
                         required={true} 
                         onInputChange={(value: string) => setSignUpData({...signUpData!, passwordConfirm: value})}
-                        status={signUpErrors.passwordError}/>
+                        status={signUpErrors.passwordError}
+                        autocomplete="new-password"/>
                     
                     <button className="button primary" disabled={loading}>
                         {!loading && "Sign Up"}

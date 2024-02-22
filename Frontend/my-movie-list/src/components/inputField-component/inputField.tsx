@@ -3,22 +3,10 @@ import "./inputField.css";
 import React from "react";
 
 export default function InputField(
-    { type, id, required, label, onInputChange, status, value, clearButton, autofocus }: 
-    { type: string, id: string, required: boolean, label: string, onInputChange: (value: string) => void , status?: string, value?: string, clearButton?: boolean, autofocus?: boolean }) {
+    { type, id, required, label, onInputChange, status, value, clearButton, autofocus, autocomplete }: 
+    { type: string, id: string, required: boolean, label: string, onInputChange: (value: string) => void , status?: string, value?: string, clearButton?: boolean, autofocus?: boolean, autocomplete?: string }) {
     const [showPassword, setShowPassword] = useState(false)
     const inputRef = React.createRef<HTMLInputElement>();
-    let autocomplete: string = "off";
-
-    switch (type) {
-        case "email":
-            autocomplete = "email";
-            break;
-        case "password":
-            autocomplete = "current-password";
-            break;
-        default:
-            break;
-    }
     
     const togglePasswordView = () => {
         // Toggle the visibility of the password

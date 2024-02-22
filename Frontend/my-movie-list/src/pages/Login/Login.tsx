@@ -44,8 +44,8 @@ export default function Login() {
                         label="Email" 
                         required={true} 
                         onInputChange={(value: string) => setLoginData({ ...loginData!, username: value })} 
-                        status={loginError}/>
-
+                        status={loginError}
+                        autocomplete="email"/>
                     <div>
                         <InputField 
                             type="password" 
@@ -53,7 +53,8 @@ export default function Login() {
                             label="Password" 
                             required={true} 
                             onInputChange={(value: string) => setLoginData({ ...loginData!, password: value })} 
-                            status={loginError}/>
+                            status={loginError}
+                            autocomplete="current-password"/>
                         <Link to="/reset-password"><p className="forgot-password">Forgot Password</p></Link>
                     </div>
                     <button className="button primary" disabled={loading}>

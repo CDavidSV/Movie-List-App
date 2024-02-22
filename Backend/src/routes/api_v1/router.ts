@@ -37,7 +37,6 @@ router.get("/user/status-in-personal-lists", getStatusInPersonalLists);
 router.post("/user/change-profile-picture", requireUser, upload.single('image'), uploadProfilePicture);
 router.post("/user/change-profile-banner", requireUser, () => { });
 router.post("/user/change-username", requireUser, changeUsername);
-router.post("/user/password-update", requireUser, () => { });
 router.delete("/user/delete-account", requireUser, deleteAccount);
 
 // Media routes

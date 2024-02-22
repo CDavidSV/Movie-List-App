@@ -5,8 +5,8 @@ const requireUser = async (req: Request, res: Response, next: any) => {
     if (!req.user) return res.sendStatus(401);
 
     try {
-        const user = await userSchema.findById(req.user.id)
-        if (!user) return res.sendStatus(401);
+        const userExists = await userSchema.exists({ _id: req.user.id });
+        if (!userExists) return res.sendStatus(401);
 
         next();
     } catch (err) {

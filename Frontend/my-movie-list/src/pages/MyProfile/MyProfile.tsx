@@ -112,7 +112,8 @@ function AccDelPassConf({ onCancel }: { onCancel: () => void }) {
                 label="Password"
                 id="password"
                 required={true}
-                onInputChange={onPasswordChange} />
+                onInputChange={onPasswordChange} 
+                autocomplete="off"/>
         <div className="modal-buttons">
             <button type="button" className="button" onClick={onCancel}>Cancel</button>
             <button className="button danger" disabled={confirmDisabled}>Confirm</button>
@@ -124,40 +125,80 @@ function AccDelPassConf({ onCancel }: { onCancel: () => void }) {
 
 function ChangePasswordTab() {
     const [passwordChangeInfo, setPasswordChangeInfo] = useState<{ currentPassword: string, newPassword: string, confirmNewPassword: string}>({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+    const [message, setMessage] = useState<string>("");
+    const [error, setError] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const attemptPasswordChange = (e: React.FormEvent) => {
         e.preventDefault();
+        const form = e.currentTarget as HTMLFormElement;
+        setMessage("");
+        setLoading(true);
 
-        console.log("Password change attempt.");
+        if (passwordChangeInfo.newPassword !== passwordChangeInfo.confirmNewPassword) {
+            setMessage("New passwords do not match.");
+            setError(true);
+            setLoading(false);
+            return;
+        }
+
+        mml_api_protected.post('/auth/change-password', {
+            oldPassword: passwordChangeInfo.currentPassword,
+            newPassword: passwordChangeInfo.newPassword,
+            deleteAllSessions: false
+        }).then((response) => {
+            setMessage(response.data.message);
+            setError(false);
+            setLoading(false);
+            setPasswordChangeInfo({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+            
+            form.reset();
+        }).catch((err) => {
+            setMessage(err.response.data.message || "An error occurred. Please try again.");
+            setError(true);
+            setLoading(false);
+        })
+        setError(false);
     }
 
     return (
         <div className="profile-page-tab">
             <div>
                 <h4 style={{margin: "0 0 15px 0"}}>Change Password</h4>
+                <p className={error ? "error-text" : "success-text"}>{message}</p>
                 <form className="change-password-container" onSubmit={attemptPasswordChange}>
+                    <input style={{  display: "none" }} type="text" name="username" autoComplete="email"/>
                     <InputField
                         type="password"
                         label="Current Password"
                         id="current-password"
                         required={true}
+                        status={error ? "invalid" : ""}
                         onInputChange={(value) => setPasswordChangeInfo({ ...passwordChangeInfo, currentPassword: value })}
+                        autocomplete="off"
                     />
                     <InputField
                         type="password"
                         label="New Password"
                         id="new-password"
                         required={true}
+                        status={error ? "invalid" : ""}
                         onInputChange={(value) => setPasswordChangeInfo({ ...passwordChangeInfo, newPassword: value })}
+                        autocomplete="new-password"
                     />
                     <InputField
                         type="password"
                         label="Confirm New Password"
                         id="confirm-new-password"
                         required={true}
+                        status={error ? "invalid" : ""}
                         onInputChange={(value) => setPasswordChangeInfo({ ...passwordChangeInfo, confirmNewPassword: value })}
+                        autocomplete="new-password"
                     />
-                    <button className="button primary">Change Password</button>
+                    <button className="button primary">
+                        {!loading && "Change Password"}
+                        {loading && <span className="spinning-loader"></span>}
+                    </button>
                 </form>
             </div>
         </div>
@@ -215,7 +256,7 @@ export default function MyProfile() {
         setSelectedTab(parseInt(e.currentTarget.id));
     }
 
-    const tabs = [<GeneralTab/>, <ChangePasswordTab/>];
+    const tabs = [<GeneralTab/>, <ChangePasswordTab />];
 
     return (
         <div className="content">

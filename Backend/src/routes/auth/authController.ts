@@ -8,6 +8,8 @@ import SHA256 from "crypto-js/sha256";
 import { createSession, invalidateSession } from "../../util/sessionHandler";
 import config from "../../config/config";
 import { sendResponse } from "../../util/apiHandler";
+import userSchema from "../../scheemas/userSchema";
+import userSessionsSchema from "../../scheemas/userSessionsSchema";
 
 const registerUser = async (req: express.Request, res: express.Response) => {
     const { username, password, email, favorite_genres } = req.body;
@@ -186,4 +188,35 @@ const revokeSession = async (req: express.Request, res: express.Response) => {
     sendResponse(res, { status: 200, message: "Session invalidated" });
 };
 
-export { registerUser, loginUser, revokeSession, refreshToken };
+const changePassword = async (req: express.Request, res: express.Response) => {
+    const { oldPassword, newPassword, deleteAllSessions } = req.body;
+
+    if (!oldPassword || !newPassword) return sendResponse(res, { status: 400, message: "Invalid request body" });
+
+    try {
+        const user = await userSchema.findById(req.user?.id);
+        if (!user) return sendResponse(res, { status: 500, message: "User not found" });
+
+        const passwordHash = user.password_hash;
+        const passwordSalt = user.password_salt;
+
+        if (SHA256(`${oldPassword}${passwordSalt}`).toString() !== passwordHash) return sendResponse(res, { status: 400, message: "Incorrect password" });
+        if (newPassword.length < 8 || newPassword.length > 50) return sendResponse(res, { status: 400, message: "Password must be between 8 and 50 characters long" });
+
+        const newPasswordResult = hashPassword(newPassword);
+        const updatedUser = await userSchema.updateOne({ _id: req.user?.id }, { password_hash: newPasswordResult.hashedPassword, password_salt: newPasswordResult.salt });
+
+        if (!updatedUser) return sendResponse(res, { status: 500, message: "Error changing password. Please try again." });
+
+        if (typeof deleteAllSessions === "boolean" && deleteAllSessions) {
+            // Invalidate all sessions.
+            userSessionsSchema.deleteMany({ $and: [{ user_id: req.user?.id }, { $not: { _id: req.user?.sessionId } }] });
+        }
+        sendResponse(res, { status: 200, message: "Password changed successfully" });
+    } catch (err) {
+        console.error(err);
+        return sendResponse(res, { status: 500, message: "Error changing password. Please try again." });
+    }
+};
+
+export { registerUser, loginUser, revokeSession, refreshToken, changePassword };
