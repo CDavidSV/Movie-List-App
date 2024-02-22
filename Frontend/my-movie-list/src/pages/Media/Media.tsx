@@ -68,8 +68,11 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
         let status = parseInt(target.value);
         const prevStatus = watchlistStatus;
         setWatchlistStatus(status);
-
-        let newProgress = props.type === 'movie' ? 1 : props.totalProgress;
+        
+        let newProgress = itemProgress.progress;
+        if (status === 2) {
+            newProgress = props.type === 'movie' ? 1 : props.totalProgress;
+        }
 
         setWatchlist(props.mediaId, props.type, status, newProgress).then(() => {
             if (status === 2) {
