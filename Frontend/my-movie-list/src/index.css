@@ -205,7 +205,7 @@ button {
     background-color: #313233;
 }
 
-.button:hover {
+.button:hover:enabled {
     background-color: #29292b;
 }
 
@@ -219,13 +219,21 @@ button {
     transform: scale(0.90);
 }
 
-button:disabled {
+button:disabled, button:disabled:hover {
     cursor: not-allowed;
-    filter: brightness(0.5);
+    filter: brightness(0.6);
 }
 
 .button.primary {
     background: var(--primary-color);
+}
+
+.button.danger {
+    background: #ff4d4d;
+}
+
+.button.danger:hover:enabled {
+    background: #ff3333;
 }
 
 .modal-buttons {
@@ -302,6 +310,12 @@ button:disabled {
 
 .error-text {
     color: red;
+    font-size: 0.8rem;
+    margin: 0 0 5px 0;
+}
+
+.success-text {
+    color: green;
     font-size: 0.8rem;
     margin: 0 0 5px 0;
 }

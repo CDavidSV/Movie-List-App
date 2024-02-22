@@ -12,13 +12,19 @@
     left: 5px;
     transform: translateY(-50%);
     color: var(--text-color);
-    font-size: 1em;
+    font-size: 0.9em;
     pointer-events: none;
     transition: ease 0.3s;
 }
 
-input:focus ~ label,
-input:not(:placeholder-shown) ~ label {
+input:focus ~ labelm, input:-webkit-autofill ~ label{
+    left: 0;
+    top: -5px;
+    font-size: 0.7em;
+    color: #b4b4b4;
+}
+
+input.has-content ~ label {
     left: 0;
     top: -5px;
     font-size: 0.7em;

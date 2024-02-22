@@ -6,7 +6,7 @@ import { getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchl
 import { getHistory, addHistory, removeHistory, clearHistory } from "./history";
 import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMoviesByGenre } from "./media";
 import requireUser from "../../middlewares/requireUser";
-import { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture } from "./user";
+import { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount } from "./user";
 import upload from "../../config/multer.config";
 
 const router: express.Router = express.Router();
@@ -36,8 +36,9 @@ router.post("/user/in-personal-lists", requireUser, hasMedia);
 router.get("/user/status-in-personal-lists", getStatusInPersonalLists);
 router.post("/user/change-profile-picture", requireUser, upload.single('image'), uploadProfilePicture);
 router.post("/user/change-profile-banner", requireUser, () => { });
-router.post("/user/update", requireUser, () => { });
+router.post("/user/change-username", requireUser, changeUsername);
 router.post("/user/password-update", requireUser, () => { });
+router.delete("/user/delete-account", requireUser, deleteAccount);
 
 // Media routes
 router.get('/media/movies/popular', getPopularMovies);

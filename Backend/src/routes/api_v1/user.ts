@@ -5,6 +5,9 @@ import favoritesSchema from "../../scheemas/favoritesSchema";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import Series from "../../Models/Series";
 import userSchema from "../../scheemas/userSchema";
+import { SHA256 } from "crypto-js";
+import historySchema from "../../scheemas/historySchema";
+import userSessionsSchema from "../../scheemas/userSessionsSchema";
 
 interface RequestMedia {
     media_id: number;
@@ -121,4 +124,60 @@ const uploadProfilePicture = async (req: Request, res: Response) => {
     sendResponse(res, { status: 200, message: "Profile picture uploaded successfully", responsePayload: { imageUrl: req.file.path } });
 };
 
-export { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture };
+const changeUsername = async (req: Request, res: Response) => {
+    const { username } = req.body;
+    if (!username) return sendResponse(res, { status: 400, message: "No username provided" });
+
+    if (username.length < 3 || username.length > 20) return sendResponse(res, { status: 400, message: "Username has to be between 3 to 20 characters long" });
+
+    try {
+        const user = await userSchema.findOne({ username: username });
+        if (user) return sendResponse(res, { status: 400, message: "Username already taken" });
+        
+        await userSchema.updateOne({ _id: req.user!.id }, { username: username });
+        return sendResponse(res, { status: 200, message: "Username changed successfully" });
+    } catch (err) {
+        console.error(err);
+        return sendResponse(res, { status: 500, message: "Error changing username" });
+    }
+};
+
+const deleteAccount = async (req: Request, res: Response) => {
+        // Check if the request type is form encoded.
+        if (!req.is("application/x-www-form-urlencoded")) return sendResponse(res, { status: 400, message: "Invalid request body" });
+        
+        const password = req.body.password;
+        if (!password) return sendResponse(res, { status: 400, message: "No password provided" });
+
+        // Validate password and attempt to delete the user's account. :(
+        try {
+            const user = await userSchema.findById(req.user!.id);
+            if (!user) return sendResponse(res, { status: 404, message: "User not found" });
+
+            const passwordHash = user.password_hash;
+            const passwordSalt = user.password_salt;
+
+            if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return sendResponse(res, { status: 400, message: "The password is incorrect" });
+
+            // Delete the user's account and all of their data.
+            await Promise.all([
+                userSchema.deleteOne({ _id: req.user!.id }),
+                historySchema.deleteMany({ user_id: req.user!.id }),
+                watchlistSchema.deleteMany({ user_id: req.user!.id }),
+                favoritesSchema.deleteMany({ user_id: req.user!.id }),
+                userSessionsSchema.deleteMany({ user_id: req.user!.id })
+            ]);
+
+            // Update cookies.
+            res.clearCookie("a_t");
+            res.clearCookie("r_t");
+            res.clearCookie("s_id");
+            
+            return sendResponse(res, { status: 200, message: "Account deleted successfully" });
+        } catch (err) {
+            console.error(err);
+            return sendResponse(res, { status: 500, message: "Error deleting account" });
+        }
+};
+
+export { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount };

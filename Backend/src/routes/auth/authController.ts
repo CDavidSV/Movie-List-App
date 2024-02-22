@@ -22,7 +22,8 @@ const registerUser = async (req: express.Request, res: express.Response) => {
     const missingFields = validateJsonBody(req.body, registerSchema);
     if (!missingFields) return sendResponse(res, { status: 400, message: "Invalid request body" });
 
-    if (password.length < 8 || password.length > 50) return sendResponse(res, { status: 400, message: "Password must be between 8 and 50 characters" });
+    if (password.length < 8 || password.length > 50) return sendResponse(res, { status: 400, message: "Password must be between 8 and 50 characters long" });
+    if (username.length < 3 || username.length > 20) return sendResponse(res, { status: 400, message: "Username must be between 3 and 20 characters long" });
 
     // Hash password with random salt.
     const hashResult = hashPassword(password);
