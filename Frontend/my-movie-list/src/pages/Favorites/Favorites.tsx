@@ -6,6 +6,7 @@ import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, D
 import WatchlistButton from "../../components/watchlist-button-component/watchlist-button";
 import Modal from "../../components/modal-component/modal";
 import "./favorites.css";
+import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 
 function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: any, removeItem: Function, provided: DraggableProvided, snapshot: DraggableStateSnapshot}) {
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
@@ -57,7 +58,10 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
 
 export default function Favorites() {
     const [favorites, setFavorites] = useState<any[]>([]);
+    const [lastId, setLastId] = useState<number | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+
+    useInfiniteScroll(() => getNextPage(), loading, !lastId);
 
     useEffect(() => {
         document.title = "Favorites - My Movie List";
@@ -65,8 +69,26 @@ export default function Favorites() {
         mml_api_protected.get("api/v1/favorites").then((res) => {
             setFavorites(res.data.responseData.favorites);
             setLoading(false);
+
+            if (res.data.responseData.lastId) setLastId(res.data.responseData.lastId);
         });
     }, []);
+
+    const getNextPage = () => {
+        if (!lastId) return;
+        setLoading(true);
+
+        mml_api_protected.get(`api/v1/favorites?last_id=${lastId}`).then((res) => {
+            setFavorites([...favorites, ...res.data.responseData.favorites]);
+            setLoading(false);
+
+            if (res.data.responseData.lastId) {
+                setLastId(res.data.responseData.lastId);
+            } else {
+                setLastId(null);
+            }
+        });
+    }
 
     const removeItemFromFavorites = (i: number) => {
         favorites.splice(i, 1);
@@ -103,9 +125,6 @@ export default function Favorites() {
             <div className="content-wrapper">                
                 <div className="favorites-container">
                     <h1>Favorites</h1>
-                    <div className={loading ? "loader active" : "loader"}>
-                        <div className="spinning-loader"></div>
-                    </div>
                     {!loading && favorites.length < 1 ? 
                     <div className="no-favorites">
                         <p style={{textAlign: "center", filter: "brightness(0.6)"}}>You have no favorites</p>
@@ -120,7 +139,7 @@ export default function Favorites() {
                             {(provided, snapshot) => (
                                 <div {...provided.droppableProps} ref={provided.innerRef}>
                                     {favorites.map((film, index) => (
-                                        <Draggable key={film.id} draggableId={film.id} index={index}>
+                                        <Draggable key={`${index}.${film.id}.${film.type}`} draggableId={`${index}.${film.id}.${film.type}`} index={index}>
                                             {(providedDraggable, snapshotDraggable) => (
                                                 <div {...providedDraggable.draggableProps} ref={providedDraggable.innerRef} className={snapshot.isDraggingOver && !snapshotDraggable.isDragging ? "drag-over" : ""}>
                                                     <FilmListCard
@@ -139,7 +158,10 @@ export default function Favorites() {
                         </Droppable>
 
                     </DragDropContext>
-                    } 
+                    }
+                    <div className={loading ? "loader active" : "loader"}>
+                        <div className="spinning-loader"></div>
+                    </div>
                 </div>
             </div>
         </div>

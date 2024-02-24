@@ -19,7 +19,6 @@ export default function History() {
             setHistory(response.data.responseData.history);
             setLastUpdatedDate(response.data.responseData.lastUpdatedDate);
             setLoading(false);
-            console.log(response.data.responseData);
         });
     }, []);
 
@@ -27,7 +26,6 @@ export default function History() {
         setLoading(true);
         mml_api_protected.get(`/api/v1/history?last_updated_date=${lastUpdatedDate}`).then(response => {
             setHistory([...history, ...response.data.responseData.history]);
-            console.log(response.data.responseData)
             setLastUpdatedDate(response.data.responseData.lastUpdatedDate);
             setLoading(false);
         });
@@ -36,6 +34,7 @@ export default function History() {
     const clearHistory = () => {
         mml_api_protected.delete('/api/v1/history/clear').then(() => {
             setHistory([]);
+            setLastUpdatedDate(null);
         });
         setModalOpen(false);
     }

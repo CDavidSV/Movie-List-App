@@ -15,7 +15,7 @@ const watchlistStatus = new Map([
 
 const getWatchlist = async (req: express.Request, res: express.Response) => {
     const status = req.query.status ? parseInt(req.query.status as string) : 3;
-    const last_id = req.query.last_id;
+    const cursor = req.query.cursor;
 
     if (status < 0 || status > 3) return sendResponse(res, { status: 400, message: "Invalid status integer" });
 
@@ -25,7 +25,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
         match = { user_id: req.user?.id }
         sort = { status: 1, updated_date: -1 } 
     };
-    if (last_id) match._id = { $lt: last_id };
+    if (cursor) match.updated_date = { $lt: cursor };
 
     watchlistSchema.aggregate([
         {
@@ -109,8 +109,8 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
             }
         });
 
-        const last_id = watchlist.length > 0 ? watchlist[watchlist.length - 1].id : null;
-        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: { lastId: last_id, watchlist } });
+        const last_id = result.length > 0 ? new Date(result[result.length - 1].updated_date).getTime() : null;
+        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: { cursor: last_id, watchlist } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching watchlist" });

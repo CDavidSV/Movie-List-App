@@ -13,7 +13,7 @@ export default function Series() {
         setLoading(true);
 
         mml_api.get(`api/v1/media/series/popular?page=${page}`).then((response) => {
-            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), (films: any) => {
+            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setMovies([...movies, ...films]);
                 setLoading(false);
             });

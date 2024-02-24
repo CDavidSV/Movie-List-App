@@ -22,14 +22,14 @@ const shortenNumber = (num: number) => {
     return shortenedNumStr;
 };
 
-const getSavedItems = (films: any[], ids: string[], callback: (films: any) => void) => {
+const getSavedItems = (films: any[], media: { id: string, type: string }[], callback: (films: any) => void) => {
     // Check first if the user is logged in
     if (!isLoggedIn()) return callback(films);
 
-    const requestMedia = ids.map((id) => {
+    const requestMedia = media.map((item) => {
         return {
-            media_id: id,
-            type: 'movie'
+            media_id: item.id,
+            type: item.type
         };
     });
 

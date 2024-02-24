@@ -19,7 +19,7 @@ export default function Genres() {
         setLoading(true);
         
         mml_api.get(`api/v1/media/movies/genres?name=${genreName}`).then((response) => {
-            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), (films: any) => {
+            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type})), (films: any) => {
                 setMedia(films);
                 setLoading(false);
             });
@@ -32,7 +32,7 @@ export default function Genres() {
 
         setLoading(true);
         mml_api.get(`api/v1/media/movies/genres?name=${genreName}&page=${nextPage}`).then((response) => {
-            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => film.id), (films: any) => {
+            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type})), (films: any) => {
                 setMedia([...media, ...films]);
                 setPage(nextPage);
                 setLoading(false);

@@ -138,7 +138,7 @@ export default function Media() {
             const mediaData = data;
             setMediaData(data);
 
-            getSavedItems(mediaData.recommendations, mediaData.recommendations.map((film: any) => film.id), (films: any) => {
+            getSavedItems(mediaData.recommendations, mediaData.recommendations.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 const recommendations = films.map((recommendation: any) => {
                     return {
                         filmData: {

@@ -8,6 +8,7 @@ import WatchlistProgress from "../../components/watchlist-progress-component/wat
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
 import Modal from "../../components/modal-component/modal";
 import axios, { CancelTokenSource } from "axios";
+import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 
 function WatchlistItem(props: WatchlistItemProps) {
     const [status, setStatus] = useState<string>("plan-to-watch");
@@ -107,6 +108,9 @@ export default function Watchlist() {
     const [loading, setLoading] = useState<boolean>(true);
     const [watchlist, setWatchlist] = useState<any[]>([]);
     const [source, setSource] = useState<CancelTokenSource | null>(null);
+    const [cursor, setCursor] = useState<number | null>(null);
+
+    useInfiniteScroll(() => getNextPage(), loading, !cursor);
 
     useEffect(() => {
         document.title = "Watchlist - My Movie List";
@@ -120,15 +124,33 @@ export default function Watchlist() {
         setSource(newSource);
 
         setLoading(true);
+        setWatchlist([]);
         const status = tabsConfig[selectedTab].status;
         mml_api_protected.get(`api/v1/watchlist?status=${status}`, {
             cancelToken: newSource.token
         }).then((response) => {
             setLoading(false);
             setWatchlist(response.data.responseData.watchlist);
+
+            if (response.data.responseData.cursor) setCursor(response.data.responseData.cursor);
         });
 
     }, [selectedTab]);
+
+    const getNextPage = () => {
+        if (!cursor) return;
+        setLoading(true);
+
+        mml_api_protected.get(`api/v1/watchlist?status=${tabsConfig[selectedTab].status}&cursor=${cursor}`).then((response) => {
+            setLoading(false);
+            setWatchlist([...watchlist, ...response.data.responseData.watchlist]);
+            if (response.data.responseData.cursor) {
+                setCursor(response.data.responseData.cursor)
+            } else {
+                setCursor(null)
+            }
+        });
+    }
 
     const handleTabChange = (i: number) => {
         if (i === selectedTab) return;
@@ -156,31 +178,29 @@ export default function Watchlist() {
                     ))}
                 </div>
                 <div className="watchlist-container">
-                    <div style={{marginTop: "150px"}} className={loading ? "loader active" : "loader"}>
-                        <div className="spinning-loader"></div>
-                    </div>
                     {watchlist.length < 1 && !loading &&
                         <NotFound message="Find something you like and add it to your watchlist" />}
-                    {watchlist.length > 0 && !loading &&
-                        <div>
-                            {watchlist.map((media: any, index) => (
-                                <WatchlistItem
-                                    key={media.id}
-                                    index={index}
-                                    title={media.title}
-                                    progress={media.progress} 
-                                    total_progress={media.totalProgress} 
-                                    backgrop={media.backdropUrl}
-                                    poster={media.posterUrl}
-                                    favorited={media.favorited}
-                                    status={media.status}
-                                    media_id={media.media_id}
-                                    id={media.media_id.toString()}
-                                    type={media.type}
-                                    removeItemFromWatchlist={removeItemFromWatchlist}/>
-                            ))}
+                    <div>
+                        {watchlist.map((media: any, index) => (
+                            <WatchlistItem
+                                key={`${media.id}.${media.type}`}
+                                index={index}
+                                title={media.title}
+                                progress={media.progress} 
+                                total_progress={media.totalProgress} 
+                                backgrop={media.backdropUrl}
+                                poster={media.posterUrl}
+                                favorited={media.favorited}
+                                status={media.status}
+                                media_id={media.media_id}
+                                id={media.media_id.toString()}
+                                type={media.type}
+                                removeItemFromWatchlist={removeItemFromWatchlist}/>
+                        ))}
+                        <div style={{marginTop: "150px"}} className={loading ? "loader active" : "loader"}>
+                            <div className="spinning-loader"></div>
                         </div>
-                    }
+                    </div>
                 </div>
             </div>
         </div>

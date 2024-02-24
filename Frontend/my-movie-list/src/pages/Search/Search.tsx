@@ -3,7 +3,7 @@ import InputField from "../../components/inputField-component/inputField";
 import FilmCard from "../../components/film-card-component/filmCard";
 import "./search.css";
 import { mml_api } from "../../axios/mml_api_intances";
-import { getSavedItems, removeSearchResultHistoryItem, SearchResultItem } from "../../helpers/util.helpers";
+import { getSavedItems, removeSearchResultHistoryItem } from "../../helpers/util.helpers";
 import { getSearchResultsHistory } from "../../helpers/util.helpers";
 import { Link } from "react-router-dom";
 
@@ -46,7 +46,7 @@ export default function Browse() {
             setMedia([]);
             window.history.pushState({}, "", `/search?query=${query}`);
             
-            if (response.data.responseData.length > 0) getSavedItems(response.data.responseData, response.data.responseData.map((media: any) => media.id), (media: any) => setMedia(media));
+            if (response.data.responseData.length > 0) getSavedItems(response.data.responseData, response.data.responseData.map((media: any) => ({ id: media.id, type: media.type })), (media: any) => setMedia(media));
         });
     }
 
