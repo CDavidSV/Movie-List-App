@@ -14,6 +14,8 @@ export default function Genres() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        document.title = `${genreName} | My Movie List`;
+
         setPage(1);
         setMedia([]);
         setLoading(true);

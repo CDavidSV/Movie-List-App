@@ -65,7 +65,7 @@ function ChangeUsername ({ username }: { username: string }) {
                     id="username"
                     required={false}
                     onInputChange={onInputChange}
-                    value={username}
+                    defaultValue={username}
                     status={error ? "invalid" : ""}
                 />
                 <button className="button" disabled={saveDisabled}>Save</button>
@@ -124,7 +124,7 @@ function AccDelPassConf({ onCancel }: { onCancel: () => void }) {
 }
 
 function ChangePasswordTab() {
-    const [passwordChangeInfo, setPasswordChangeInfo] = useState<{ currentPassword: string, newPassword: string, confirmNewPassword: string}>({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+    const [passwordChangeInfo, setPasswordChangeInfo] = useState<{ currentPassword: string, newPassword: string, confirmNewPassword: string, deleteSessions: boolean }>({ currentPassword: '', newPassword: '', confirmNewPassword: '',  deleteSessions: false });
     const [message, setMessage] = useState<string>("");
     const [error, setError] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -145,14 +145,12 @@ function ChangePasswordTab() {
         mml_api_protected.post('/auth/change-password', {
             oldPassword: passwordChangeInfo.currentPassword,
             newPassword: passwordChangeInfo.newPassword,
-            deleteAllSessions: false
+            deleteAllSessions: passwordChangeInfo.deleteSessions
         }).then((response) => {
             setMessage(response.data.message);
             setError(false);
             setLoading(false);
-            setPasswordChangeInfo({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
-            
-            form.reset();
+            setPasswordChangeInfo({ currentPassword: '', newPassword: '', confirmNewPassword: '', deleteSessions: passwordChangeInfo.deleteSessions });
         }).catch((err) => {
             setMessage(err.response.data.message || "An error occurred. Please try again.");
             setError(true);
@@ -173,6 +171,7 @@ function ChangePasswordTab() {
                         label="Current Password"
                         id="current-password"
                         required={true}
+                        value={passwordChangeInfo.currentPassword}
                         status={error ? "invalid" : ""}
                         onInputChange={(value) => setPasswordChangeInfo({ ...passwordChangeInfo, currentPassword: value })}
                         autocomplete="off"
@@ -182,6 +181,7 @@ function ChangePasswordTab() {
                         label="New Password"
                         id="new-password"
                         required={true}
+                        value={passwordChangeInfo.newPassword}
                         status={error ? "invalid" : ""}
                         onInputChange={(value) => setPasswordChangeInfo({ ...passwordChangeInfo, newPassword: value })}
                         autocomplete="new-password"
@@ -191,10 +191,19 @@ function ChangePasswordTab() {
                         label="Confirm New Password"
                         id="confirm-new-password"
                         required={true}
+                        value={passwordChangeInfo.confirmNewPassword}
                         status={error ? "invalid" : ""}
                         onInputChange={(value) => setPasswordChangeInfo({ ...passwordChangeInfo, confirmNewPassword: value })}
                         autocomplete="new-password"
                     />
+                    <div>
+                        <input checked={passwordChangeInfo.deleteSessions} type="checkbox" id="delete-sessions" onChange={(e) => setPasswordChangeInfo({ ...passwordChangeInfo, deleteSessions: e.target.checked })} />
+                        <label 
+                        style={{ marginLeft: "10px", fontSize: "0.9rem"}} 
+                        htmlFor="delete-sessions">
+                            Sign out of all devices except this one
+                        </label>
+                    </div>
                     <button className="button primary">
                         {!loading && "Change Password"}
                         {loading && <span className="spinning-loader"></span>}
@@ -247,6 +256,8 @@ export default function MyProfile() {
     const [selectedTab, setSelectedTab] = useState<number>(0);
 
     useEffect(() => {
+        document.title = "Profile | My Movie List";
+
         if (!sessionData) {
             navigate('/login');
         }

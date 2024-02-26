@@ -17,7 +17,6 @@ export default function FilmSlider (props: FilmSliderProps) {
 
         clearTimeout(timeout!);
         timeout = setTimeout(() => {
-            console.log('scrolling');
             const sliderRect = current.getBoundingClientRect();
             const firstChild = current.firstElementChild as HTMLDivElement;
             const lastChild = current.lastElementChild as HTMLDivElement;

@@ -23,6 +23,8 @@ export default function Series() {
     useInfiniteScroll(() => setPage(page + 1), loading);
 
     useEffect(() => {
+        document.title = "Series | My Movie List";
+
         getShows(page);
     }, [page]);
 

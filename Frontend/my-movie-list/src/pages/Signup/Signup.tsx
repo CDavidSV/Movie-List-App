@@ -11,7 +11,7 @@ export default function SignUp() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    document.title = "Sign Up - My Movie List";
+    document.title = "Sign Up | My Movie List";
 
     const attemptSignUp = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();

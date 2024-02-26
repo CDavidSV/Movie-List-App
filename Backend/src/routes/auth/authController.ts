@@ -210,7 +210,7 @@ const changePassword = async (req: express.Request, res: express.Response) => {
 
         if (typeof deleteAllSessions === "boolean" && deleteAllSessions) {
             // Invalidate all sessions.
-            userSessionsSchema.deleteMany({ $and: [{ user_id: req.user?.id }, { $not: { _id: req.user?.sessionId } }] });
+            userSessionsSchema.deleteMany({ user_id: req.user?.id, session_id: { $ne: req.user?.sessionId } }).catch((err) => console.error("Error deleting sessions: ", err));
         }
         sendResponse(res, { status: 200, message: "Password changed successfully" });
     } catch (err) {

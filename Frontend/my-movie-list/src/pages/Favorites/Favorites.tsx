@@ -64,7 +64,7 @@ export default function Favorites() {
     useInfiniteScroll(() => getNextPage(), loading, !lastId);
 
     useEffect(() => {
-        document.title = "Favorites - My Movie List";
+        document.title = "Favorites | My Movie List";
 
         mml_api_protected.get("api/v1/favorites").then((res) => {
             setFavorites(res.data.responseData.favorites);

@@ -12,7 +12,7 @@ export default function History() {
     const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
-        document.title = "My Movie List - History";
+        document.title = "History | My Movie List";
 
         setLoading(true);
         mml_api_protected.get('/api/v1/history').then(response => {

@@ -3,8 +3,8 @@ import "./inputField.css";
 import React from "react";
 
 export default function InputField(
-    { type, id, required, label, onInputChange, status, value, clearButton, autofocus, autocomplete }: 
-    { type: string, id: string, required: boolean, label: string, onInputChange: (value: string) => void , status?: string, value?: string, clearButton?: boolean, autofocus?: boolean, autocomplete?: string }) {
+    { type, id, required, label, onInputChange, status, defaultValue, clearButton, autofocus, autocomplete, value }: 
+    { type: string, id: string, required: boolean, label: string, onInputChange: (value: string) => void , status?: string, defaultValue?: string, clearButton?: boolean, autofocus?: boolean, autocomplete?: string, value?: string }) {
     const [showPassword, setShowPassword] = useState(false)
     const inputRef = React.createRef<HTMLInputElement>();
     
@@ -40,16 +40,17 @@ export default function InputField(
         <div className={`input-box ${status ? status : ""}`}>
             {type === "password" && 
                 <span onClick={togglePasswordView} className="material-icons">
-                    { showPassword ? "visibility" : "visibility_off"}
+                    { showPassword ? "visibility" : "visibility_off" }
                 </span>
             }
             {clearButton && <span onClick={clearinput} style={{userSelect: "none"}} className="material-icons">close</span>}
             <input 
             ref={inputRef} 
-            onChange={inputChangeEvent} 
+            onChange={inputChangeEvent}
             type={showPassword ? "text" : type} 
             id={id} required={required} 
-            defaultValue={value}
+            defaultValue={defaultValue}
+            value={value}
             autoComplete={autocomplete}
             autoFocus={autofocus ? autofocus : false}/>
             <label htmlFor={id}>{label}</label>

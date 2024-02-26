@@ -28,7 +28,7 @@ export default function Browse() {
     const [searchHistory, setSearchHistory] = useState<SearchResultItem[]>(getSearchResultsHistory());
 
     useEffect(() => {
-        document.title = "Search - My Movie List";
+        document.title = "Search | My Movie List";
 
         const params = new URLSearchParams(window.location.search);
         const query = params.get("query");

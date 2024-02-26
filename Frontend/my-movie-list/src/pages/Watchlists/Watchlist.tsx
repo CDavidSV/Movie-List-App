@@ -113,7 +113,7 @@ export default function Watchlist() {
     useInfiniteScroll(() => getNextPage(), loading, !cursor);
 
     useEffect(() => {
-        document.title = "Watchlist - My Movie List";
+        document.title = "Watchlist | My Movie List";
         if (selectedTab > tabsConfig.length - 1) return;
 
         if (source) source.cancel();

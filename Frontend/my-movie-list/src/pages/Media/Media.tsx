@@ -192,7 +192,7 @@ export default function Media() {
             });
 
             // Set the page title
-            document.title = `${mediaData.name || mediaData.title} - My Movie List`;
+            document.title = `${mediaData.name || mediaData.title} | My Movie List`;
 
             let genres = "";
             let facts = "";
