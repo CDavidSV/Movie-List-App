@@ -2,25 +2,31 @@ import { useEffect, useRef, useState } from 'react';
 import FilmCard from '../film-card-component/filmCard';
 import './filmSlider.css';
 import FilmCardSkeleton from '../film-card-skeleton-component/film-card-skeleton';
+import React from 'react';
+
+const MemoizedFilmCard = React.memo(FilmCard);
 
 export default function FilmSlider (props: FilmSliderProps) {
     const slider = useRef<HTMLDivElement>(null);
-    const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
     const [buttonStates, setButtonStates] = useState({ left: false, right: false });
+    let timeout: NodeJS.Timeout | null = null;
     
     const scrollHandler = () => {
         if (!slider.current) return;
+        const current = slider.current;
 
-        const sliderRect = slider.current.getBoundingClientRect();
-        const firstChild = slider.current.firstElementChild as HTMLDivElement;
-        const lastChild = slider.current.lastElementChild as HTMLDivElement;
+        clearTimeout(timeout!);
+        timeout = setTimeout(() => {
+            console.log('scrolling');
+            const sliderRect = current.getBoundingClientRect();
+            const firstChild = current.firstElementChild as HTMLDivElement;
+            const lastChild = current.lastElementChild as HTMLDivElement;
 
-        setButtonStates({
-            left: firstChild.getBoundingClientRect().left < sliderRect.left,
-            right: lastChild.getBoundingClientRect().right > sliderRect.right
-        });
-
-        scrollTimeout.current = null;
+            setButtonStates({
+                left: firstChild.getBoundingClientRect().left < sliderRect.left,
+                right: lastChild.getBoundingClientRect().right > sliderRect.right
+            });
+        }, 50);
     }
 
     useEffect(() => {
@@ -75,7 +81,7 @@ export default function FilmSlider (props: FilmSliderProps) {
             </div> 
             <div ref={slider} className="slider">
                 {props.filmArr.length > 0 ? props.filmArr.map((movie) => (
-                    <FilmCard 
+                    <MemoizedFilmCard 
                         key={`${movie.filmData.id}.${movie.filmData.type}`} 
                         filmData={{
                             id: movie.filmData.id,

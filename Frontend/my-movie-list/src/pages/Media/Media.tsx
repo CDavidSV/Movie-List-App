@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { mml_api_protected } from "../../axios/mml_api_intances";
-import "./media.css";
 import { calculateMovieRuntime, getSavedItems, saveToHistory, setWatchlist } from "../../helpers/util.helpers";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
@@ -10,6 +9,7 @@ import { isLoggedIn } from "../../helpers/session.helpers";
 import FilmSlider from "../../components/film-slider-component/filmSlider";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import PageNotFound from "../PageNotFound/PageNotFound";
+import "./media.css";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -31,7 +31,7 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
     useEffect(() => {
         if (!isLoggedIn()) return;
 
-        mml_api_protected.get(`/api/v1/user/status-in-personal-lists?media_id=${props.mediaId}&type=${props.type}`).then((response) => {
+        mml_api_protected.post(`/api/v1/user/status-in-personal-lists?media_id=${props.mediaId}&type=${props.type}`).then((response) => {
             const responseData = response.data.responseData;
             
             if (responseData.watchlist) {
@@ -124,6 +124,38 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
     );
 }
 
+function Images() {
+    return (
+        <div>
+            Images
+        </div>
+    );
+}
+
+function Videos() {
+    return (
+        <div>
+            Videos
+        </div>
+    );
+}
+
+function Cast() {
+    return (
+        <div>
+            Cast
+        </div>
+    );
+}
+
+function Crew() {
+    return (
+        <div>
+            Crew
+        </div>
+    );
+}
+
 export default function Media() {
     let { type, id } = useParams<{ type: string, id: string }>();
     const [mediaData, setMediaData] = useState<any>(null);
@@ -179,6 +211,8 @@ export default function Media() {
 
     if (!type || !id || (type !== 'movie' && type !== 'series')) return <PageNotFound />;
 
+    // TODO: Fix for mobile view
+    // TODO: Add tabs for Images, Videos, Cast and Crew
     return (
         <div className="content">
             {mediaData && 

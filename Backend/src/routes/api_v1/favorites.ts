@@ -1,10 +1,10 @@
 import express from "express";
 import favoritesSchema from "../../scheemas/favoritesSchema";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
-import { validateJsonBody } from "../../util/validateJson";
 import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../util/lexorank";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
+import Joi from "joi";
 
 const getFavorites = async (req: express.Request, res: express.Response) => {
     const last_id = req.query.last_id;
@@ -107,7 +107,7 @@ const addFavorite = async (req: express.Request, res: express.Response) => {
         // Validate id and get the latest favorite saved
         const [mediaData, lastFavorite] = await Promise.all([
             findMediaById(media_id as string, type as string),
-            favoritesSchema.findOne({ user_id: req.user!.id }).sort({ rank: -1 }),
+            favoritesSchema.findOne({ user_id: req.user!.id }, { rank: 1 }).sort({ rank: -1 }),
         ]);
 
         if (!mediaData || !lastFavorite) return sendResponse(res, { status: 404, message: "Media not found" });
@@ -151,13 +151,14 @@ const reorderFavorites = async (req: express.Request, res: express.Response) => 
     // ref_id: The id of the reference favorite
     // target_id: The id of the favorite moved to the new position
     // position: The position of the target favorite relative to the reference favorite
-    const reorderSchema = {
-        ref_id: { type: "string", required: true },
-        target_id: { type: "string", required: true },
-        position: { type: "string", required: true }
-    };
-    const validation = validateJsonBody(req.body, reorderSchema);
-    if (!validation) return res.status(400).send({ status: "error", message: "Invalid request body" });
+    const reorderSchema =  Joi.object({
+        ref_id: Joi.string().required(),
+        target_id: Joi.string().required(),
+        position: Joi.string().required()
+    });
+
+    const { error } = reorderSchema.validate(req.body);
+    if (error) return res.status(400).send({ status: "error", message: error.details[0].message });
 
     // Get the reference and target favorites
     try {

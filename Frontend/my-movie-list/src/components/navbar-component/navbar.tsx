@@ -6,7 +6,7 @@ import defaultPfp from '../../assets/images/profile-default.png';
 import Logo from '../../assets/logos/mml_logo.svg?react';
 import LogoWithName from '../../assets/logos/mml_logo_with_name.svg?react';
 import useRouteChange from '../../hooks/useRouteChange';
-import { getSessionData, isLoggedIn, logOut, SessionData } from '../../helpers/session.helpers';
+import { getSessionData, isLoggedIn, logOut } from '../../helpers/session.helpers';
 import './navbar.css';
 
 const genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
@@ -159,6 +159,48 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
     );
 }
 
+function HanburgerMenu({handleMenuStateChange}: {handleMenuStateChange: (isOpen: boolean) => void}) {
+    const { node, menuState, toggleMenu } = useDropdown(handleMenuStateChange);
+    const [genreMenuState, setGenreMenuState] = useState(false);
+
+    return (
+        <div style={{ height: "100%" }}>
+            <div 
+                ref={node} 
+                style={{ height: "100%" }}
+                >
+                <div className="header-hoverable hamburger-btn" onClick={toggleMenu}>
+                    <span className="material-icons">menu</span>
+                </div>
+                <div className={menuState ? "dropdown hamburger-menu select-active" : "dropdown hamburger-menu"}>
+                    <div className="hamburger-links">
+                        <NavLink to="/" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
+                            <p>Home</p>
+                        </NavLink>
+                        <NavLink to="/movies" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
+                            <p>Movies</p>
+                        </NavLink>
+                        <NavLink to="/series" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
+                            <p>Series</p>
+                        </NavLink>
+                        <div className="header-hoverable" onClick={() => setGenreMenuState(!genreMenuState)}>
+                            <p>Genres</p>
+                            <span style={{ marginLeft: "15px" }} className={genreMenuState ? "select-arrow select-active" : "select-arrow"}></span>
+                        </div>
+                        <div className={`hamburger-menu-genres${genreMenuState ? " open": ""}`}>
+                            {genres.map((genre) => (
+                                <li key={genre} className="menu-item">
+                                    <NavLink className={({isActive}) => isActive ? "menu-item-title selected" : "menu-item-title"} to={`/genres/${genre}`}>{genre}</NavLink>
+                                </li>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function Navbar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -171,11 +213,7 @@ export default function Navbar() {
             <div className={dropdownOpen ? "dropdown-select-cover active" : "dropdown-select-cover"}></div>
             <header>
                 <div className="header-section">
-                    <div className="header-section">
-                        <div className="header-hoverable hamburger-btn">
-                            <span className="material-icons">menu</span>
-                        </div>
-                    </div>
+                    <HanburgerMenu handleMenuStateChange={handleMenuStateChange}/>
                     <NavLink to="/" className="logo-container"> 
                         <LogoWithName className="logo-desktop"/>
                         <Logo className="logo-mobile"/>

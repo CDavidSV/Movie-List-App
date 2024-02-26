@@ -8,7 +8,7 @@ import Modal from "../../components/modal-component/modal";
 export default function History() {
     const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [lastUpdatedDate, setLastUpdatedDate] = useState<string | null>(null);
+    const [cursor, setCursor] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
@@ -17,24 +17,24 @@ export default function History() {
         setLoading(true);
         mml_api_protected.get('/api/v1/history').then(response => {
             setHistory(response.data.responseData.history);
-            setLastUpdatedDate(response.data.responseData.lastUpdatedDate);
+            setCursor(response.data.responseData.cursor);
             setLoading(false);
         });
     }, []);
 
     useInfiniteScroll(() => {
         setLoading(true);
-        mml_api_protected.get(`/api/v1/history?last_updated_date=${lastUpdatedDate}`).then(response => {
+        mml_api_protected.get(`/api/v1/history?cursor=${cursor}`).then(response => {
             setHistory([...history, ...response.data.responseData.history]);
-            setLastUpdatedDate(response.data.responseData.lastUpdatedDate);
+            setCursor(response.data.responseData.cursor);
             setLoading(false);
         });
-    }, loading, lastUpdatedDate === null);
+    }, loading, cursor === null);
 
     const clearHistory = () => {
         mml_api_protected.delete('/api/v1/history/clear').then(() => {
             setHistory([]);
-            setLastUpdatedDate(null);
+            setCursor(null);
         });
         setModalOpen(false);
     }

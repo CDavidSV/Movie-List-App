@@ -37,6 +37,15 @@ const getUpcomingMovies = async (req: express.Request, res: express.Response) =>
     sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
 };
 
+const getUpcomingSeries = async (req: express.Request, res: express.Response) => {
+    const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+
+    const response = await fetchMedia("tv", "upcoming", page as number);
+    if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
+
+    sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
+};
+
 const getTopRatedMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
 
@@ -44,6 +53,15 @@ const getTopRatedMovies = async (req: express.Request, res: express.Response) =>
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
     sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
+};
+
+const getTopRatedSeries = async (req: express.Request, res: express.Response) => {
+    const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+
+    const response = await fetchMedia("tv", "top_rated", page as number);
+    if (!response) return sendResponse(res, { status: 500, message: "Error fetching series" });
+
+    sendResponse(res, { status: 200, message: "Series fetched successfully", responsePayload: response });
 };
 
 const getNowPlayingMovies = async (req: express.Request, res: express.Response) => {
@@ -134,6 +152,46 @@ const getMoviesByGenre = async (req: express.Request, res: express.Response) => 
     sendResponse(res, { status: 200, message: "Media fetched successfully", responsePayload: mediaResponse });
 };
 
+const getCast = async (req: express.Request, res: express.Response) => {
+    const { type, id } = req.params;
+
+    if (!type || !id) return sendResponse(res, { status: 400, message: "Missing query parameters" });
+    if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid media type" });
+
+    try {
+        const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/credits?language=en-US`);
+        if (!response) return sendResponse(res, { status: 500, message: "Error fetching credits" });
+
+        // Remove the crew data from the response
+        delete response.crew;
+
+        sendResponse(res, { status: 200, message: "Credits fetched successfully", responsePayload: response });
+    } catch (err) {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching credits" });
+    }
+};
+
+const getCrew = async (req: express.Request, res: express.Response) => {
+    const { type, id } = req.params;
+
+    if (!type || !id) return sendResponse(res, { status: 400, message: "Missing query parameters" });
+    if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid media type" });
+
+    try {
+        const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/credits?language=en-US`);
+        if (!response) return sendResponse(res, { status: 500, message: "Error fetching credits" });
+
+        // Remove the cast data from the response
+        delete response.cast;
+
+        sendResponse(res, { status: 200, message: "Credits fetched successfully", responsePayload: response });
+    } catch (err) {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching credits" });
+    }
+};
+
 export { 
     getPopularMovies, 
     getUpcomingMovies, 
@@ -142,5 +200,9 @@ export {
     getNowPlayingMovies, 
     getMediaById,
     getPopularSeries,
-    getMoviesByGenre
+    getMoviesByGenre,
+    getTopRatedSeries,
+    getUpcomingSeries,
+    getCast,
+    getCrew,
 };

@@ -8,29 +8,56 @@ import userSchema from "../../scheemas/userSchema";
 import { SHA256 } from "crypto-js";
 import historySchema from "../../scheemas/historySchema";
 import userSessionsSchema from "../../scheemas/userSessionsSchema";
+import Joi from "joi";
 
-interface RequestMedia {
-    media_id: number;
-    type: string;
-}
+const getuserInfo = async (req: Request, res: Response) => {
+    const userId = req.params.id;
 
-const getMeUserInfo = async (req: Request, res: Response) => {
-    userSchema.findOne({ _id: req.user!.id }).then(user => {
+    if (!userId) return sendResponse(res, { status: 400, message: "Invalid user id" });
+
+    userSchema.findOne({ _id: userId }, {
+        id: { $toString: "$_id" },
+        username: 1,
+        email: 1,
+        verified: 1,
+        joined_at: 1,
+        profile_picture_url: 1,
+        profile_banner_url: 1,
+        _id: 0
+    }).then(user => {
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
 
         sendResponse(res, 
             { 
                 status: 200, 
                 message: "User fetched successfully", 
-                responsePayload: {
-                    id: user._id,
-                    username: user.username,
-                    email: user.email,
-                    verified: user.verified,
-                    joinedAt: user.joined_at,
-                    profileUrl: user.profile_picture_url,
-                    bannerUrl: user.profile_banner_url,
-                } 
+                responsePayload: user
+            }
+        );
+    }).catch(err => {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching user info" });
+    });
+};
+
+const getMeUserInfo = async (req: Request, res: Response) => {
+    userSchema.findOne({ _id: req.user!.id }, {
+        id: { $toString: "$_id" },
+        username: 1,
+        email: 1,
+        verified: 1,
+        joined_at: 1,
+        profile_picture_url: 1,
+        profile_banner_url: 1,
+        _id: 0
+    }).then(user => {
+        if (!user) return sendResponse(res, { status: 404, message: "User not found" });
+
+        sendResponse(res, 
+            { 
+                status: 200, 
+                message: "User fetched successfully", 
+                responsePayload: user
             }
         );
     }).catch(err => {
@@ -40,21 +67,26 @@ const getMeUserInfo = async (req: Request, res: Response) => {
 };
 
 const hasMedia = async (req: Request, res: Response) => {
-    const reqMedia = req.body as unknown as RequestMedia[];
+    const reqMedia = req.body;
     if (!reqMedia) return sendResponse(res, { status: 400, message: "Invalid request" });
+    
+    const requestMediaSchema = Joi.array().items(Joi.object({
+        media_id: Joi.number().required(),
+        type: Joi.string().required()
+    }));
 
-    // TODO: Validate the request body
-    // Validate the request body
+    const { value, error } = requestMediaSchema.validate(reqMedia);
+    if (error) return sendResponse(res, { status: 400, message: error.details[0].message });
 
     try {
-        const idList = reqMedia.map((i) => i.media_id.toString());
+        const idList = value.map((i) => i.media_id.toString());
         const [watchlist, favorites] = await Promise.all([
-            watchlistSchema.find({ user_id: req.user!.id, media_id: { $in: idList } }),
-            favoritesSchema.find({ user_id: req.user!.id, media_id: { $in: idList } })
+            watchlistSchema.find({ user_id: req.user!.id, media_id: { $in: idList } }, { media_id: 1, type: 1 }),
+            favoritesSchema.find({ user_id: req.user!.id, media_id: { $in: idList } }, { media_id: 1, type: 1 })
         ]);
 
         const itemsInWatchlist = new Map<string, { favorite: boolean, watchlist: boolean }>();
-        for (let media of reqMedia) {
+        for (let media of value) {
             // Check if the current media is in the user's watchlist or favorites based on the id of the media and its type
             const favoriteItem = favorites.find(item => item.media_id === media.media_id.toString() && item.type === media.type);
             const watchlistItem = watchlist.find(item => item.media_id === media.media_id.toString() && item.type === media.type);
@@ -81,13 +113,13 @@ const hasMedia = async (req: Request, res: Response) => {
 const getStatusInPersonalLists = async (req: Request, res: Response) => {
     const { media_id, type } = req.query;
 
-    if (!media_id) return sendResponse(res, { status: 400, message: "Invalid media id" });
+    if (!media_id) return sendResponse(res, { status: 400, message: "Media id required" });
     if (!type || !isValidMediaType(type as string)) return sendResponse(res, { status: 400, message: "Invalid type" });
 
     try {
         const [watchlistItem, favoriteItem, mediaData] = await Promise.all([
-            watchlistSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }),
-            favoritesSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }),
+            watchlistSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { id: { $toString: "_id" }, status: 1, progress: 1, updated_date: 1, added_date: 1, _id: 0 }),
+            favoritesSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { id: { $toString: "_id" }, date_added: 1, _id: 0 }),
             findMediaById(media_id as string, type as string)
         ]);
 
@@ -96,7 +128,7 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
         const status: any = { favorite: null, watchlist: null };
         if (watchlistItem) {
             status.watchlist = {
-                id: watchlistItem._id.toString(),
+                id: watchlistItem.id,
                 status: watchlistItem.status,
                 progress: watchlistItem.progress,
                 dateUpdated: watchlistItem.updated_date,
@@ -106,7 +138,7 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
         }
         if (favoriteItem) {
             status.favorite = {
-                id: favoriteItem._id.toString(),
+                id: favoriteItem.id,
                 dateAdded: favoriteItem.date_added,
             };
         }
@@ -124,11 +156,21 @@ const uploadProfilePicture = async (req: Request, res: Response) => {
     sendResponse(res, { status: 200, message: "Profile picture uploaded successfully", responsePayload: { imageUrl: req.file.path } });
 };
 
+const uploadBannerPicture = async (req: Request, res: Response) => {
+    if (!req.file) return sendResponse(res, { status: 400, message: "Invalid request. No image provided" });
+
+    sendResponse(res, { status: 200, message: "Banner uploaded successfully", responsePayload: { imageUrl: req.file.path } });
+};
+
+
 const changeUsername = async (req: Request, res: Response) => {
     const { username } = req.body;
     if (!username) return sendResponse(res, { status: 400, message: "No username provided" });
 
-    if (username.length < 3 || username.length > 20) return sendResponse(res, { status: 400, message: "Username has to be between 3 to 20 characters long" });
+    const usernameSchema = Joi.string().min(3).max(20).required();
+    
+    const { error } = usernameSchema.validate(username);
+    if (error) return sendResponse(res, { status: 400, message: error.details[0].message.replace('"value"', "Username") });
 
     try {
         const user = await userSchema.findOne({ username: username });
@@ -143,41 +185,41 @@ const changeUsername = async (req: Request, res: Response) => {
 };
 
 const deleteAccount = async (req: Request, res: Response) => {
-        // Check if the request type is form encoded.
-        if (!req.is("application/x-www-form-urlencoded")) return sendResponse(res, { status: 400, message: "Invalid request body" });
+    // Check if the request type is form encoded.
+    if (!req.is("application/x-www-form-urlencoded")) return sendResponse(res, { status: 400, message: "Invalid request body" });
+    
+    const password = req.body.password;
+    if (!password) return sendResponse(res, { status: 400, message: "No password provided" });
+
+    // Validate password and attempt to delete the user's account. :(
+    try {
+        const user = await userSchema.findById(req.user!.id);
+        if (!user) return sendResponse(res, { status: 404, message: "User not found" });
+
+        const passwordHash = user.password_hash;
+        const passwordSalt = user.password_salt;
+
+        if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return sendResponse(res, { status: 400, message: "The password is incorrect" });
+
+        // Delete the user's account and all of their data.
+        await Promise.all([
+            userSchema.deleteOne({ _id: req.user!.id }),
+            historySchema.deleteMany({ user_id: req.user!.id }),
+            watchlistSchema.deleteMany({ user_id: req.user!.id }),
+            favoritesSchema.deleteMany({ user_id: req.user!.id }),
+            userSessionsSchema.deleteMany({ user_id: req.user!.id })
+        ]);
+
+        // Update cookies.
+        res.clearCookie("a_t");
+        res.clearCookie("r_t");
+        res.clearCookie("s_id");
         
-        const password = req.body.password;
-        if (!password) return sendResponse(res, { status: 400, message: "No password provided" });
-
-        // Validate password and attempt to delete the user's account. :(
-        try {
-            const user = await userSchema.findById(req.user!.id);
-            if (!user) return sendResponse(res, { status: 404, message: "User not found" });
-
-            const passwordHash = user.password_hash;
-            const passwordSalt = user.password_salt;
-
-            if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return sendResponse(res, { status: 400, message: "The password is incorrect" });
-
-            // Delete the user's account and all of their data.
-            await Promise.all([
-                userSchema.deleteOne({ _id: req.user!.id }),
-                historySchema.deleteMany({ user_id: req.user!.id }),
-                watchlistSchema.deleteMany({ user_id: req.user!.id }),
-                favoritesSchema.deleteMany({ user_id: req.user!.id }),
-                userSessionsSchema.deleteMany({ user_id: req.user!.id })
-            ]);
-
-            // Update cookies.
-            res.clearCookie("a_t");
-            res.clearCookie("r_t");
-            res.clearCookie("s_id");
-            
-            return sendResponse(res, { status: 200, message: "Account deleted successfully" });
-        } catch (err) {
-            console.error(err);
-            return sendResponse(res, { status: 500, message: "Error deleting account" });
-        }
+        return sendResponse(res, { status: 200, message: "Account deleted successfully" });
+    } catch (err) {
+        console.error(err);
+        return sendResponse(res, { status: 500, message: "Error deleting account" });
+    }
 };
 
-export { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount };
+export { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getuserInfo, uploadBannerPicture };

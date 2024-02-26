@@ -148,9 +148,39 @@ header {
     background-color: var(--secondary-background-color);
     margin: 0;
 
-    width: 100vw;
-    max-width: 400px;
+    width: 100%;
+    height: 100dvh;
+    max-width: 500px;
+    overflow: auto;
+}
 
+.hamburger-genres {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+    padding: 10px 0;
+    gap: 10px;
+}
+
+.hamburger-menu-genres {
+    display: none;
+    flex-direction: column;
+    padding: 5px;
+    max-height: 900px;
+    background: var(--tertiary-background-color);
+}
+
+.hamburger-menu-genres.open {
+    display: flex;
+}
+
+.hambuger-lings {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
 }
 
 .profile-dropdown-section {

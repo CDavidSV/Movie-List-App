@@ -32,7 +32,7 @@ const registerUser = async (req: express.Request, res: express.Response) => {
 
     try {
         // Check if username already exists.
-        const user = await UserSchema.findOne({ "$or": [{ email }, { username }] });
+        const user = await UserSchema.findOne({ "$or": [{ email }, { username }] }, { username: 1, email: 1 });
         if (user && user.username === username) return sendResponse(res, { status: 400, message: "Username already in use" });
         if (user && user.email === email) return sendResponse(res, { status: 400, message: "Email already in use" });
 

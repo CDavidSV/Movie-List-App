@@ -24,7 +24,7 @@ export default function Footer() {
                     <h4>Account</h4>
                     {isLoggedIn() ? <>
                             <FooterLink text="My Profile" link="/profile"/>
-                            <FooterLink text="My Lists" link="/my-lists"/>
+                            {/* <FooterLink text="My Lists" link="/my-lists"/> */}
                             <FooterLink text="Favorites" link="/favorites"/>
                             <FooterLink text="History" link="/history"/>
                         </>:<>

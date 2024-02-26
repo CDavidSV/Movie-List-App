@@ -73,6 +73,7 @@ export default function Home() {
         });
     }), []);
 
+    // TODO: Implement image slider for movies
     return (
         <PersonalListsProvider>
             <div className="content">

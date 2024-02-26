@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
 import historySchema from "../../scheemas/historySchema";
-import { validateJsonBody } from "../../util/validateJson";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
+import Joi from "joi";
 
 const getHistory = async (req: Request, res: Response) => {
-    const last_updated_date = new Date(Number(req.query.last_updated_date));
+    const cursor = new Date(Number(req.query.cursor));
 
     const matchStr: any = { user_id: req.user?.id };
-    if (last_updated_date && !isNaN(last_updated_date.getTime())) matchStr.date_updated = { $lt: last_updated_date };
+    if (cursor && !isNaN(cursor.getTime())) matchStr.date_updated = { $lt: cursor };
 
     historySchema.aggregate([
         {
@@ -109,8 +109,8 @@ const getHistory = async (req: Request, res: Response) => {
             }
         });
 
-        const lastUpdatedDate = history.length > 0 ? new Date(history[history.length - 1].dateUpdated).getTime() : null;
-        sendResponse(res, { status: 200, message: "History fetched", responsePayload: { lastUpdatedDate, history } });
+        const cursor = history.length > 0 ? new Date(history[history.length - 1].dateUpdated).getTime() : null;
+        sendResponse(res, { status: 200, message: "History fetched", responsePayload: { cursor, history } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching history list" });
@@ -120,12 +120,12 @@ const getHistory = async (req: Request, res: Response) => {
 const addHistory = async (req: Request, res: Response) => {
     const { media_id, type } = req.body;
 
-    const addHistorySchema = {
-        media_id: { type: "string", required: true },
-        type: { type: "string", required: true },
-    }
-    const validation = validateJsonBody(req.body, addHistorySchema);
-    if (!validation) return sendResponse(res, { status: 400, message: "Invalid request body" });
+    const addHistorySchema = Joi.object({
+        media_id: Joi.string().required(),
+        type: Joi.string().required()
+    })
+    const { error } = addHistorySchema.validate(req.body);
+    if (error) return sendResponse(res, { status: 400, message: error.details[0].message });
     if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid type" });
 
     // Add history
@@ -146,11 +146,13 @@ const addHistory = async (req: Request, res: Response) => {
 const removeHistory = async (req: Request, res: Response) => {
     const { id } = req.body;
 
+    if (!id) return sendResponse(res, { status: 400, message: "Id is required" });
+
     historySchema.findByIdAndDelete(id).then(() => {
-        sendResponse(res, { status: 200, message: "History removed" });
+        sendResponse(res, { status: 200, message: "History item removed" });
     }).catch((err) => {
         console.error(err);
-        sendResponse(res, { status: 500, message: "Error removing history" });
+        sendResponse(res, { status: 500, message: "Error removing history item" });
     });
 };
 
