@@ -24,8 +24,9 @@ export default function Browse() {
     const [media, setMedia] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [timeoutFunc, setTimeoutFunc] = useState<NodeJS.Timeout | null>(null);
-    const cooldown = 400;
     const [searchHistory, setSearchHistory] = useState<SearchResultItem[]>(getSearchResultsHistory());
+    const [defaultValue, setDefaultValue] = useState<string>("");
+    const cooldown = 400;
 
     useEffect(() => {
         document.title = "Search | My Movie List";
@@ -35,6 +36,7 @@ export default function Browse() {
 
         if (query) {
             search(query);
+            setDefaultValue(query);
         }
     }, []);
 
@@ -74,12 +76,14 @@ export default function Browse() {
         <div className="content">
             <div className="search-bar">
                 <InputField
+                    key={defaultValue}
                     type="text" 
                     id="search-query" 
                     required={false} 
                     label="Search"
                     onInputChange={(value: string) => querySearchCooldown(value)}
                     clearButton={true}
+                    defaultValue={defaultValue}
                     autofocus={true}
                 />
             </div>

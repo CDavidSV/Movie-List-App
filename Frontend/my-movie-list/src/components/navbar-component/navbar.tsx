@@ -164,7 +164,7 @@ function HanburgerMenu({handleMenuStateChange}: {handleMenuStateChange: (isOpen:
     const [genreMenuState, setGenreMenuState] = useState(false);
 
     return (
-        <div style={{ height: "100%" }}>
+        <div style={{ height: "100%", left: 0 }}>
             <div 
                 ref={node} 
                 style={{ height: "100%" }}
