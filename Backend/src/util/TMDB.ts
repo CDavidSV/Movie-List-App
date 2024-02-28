@@ -178,6 +178,48 @@ const fetchMoviesByGenre = async (genreId: number, page: number) => {
     return media;
 };
 
+const getCredits = async (id: string, type: string) => {
+    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/credits?language=en-US`);
+    if (!response) return null;
+
+    const cast = response.cast.map((cast: any) => {
+        return {
+            adult: cast.adult,
+            gender: cast.gender,
+            id: cast.id,
+            name: cast.name,
+            originalName: cast.original_name,
+            popularity: cast.popularity,
+            knownForDepartment: cast.known_for_department,
+            castId: cast.cast_id,
+            creditId: cast.credit_id,
+            order: cast.order,
+            character: cast.character,
+            profilePath: cast.profile_path ? `${config.tmdbPosterUrl}${cast.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Profile"
+        }
+    });
+
+    const crew = response.crew.map((crew: any) => {
+        return {
+            adult: crew.adult,
+            gender: crew.gender,
+            id: crew.id,
+            name: crew.name,
+            originalName: crew.original_name,
+            popularity: crew.popularity,
+            knownForDepartment: crew.known_for_department,
+            creditId: crew.credit_id,
+            department: crew.department,
+            job: crew.job,
+            profilePath: crew.profile_path ? `${config.tmdbPosterUrl}${crew.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Profile"
+        }
+    });
+    response.cast = cast;
+    response.crew = crew;
+
+    return response;
+};
+
 /**
  * 
  * @param type Valid types are "movie" and "series"
@@ -193,5 +235,6 @@ export {
     fetchMedia, 
     findMediaByTitle, 
     makeTMDBRequest, 
-    fetchMoviesByGenre 
+    fetchMoviesByGenre,
+    getCredits
 };

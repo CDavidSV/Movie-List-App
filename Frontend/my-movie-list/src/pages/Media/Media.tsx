@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { mml_api_protected } from "../../axios/mml_api_intances";
+import { mml_api, mml_api_protected } from "../../axios/mml_api_intances";
 import { calculateMovieRuntime, getSavedItems, saveToHistory, setWatchlist } from "../../helpers/util.helpers";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
@@ -124,45 +124,211 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
     );
 }
 
-// function Images() {
-//     return (
-//         <div>
-//             Images
-//         </div>
-//     );
-// }
+function Overview({ mediaData, recommendations }: { mediaData: any, recommendations: FilmCardProps[] }) {
+    return (
+        <>
+            {mediaData.castMembers.length > 0 && 
+                <>
+                    <h3>Cast</h3>
+                    <div className="credits-container">
+                        {mediaData.castMembers.map((person: any) => 
+                            <PersonCard 
+                                key={`${person.id}.${person.character}`}
+                                id={person.id}
+                                name={person.name}
+                                character={person.character}
+                                profileUrl={person.profilePath}
+                            />)}
+                    </div>
+                </>}
+            {mediaData.crewMembers.length > 0 &&
+                <>
+                    <h3>Crew</h3>
+                    <div className="credits-container">
+                        {mediaData.crewMembers.map((person: any) => 
+                            <PersonCard 
+                                key={`${person.id}.${person.job}`}
+                                id={person.id}
+                                name={person.name}
+                                character={person.job}
+                                profileUrl={person.profilePath}
+                            />)}
+                    </div>
+                </>}
+            {mediaData.trailer && mediaData.trailer.site === "YouTube" &&
+                <>
+                    <h3>Trailer</h3>
+                    <iframe className="youtube-video-container"
+                        key={`${mediaData.trailer.key}`}
+                        title={mediaData.trailer.name}
+                        src={`https://www.youtube.com/embed/${mediaData.trailer.key}?autoplay=0`}
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        sandbox="allow-scripts allow-same-origin allow-presentation"
+                        allowFullScreen
+                        loading="lazy"/>
+                </>}
+            {mediaData.recommendations.length > 0 &&
+                <>
+                    <h3>Recommended</h3>
+                    <FilmSlider key={`${mediaData.id}.${mediaData.type}`} filmArr={recommendations}/>
+                </>}
+        </>
+    );
+}
 
-// function Videos() {
-//     return (
-//         <div>
-//             Videos
-//         </div>
-//     );
-// }
+function Images() {
+    return (
+        <div>
+            Images
+        </div>
+    );
+}
 
-// function Cast() {
-//     return (
-//         <div>
-//             Cast
-//         </div>
-//     );
-// }
+function Videos() {
+    return (
+        <div>
+            Videos
+        </div>
+    );
+}
 
-// function Crew() {
-//     return (
-//         <div>
-//             Crew
-//         </div>
-//     );
-// }
+function Cast({ type, id }: { type: string, id: string }) {
+    const [cast, setCast] = useState<any[]>([]);
+
+    useEffect(() => {
+        mml_api.get(`/api/v1/media/${type}/${id}/cast`).then((response) => {
+            setCast(response.data.responseData);
+        });
+    }, []);
+
+    return (
+        <div className="cast-tab-container">
+            {cast.map((person: any) =>
+                <PersonCard
+                    key={`${person.id}.${person.character}`}
+                    id={person.id}
+                    name={person.name}
+                    character={person.character}
+                    profileUrl={person.profilePath}
+                />
+            )}
+        </div>
+    );
+}
+
+function Crew({ type, id }: { type: string, id: string }) {
+    const [crew, setCrew] = useState<{ name: string, members: any[] }[]>([]);
+
+    useEffect(() => {
+        mml_api.get(`/api/v1/media/${type}/${id}/crew`).then((response) => {
+            const crew: Map<string, {name: string, members: any[]}> = new Map();
+
+            response.data.responseData.forEach((member: any) => {
+                if (crew.has(member.department)) {
+                    crew.get(member.department)!.members.push(member);
+                } else {
+                    crew.set(member.department, { name: member.department, members: [member] });
+                }
+            });
+
+            setCrew(Array.from(crew.values()));
+        });
+    }, []);
+
+    return (
+        <div>
+            {crew.map(department => (
+                <>
+                    <h3>{department.name}</h3>
+                    <div className="credits-container">
+                        {department.members.map((person: any) =>
+                            <PersonCard
+                                key={`${person.id}.${person.job}`}
+                                id={person.id}
+                                name={person.name}
+                                character={person.job}
+                                profileUrl={person.profilePath}
+                            />
+                        )}
+                    </div>
+                </>
+            ))}
+        </div>
+    );
+}
+
+function TabHandler({ tabs }: { tabs: { id: string, title: string, tab: React.ReactNode }[] } ) {
+    const [selectedTab, setSelectedTab] = useState<string>(tabs[0].id);
+    const [renderedTabs, setRenderedTabs] = useState({ [tabs[0].id]: true });
+
+    const changeTab = (tabId: string) => {
+        // Change the selected tab
+        setSelectedTab(tabId);
+        setRenderedTabs({ ...renderedTabs, [tabId]: true });
+    }
+
+    return (
+        <>
+            <div className="media-page-tabs">
+                {tabs.map((tab) => (
+                    <div 
+                    key={tab.id} 
+                    className={`media-tab${selectedTab === tab.id ? " selected" : "" }`}
+                    onClick={() => changeTab(tab.id)}>
+                        <p>{tab.title}</p>
+                    </div>
+                ))}
+            </div>
+            {tabs.map((tab) => (
+                <div
+                key={tab.id} 
+                style={{display: selectedTab === tab.id ? "block" : "none", marginTop: "20px" }}>
+                    {renderedTabs[tab.id] && tab.tab}
+                </div>
+            ))}
+        </>
+    );
+}
 
 export default function Media() {
     let { type, id } = useParams<{ type: string, id: string }>();
     const [mediaData, setMediaData] = useState<any>(null);
-    const [recommendations, setRecommendations] = useState<FilmCardProps[]>([]);
     const [facts, setFacts] = useState<string>("");
+    const [recommendations, setRecommendations] = useState<FilmCardProps[]>([]);
     const getMediaData = useContext(GlobalContext).getMediaData;
     const navigate = useNavigate();
+    
+    // I case no id or type is provided
+    if (!type || !id || (type !== 'movie' && type !== 'series')) return <PageNotFound />;
+
+    // Setup tabs
+    const tabs = [
+        {
+            id: "1",
+            title: "Overview",
+            tab: <Overview mediaData={mediaData} recommendations={recommendations}/>
+        },
+        {
+            id: "2",
+            title: "Images",
+            tab: <Images />
+        },
+        {
+            id: "3",
+            title: "Videos",
+            tab: <Videos />
+        },
+        {
+            id: "4",
+            title: "Cast",
+            tab: <Cast type={type} id={id} />
+        },
+        {
+            id: "5",
+            title: "Crew",
+            tab: <Crew type={type} id={id} />
+        }
+    ];
 
     useEffect(() => {
         // Fetch media data based on type
@@ -209,7 +375,6 @@ export default function Media() {
         });
     }, [navigate]);
 
-    if (!type || !id || (type !== 'movie' && type !== 'series')) return <PageNotFound />;
 
     // TODO: Add tabs for Images, Videos, Cast and Crew
     return (
@@ -313,51 +478,7 @@ export default function Media() {
                     </div>
                     
                     <div className="film-content-main">
-                        {mediaData.castMembers.length > 0 && 
-                            <>
-                                <h3>Cast</h3>
-                                <div className="credits-container">
-                                    {mediaData.castMembers.map((person: any) => 
-                                        <PersonCard 
-                                            key={`${person.id}.${person.character}`}
-                                            id={person.id}
-                                            name={person.name}
-                                            character={person.character}
-                                            profleUrl={person.profilePath}
-                                        />)}
-                                </div>
-                            </>}
-                        {mediaData.crewMembers.length > 0 &&
-                            <>
-                                <h3>Crew</h3>
-                                <div className="credits-container">
-                                    {mediaData.crewMembers.map((person: any) => 
-                                        <PersonCard 
-                                            key={`${person.id}.${person.job}`}
-                                            id={person.id}
-                                            name={person.name}
-                                            character={person.job}
-                                            profleUrl={person.profilePath}
-                                        />)}
-                                </div>
-                            </>}
-                        {mediaData.trailer && mediaData.trailer.site === "YouTube" &&
-                            <>
-                                <h3>Trailer</h3>
-                                <iframe className="youtube-video-container"
-                                    key={`${mediaData.trailer.key}`}
-                                    title={mediaData.trailer.name}
-                                    src={`https://www.youtube.com/embed/${mediaData.trailer.key}?autoplay=0`}
-                                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    sandbox="allow-scripts allow-same-origin allow-presentation"
-                                    allowFullScreen
-                                    loading="lazy"/>
-                            </>}
-                        {mediaData.recommendations.length > 0 &&
-                            <>
-                                <h3>Recommended</h3>
-                                <FilmSlider key={`${mediaData.id}.${mediaData.type}`} filmArr={recommendations}/>
-                            </>}
+                        <TabHandler tabs={tabs} />
                     </div>
                 </div>
             </>

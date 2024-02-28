@@ -1,6 +1,6 @@
 import express from 'express';
 import { sendResponse } from '../../util/apiHandler';
-import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre } from '../../util/TMDB';
+import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre, getCredits } from '../../util/TMDB';
 import Movie from '../../Models/Movie';
 import Series from '../../Models/Series';
 import config from '../../config/config';
@@ -159,13 +159,12 @@ const getCast = async (req: express.Request, res: express.Response) => {
     if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid media type" });
 
     try {
-        const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/credits?language=en-US`);
+        const response = await getCredits(id, type);
         if (!response) return sendResponse(res, { status: 500, message: "Error fetching credits" });
 
         // Remove the crew data from the response
         delete response.crew;
-
-        sendResponse(res, { status: 200, message: "Credits fetched successfully", responsePayload: response });
+        sendResponse(res, { status: 200, message: "Credits fetched successfully", responsePayload: response.cast });
     } catch (err) {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching credits" });
@@ -179,13 +178,13 @@ const getCrew = async (req: express.Request, res: express.Response) => {
     if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid media type" });
 
     try {
-        const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/credits?language=en-US`);
+        const response = await getCredits(id, type);
         if (!response) return sendResponse(res, { status: 500, message: "Error fetching credits" });
 
         // Remove the cast data from the response
         delete response.cast;
 
-        sendResponse(res, { status: 200, message: "Credits fetched successfully", responsePayload: response });
+        sendResponse(res, { status: 200, message: "Credits fetched successfully", responsePayload: response.crew });
     } catch (err) {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching credits" });

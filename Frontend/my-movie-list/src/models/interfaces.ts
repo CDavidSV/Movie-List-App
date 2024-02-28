@@ -25,7 +25,7 @@ interface PersonCardProps {
     id: number;
     name: string;
     character: string;
-    profleUrl: string;
+    profileUrl: string;
 }
 
 interface ProgressProps {
