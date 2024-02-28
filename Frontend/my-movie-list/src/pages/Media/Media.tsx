@@ -211,7 +211,6 @@ export default function Media() {
 
     if (!type || !id || (type !== 'movie' && type !== 'series')) return <PageNotFound />;
 
-    // TODO: Fix for mobile view
     // TODO: Add tabs for Images, Videos, Cast and Crew
     return (
         <div className="content">
@@ -276,9 +275,16 @@ export default function Media() {
                             <SidebarSection title="First Air Date">
                                 <p>{mediaData.firstAirDate}</p>
                             </SidebarSection>
-                            <SidebarSection title="Last Air Date">
-                                <p>{mediaData.lastAirDate}</p>
-                            </SidebarSection>
+                            { mediaData.lastEpisodeToAir &&
+                                <SidebarSection title="Last Air Date">
+                                    <p>{mediaData.lastEpisodeToAir.airDate}</p>
+                                </SidebarSection>
+                            }
+                            { mediaData.nextEpisodeToAir &&
+                                <SidebarSection title="Next Air Date">
+                                    <p>{mediaData.nextEpisodeToAir.airDate}</p>
+                                </SidebarSection>
+                            }
                             <SidebarSection title="Episodes">
                                 <p>{mediaData.numberOfEpisodes}</p>
                             </SidebarSection>
@@ -305,6 +311,7 @@ export default function Media() {
                             <p>TMDB</p>
                         </SidebarSection>
                     </div>
+                    
                     <div className="film-content-main">
                         {mediaData.castMembers.length > 0 && 
                             <>

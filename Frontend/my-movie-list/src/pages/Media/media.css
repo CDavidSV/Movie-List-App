@@ -168,6 +168,27 @@
     }
 }
 
+@media screen and (max-width: 870px) {
+    .film-content-wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .film-content-sidebar { 
+        width: 100%;
+        flex-direction: row;
+        gap: 25px;
+        overflow-x: scroll;
+        padding: 15px 20px;
+    }
+
+    .sidebar-section {
+        flex-grow: 1;
+        flex-shrink: 0;
+    }
+}
+
 @media screen and (max-width: 600px) {
     .film-info-content {
         flex-direction: column;

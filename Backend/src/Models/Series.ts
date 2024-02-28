@@ -12,9 +12,9 @@ export default class Series {
     public id: number;
     public inProduction: boolean;
     public languages: string[];
-    public lastEpisodeToAir: Episode;
+    public lastEpisodeToAir: Episode | null;
     public name: string;
-    public nextEpisodeToAir: string | null;
+    public nextEpisodeToAir: Episode | null;
     public networks: Network[];
     public numberOfEpisodes: number;
     public numberOfSeasons: number;
@@ -46,22 +46,7 @@ export default class Series {
         this.homepage = mediajson.homepage;
         this.id = mediajson.id;
         this.inProduction = mediajson.in_production;
-        this.lastEpisodeToAir = {
-            id: mediajson.last_episode_to_air.id,
-            name: mediajson.last_episode_to_air.name,
-            overview: mediajson.last_episode_to_air.overview,
-            voteAverage: mediajson.last_episode_to_air.vote_average,
-            voteCount: mediajson.last_episode_to_air.vote_count,
-            airDate: mediajson.last_episode_to_air.air_date,
-            episodeNumber: mediajson.last_episode_to_air.episode_number,
-            productionCode: mediajson.last_episode_to_air.production_code,
-            runtime: mediajson.last_episode_to_air.runtime,
-            seasonNumber: mediajson.last_episode_to_air.season_number,
-            showId: mediajson.last_episode_to_air.show_id,
-            stillPath: mediajson.last_episode_to_air.still_path
-        } as Episode;
         this.name = mediajson.name;
-        this.nextEpisodeToAir = mediajson.next_episode_to_air;
         this.numberOfEpisodes = mediajson.number_of_episodes;
         this.numberOfSeasons = mediajson.number_of_seasons;
         this.originCountry = mediajson.origin_country;
@@ -75,6 +60,36 @@ export default class Series {
         this.type = mediajson.type;
         this.voteAverage = mediajson.vote_average;
         this.voteCount = mediajson.vote_count;
+
+
+        this.lastEpisodeToAir = mediajson.last_episode_to_air ? {
+            id: mediajson.last_episode_to_air.id,
+            name: mediajson.last_episode_to_air.name,
+            overview: mediajson.last_episode_to_air.overview,
+            voteAverage: mediajson.last_episode_to_air.vote_average,
+            voteCount: mediajson.last_episode_to_air.vote_count,
+            airDate: mediajson.last_episode_to_air.air_date,
+            episodeNumber: mediajson.last_episode_to_air.episode_number,
+            productionCode: mediajson.last_episode_to_air.production_code,
+            runtime: mediajson.last_episode_to_air.runtime,
+            seasonNumber: mediajson.last_episode_to_air.season_number,
+            showId: mediajson.last_episode_to_air.show_id,
+            stillPath: mediajson.last_episode_to_air.still_path
+        } as Episode : null;
+        this.nextEpisodeToAir = mediajson.next_episode_to_air ? {
+            id: mediajson.next_episode_to_air.id,
+            name: mediajson.next_episode_to_air.name,
+            overview: mediajson.next_episode_to_air.overview,
+            voteAverage: mediajson.next_episode_to_air.vote_average,
+            voteCount: mediajson.next_episode_to_air.vote_count,
+            airDate: mediajson.next_episode_to_air.air_date,
+            episodeNumber: mediajson.next_episode_to_air.episode_number,
+            productionCode: mediajson.next_episode_to_air.production_code,
+            runtime: mediajson.next_episode_to_air.runtime,
+            seasonNumber: mediajson.next_episode_to_air.season_number,
+            showId: mediajson.next_episode_to_air.show_id,
+            stillPath: mediajson.next_episode_to_air.still_path
+        } as Episode : null;
         
         this.createdBy = mediajson.created_by.map((author: any) => {
             return {
