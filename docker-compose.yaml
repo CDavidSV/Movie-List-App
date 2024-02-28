@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: ./Backend
+    ports:
+      - "3000:3000"
+    environment:
+      # MONGO_URI:
+      # TMDB_API_KEY:
+      # TMDB_ACCESS_TOKEN:
+      # ACCESS_TOKEN_KEY:
+      # REFRESH_TOKEN_KEY:
+      - NODE_ENV=production
+  frontend:
+    build: ./Frontend/my-movie-list
+    ports:
+      - "80:80"

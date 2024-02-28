@@ -131,7 +131,6 @@ function ChangePasswordTab() {
 
     const attemptPasswordChange = (e: React.FormEvent) => {
         e.preventDefault();
-        const form = e.currentTarget as HTMLFormElement;
         setMessage("");
         setLoading(true);
 

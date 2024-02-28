@@ -124,37 +124,37 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
     );
 }
 
-function Images() {
-    return (
-        <div>
-            Images
-        </div>
-    );
-}
+// function Images() {
+//     return (
+//         <div>
+//             Images
+//         </div>
+//     );
+// }
 
-function Videos() {
-    return (
-        <div>
-            Videos
-        </div>
-    );
-}
+// function Videos() {
+//     return (
+//         <div>
+//             Videos
+//         </div>
+//     );
+// }
 
-function Cast() {
-    return (
-        <div>
-            Cast
-        </div>
-    );
-}
+// function Cast() {
+//     return (
+//         <div>
+//             Cast
+//         </div>
+//     );
+// }
 
-function Crew() {
-    return (
-        <div>
-            Crew
-        </div>
-    );
-}
+// function Crew() {
+//     return (
+//         <div>
+//             Crew
+//         </div>
+//     );
+// }
 
 export default function Media() {
     let { type, id } = useParams<{ type: string, id: string }>();
