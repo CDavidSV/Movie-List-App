@@ -207,7 +207,7 @@ function Images({ type, id }: { type: string, id: string }) {
             <div>
                 <Modal open={showModal} onClose={() => setShowModal(false)}>
                     <div>
-                        <img loading="lazy" src={selectedImage} alt="selected-image" style={{ objectFit: "contain", maxHeight: "700px", maxWidth: "1300px" }}/>
+                        <img loading="lazy" src={selectedImage} alt="selected-image" style={{ objectFit: "contain", maxHeight: "800px", maxWidth: "1300px", width: "100%" }}/>
                     </div>
                 </Modal>
                 <select name="images" id="images" defaultValue="backdrops" onChange={handleSelectType}>
@@ -249,7 +249,7 @@ function Videos({ type, id }: { type: string, id: string }) {
             <Modal 
             open={showModal} 
             onClose={() => setShowModal(false)} 
-            style={{ width: "95%", minWidth: "200px", maxWidth: "1250px" }}>
+            style={{ width: "95%", minWidth: "200px", maxWidth: "1300px" }}>
                 <div className="video-preview-modal">
                     { selectedVideo &&
                         <iframe className="youtube-video-container"
@@ -257,7 +257,7 @@ function Videos({ type, id }: { type: string, id: string }) {
                             title={selectedVideo.name}
                             src={`https://www.youtube.com/embed/${selectedVideo.key}?autoplay=0`}
                             allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            sandbox="allow-scripts allow-same-origin allow-presentation"
+                            sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-presentation"
                             allowFullScreen
                             loading="lazy"/>
                     }
