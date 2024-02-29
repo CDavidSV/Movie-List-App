@@ -267,7 +267,8 @@ export default function MyProfile() {
     }
 
     const tabs = [<GeneralTab/>, <ChangePasswordTab />];
-
+    
+    // TODO: Implement a way to change the user's profile picture and banner
     return (
         <div className="content">
             <div className="profile-wallpaper"></div>

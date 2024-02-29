@@ -251,7 +251,8 @@ const getMediaImages = async (id: string, type: string) => {
     response.logos = response.logos.map((logo: any) => {
         return {
             aspectRatio: logo.aspect_ratio,
-            filePath: logo.file_path ? `${config.tmdbImageLarge}${logo.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            previewFilePath: logo.file_path ? `${config.tmdbImageLarge}${logo.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            originalFilePath: logo.file_path ? `${config.tmdbImageOriginal}${logo.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
             height: logo.height,
             width: logo.width,
             iso6391: logo.iso_639_1,
@@ -278,7 +279,7 @@ const getMediaVideos = async (id: string, type: string) => {
             type: video.type,
             official: video.official,
             publishedAt: video.published_at,
-            thumbnail: `https://img.youtube.com/vi/${video.key}/hqdefault.jpg`
+            thumbnail: video.site === "YouTube" ? `https://img.youtube.com/vi/${video.key}/maxresdefault.jpg` : null
         }
     });
 

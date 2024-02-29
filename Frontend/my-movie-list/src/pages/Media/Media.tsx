@@ -166,7 +166,8 @@ function Overview({ mediaData, recommendations }: { mediaData: any, recommendati
                         allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         sandbox="allow-scripts allow-same-origin allow-presentation"
                         allowFullScreen
-                        loading="lazy"/>
+                        loading="lazy"
+                        style={{ maxWidth: "450px", borderRadius: "10px" }}/>
                 </>}
             {mediaData.recommendations.length > 0 &&
                 <>
@@ -181,29 +182,43 @@ function Images({ type, id }: { type: string, id: string }) {
     const [images, setImages] = useState<any>();
     const [showModal, setShowModal] = useState<boolean>(false);
     const [selectedImage, setSelectedImage] = useState<string>("");
+    const [selectedImages, setSelectedImages] = useState<any[]>([]);
 
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/images`).then((response) => {
             setImages(response.data.responseData);
+            setSelectedImages(response.data.responseData.backdrops);
         });
-    }, []);
+    }, [type, id]);
 
     const handleSelectImage = (imageUrl: string) => {
         setSelectedImage(imageUrl);
         setShowModal(true);
     }
 
+    const handleSelectType = (e: React.ChangeEvent) => {
+        let target = e.target as HTMLSelectElement;
+
+        if (images) setSelectedImages(images[target.value]);
+    }
+
     return (
         <>
             <div>
-                <Modal open={showModal} onClose={() => setShowModal(false)} maxWidth={1250}>
-                    <img loading="lazy" src={selectedImage} alt="selected-image" style={{ width: "100%", objectFit: "cover"}}/>
+                <Modal open={showModal} onClose={() => setShowModal(false)}>
+                    <div>
+                        <img loading="lazy" src={selectedImage} alt="selected-image" style={{ objectFit: "contain", maxHeight: "700px", maxWidth: "1300px" }}/>
+                    </div>
                 </Modal>
-                <h3>Backdrops</h3>
+                <select name="images" id="images" defaultValue="backdrops" onChange={handleSelectType}>
+                    <option value="backdrops">Backdrops</option>
+                    <option value="posters">Posters</option>
+                    <option value="logos">Logos</option>
+                </select>
                 <div className="imgs-container">
-                    {images && images.backdrops.map((backdrop: any, index: number) => (
-                        <div key={backdrop.previewFilePath} className="backdrop-image-wrapper" onClick={() => handleSelectImage(backdrop.originalFilePath)}>
-                            <img loading="lazy" key={backdrop.previewFilePath} src={backdrop.previewFilePath} alt={`backgrop-${index}`}/>
+                    {selectedImages.map((backdrop: any) => (
+                        <div key={backdrop.previewFilePath} className="image-wrapper" onClick={() => handleSelectImage(backdrop.originalFilePath)}>
+                            <img loading="lazy" key={backdrop.previewFilePath} src={backdrop.previewFilePath} />
                         </div>
                     ))}
                 </div>
@@ -213,16 +228,56 @@ function Images({ type, id }: { type: string, id: string }) {
 }
 
 function Videos({ type, id }: { type: string, id: string }) {
+    const [videos, setVideos] = useState<any[]>([]);
+    const [selectedVideo, setSelectedVideo] = useState<{ name: string, key: string } | null>();
+    const [showModal, setShowModal] = useState<boolean>(false);
+
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/videos`).then((response) => {
-            console.log(response.data);
+            console.log(response.data.responseData);
+            setVideos(response.data.responseData);
         });
-    }, []);
+    }, [type, id]);
+
+    const handleSelectVideo = (key: string, name: string) => {
+        setSelectedVideo({ name: name, key: key });
+        setShowModal(true);
+    }
 
     return (
-        <>
-            Videos
-        </>
+        <div className="videos-container">
+            <Modal 
+            open={showModal} 
+            onClose={() => setShowModal(false)} 
+            style={{ width: "95%", minWidth: "200px", maxWidth: "1250px" }}>
+                <div className="video-preview-modal">
+                    { selectedVideo &&
+                        <iframe className="youtube-video-container"
+                            key={`${selectedVideo.key}`}
+                            title={selectedVideo.name}
+                            src={`https://www.youtube.com/embed/${selectedVideo.key}?autoplay=0`}
+                            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            sandbox="allow-scripts allow-same-origin allow-presentation"
+                            allowFullScreen
+                            loading="lazy"/>
+                    }
+                </div>
+            </Modal>
+            {videos.map((video: any) => (
+                <div className="video-card">
+                    <div className="video-thumbnail" onClick={() => handleSelectVideo(video.key, video.name)}>
+                        <span className="play-btn material-icons">
+                            play_circle_outline
+                        </span>
+                        <img src={video.thumbnail} alt={video.name} />
+                    </div>
+                    <div className="video-details">
+                        <h4>{video.name}</h4>
+                        <p>{video.site}</p>
+                    </div>
+                </div>
+            ))}
+        </div>
     );
 }
 
@@ -233,7 +288,7 @@ function Cast({ type, id }: { type: string, id: string }) {
         mml_api.get(`/api/v1/media/${type}/${id}/cast`).then((response) => {
             setCast(response.data.responseData);
         });
-    }, []);
+    }, [type, id]);
 
     return (
         <div className="cast-tab-container">
@@ -267,12 +322,12 @@ function Crew({ type, id }: { type: string, id: string }) {
 
             setCrew(Array.from(crew.values()));
         });
-    }, []);
+    }, [type, id]);
 
     return (
-        <div>
+        <div className="crew-container">
             {crew.map(department => (
-                <>
+                <div style={{ overflowX: "scroll" }}>
                     <h3>{department.name}</h3>
                     <div className="credits-container">
                         {department.members.map((person: any) =>
@@ -285,7 +340,7 @@ function Crew({ type, id }: { type: string, id: string }) {
                             />
                         )}
                     </div>
-                </>
+                </div>
             ))}
         </div>
     );
@@ -510,7 +565,7 @@ export default function Media() {
                     </div>
                     
                     <div className="film-content-main">
-                        <TabHandler tabs={tabs} key={id + type}/>
+                        <TabHandler tabs={tabs}/>
                     </div>
                 </div>
             </>

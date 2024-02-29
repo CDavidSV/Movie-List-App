@@ -1,10 +1,10 @@
 import ReactDOM from "react-dom";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./modal.css";
 
 type ModalState = "open" | "closed" | "opening" | "closing";
 
-export default function Modal({ open, onClose, children, maxWidth }: { open: boolean, onClose: () => void, children: React.ReactNode, maxWidth?: number}) {    
+export default function Modal({ open, onClose, children, style }: { open: boolean, onClose: () => void, children: React.ReactNode, style?: React.CSSProperties }) {    
     const [modalState, setModalState] = useState<ModalState>("closed");
 
     useEffect(() => {
@@ -28,9 +28,9 @@ export default function Modal({ open, onClose, children, maxWidth }: { open: boo
     
     return ReactDOM.createPortal(
         <>
-            <div className={`modal ${modalState}`} style={{ maxWidth: maxWidth }}>
+            <div className={`modal ${modalState}`} style={style}>
                 <span className="material-icons modal-close" onClick={() => onClose()}>close</span>
-                <div className="modal-content">
+                <div>
                     {children}
                 </div>
             </div>

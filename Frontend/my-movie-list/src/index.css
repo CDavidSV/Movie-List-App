@@ -321,10 +321,8 @@ button:disabled, button:disabled:hover {
 }
 
 .youtube-video-container {
-    max-width: 450px;
     width: 100%;
     object-fit: cover;
-    border-radius: 10px;
     border: none;
     aspect-ratio: 16 / 9;
 }
