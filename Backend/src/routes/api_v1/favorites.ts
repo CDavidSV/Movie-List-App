@@ -80,8 +80,8 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 dateAded: favorite.date_added,
                 title: favorite.media[0].title,
                 description: favorite.media[0].description,
-                posterUrl: favorite.media[0].poster_url ? `${config.tmdbPosterUrl}${favorite.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: favorite.media[0].backdrop_url ? `${config.tmdbPosterUrl}${favorite.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: favorite.media[0].poster_url ? `${config.tmdbImageLarge}${favorite.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: favorite.media[0].backdrop_url ? `${config.tmdbImageLarge}${favorite.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 releaseDate: favorite.media[0].release_date ? favorite.media[0].release_date : "NA",
                 runtime: favorite.media[0].runtime ? favorite.media[0].runtime : 0,
                 watchlisted: favorite.watchlisted.length >= 1 ? true : false

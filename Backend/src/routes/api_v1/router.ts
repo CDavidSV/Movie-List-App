@@ -4,7 +4,7 @@ import express from "express";
 import { addFavorite, getFavorites, removeFavorite, reorderFavorites } from "./favorites";
 import { getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchlist";
 import { getHistory, addHistory, removeHistory, clearHistory } from "./history";
-import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMoviesByGenre, getTopRatedSeries, getUpcomingSeries, getCast, getCrew } from "./media";
+import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMoviesByGenre, getTopRatedSeries, getUpcomingSeries, getCast, getCrew, getImages, getVideos } from "./media";
 import { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getuserInfo, uploadBannerPicture } from "./user";
 import upload from "../../config/multer.config";
 import requireUser from "../../middlewares/requireUser";
@@ -53,6 +53,8 @@ router.get("/media/search", searchByTitle);
 router.get("/media/movies/genres", getMoviesByGenre);
 router.get("/media/:type/:id/cast", getCast);
 router.get("/media/:type/:id/crew", getCrew);
+router.get("/media/:type/:id/images", getImages);
+router.get("/media/:type/:id/videos", getVideos);
 
 // History routes
 router.get("/history", requireUser, getHistory);

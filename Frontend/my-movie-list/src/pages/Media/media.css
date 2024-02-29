@@ -180,6 +180,40 @@
     flex-wrap: wrap;
 }
 
+.imgs-container {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    flex-wrap: wrap;
+    padding: 10px 0;
+    align-items: stretch;
+}
+
+.backdrop-image-wrapper {
+    width: 300px;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.backdrop-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.poster-image-wrapper {
+    width: 150px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.poster-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 @media screen and (max-width: 1024px){
     .film-backdrop-container {
         font-size: 0.8rem;

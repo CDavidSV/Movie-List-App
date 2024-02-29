@@ -1,6 +1,6 @@
 import express from 'express';
 import { sendResponse } from '../../util/apiHandler';
-import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre, getCredits } from '../../util/TMDB';
+import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre, getCredits, getMediaImages, getMediaVideos } from '../../util/TMDB';
 import Movie from '../../Models/Movie';
 import Series from '../../Models/Series';
 import config from '../../config/config';
@@ -111,8 +111,8 @@ const getMediaById = async (req: express.Request, res: express.Response) => {
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
 
         // Replace poster and backdrop paths with full URLs.
-        mediaData.posterPath ? mediaData.posterPath = `${config.tmdbPosterUrl}${mediaData.posterPath}` : "https://via.placeholder.com/300x450.png?text=No+Poster";
-        mediaData.backdropPath ? mediaData.backdropPath = `${config.tmbdFullBackdropUrl}${mediaData.backdropPath}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop";
+        mediaData.posterPath ? mediaData.posterPath = `${config.tmdbImageLarge}${mediaData.posterPath}` : "https://via.placeholder.com/300x450.png?text=No+Poster";
+        mediaData.backdropPath ? mediaData.backdropPath = `${config.tmdbImageOriginal}${mediaData.backdropPath}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop";
     
         sendResponse(res, { status: 200, message: "Media fetched successfully", responsePayload: mediaData });
     } catch (err) {
@@ -191,6 +191,30 @@ const getCrew = async (req: express.Request, res: express.Response) => {
     }
 };
 
+const getImages = async (req: express.Request, res: express.Response) => {
+    const { type, id } = req.params;
+
+    if (!type || !id) return sendResponse(res, { status: 400, message: "Missing query parameters" });
+    if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid media type" });
+
+    const images = await getMediaImages(id, type);
+    if (!images) return sendResponse(res, { status: 500, message: "Error fetching images" });
+
+    sendResponse(res, { status: 200, message: "Images fetched successfully", responsePayload: images });
+};
+
+const getVideos = async (req: express.Request, res: express.Response) => {
+    const { type, id } = req.params;
+
+    if (!type || !id) return sendResponse(res, { status: 400, message: "Missing query parameters" });
+    if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid media type" });
+
+    const videos = await getMediaVideos(id, type);
+    if (!videos) return sendResponse(res, { status: 500, message: "Error fetching videos" });
+
+    sendResponse(res, { status: 200, message: "Videos fetched successfully", responsePayload: videos });
+};
+
 export { 
     getPopularMovies, 
     getUpcomingMovies, 
@@ -204,4 +228,6 @@ export {
     getUpcomingSeries,
     getCast,
     getCrew,
+    getImages,
+    getVideos
 };

@@ -10,6 +10,7 @@ import FilmSlider from "../../components/film-slider-component/filmSlider";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import "./media.css";
+import Modal from "../../components/modal-component/modal";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -176,19 +177,52 @@ function Overview({ mediaData, recommendations }: { mediaData: any, recommendati
     );
 }
 
-function Images() {
+function Images({ type, id }: { type: string, id: string }) {
+    const [images, setImages] = useState<any>();
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [selectedImage, setSelectedImage] = useState<string>("");
+
+    useEffect(() => {
+        mml_api.get(`/api/v1/media/${type}/${id}/images`).then((response) => {
+            setImages(response.data.responseData);
+        });
+    }, []);
+
+    const handleSelectImage = (imageUrl: string) => {
+        setSelectedImage(imageUrl);
+        setShowModal(true);
+    }
+
     return (
-        <div>
-            Images
-        </div>
+        <>
+            <div>
+                <Modal open={showModal} onClose={() => setShowModal(false)} maxWidth={1250}>
+                    <img loading="lazy" src={selectedImage} alt="selected-image" style={{ width: "100%", objectFit: "cover"}}/>
+                </Modal>
+                <h3>Backdrops</h3>
+                <div className="imgs-container">
+                    {images && images.backdrops.map((backdrop: any, index: number) => (
+                        <div key={backdrop.previewFilePath} className="backdrop-image-wrapper" onClick={() => handleSelectImage(backdrop.originalFilePath)}>
+                            <img loading="lazy" key={backdrop.previewFilePath} src={backdrop.previewFilePath} alt={`backgrop-${index}`}/>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </>
     );
 }
 
-function Videos() {
+function Videos({ type, id }: { type: string, id: string }) {
+    useEffect(() => {
+        mml_api.get(`/api/v1/media/${type}/${id}/videos`).then((response) => {
+            console.log(response.data);
+        });
+    }, []);
+
     return (
-        <div>
+        <>
             Videos
-        </div>
+        </>
     );
 }
 
@@ -311,12 +345,12 @@ export default function Media() {
         {
             id: "2",
             title: "Images",
-            tab: <Images />
+            tab: <Images type={type} id={id} />
         },
         {
             id: "3",
             title: "Videos",
-            tab: <Videos />
+            tab: <Videos type={type} id={id} />
         },
         {
             id: "4",
@@ -375,8 +409,6 @@ export default function Media() {
         });
     }, [navigate]);
 
-
-    // TODO: Add tabs for Images, Videos, Cast and Crew
     return (
         <div className="content">
             {mediaData && 
@@ -478,7 +510,7 @@ export default function Media() {
                     </div>
                     
                     <div className="film-content-main">
-                        <TabHandler tabs={tabs} />
+                        <TabHandler tabs={tabs} key={id + type}/>
                     </div>
                 </div>
             </>

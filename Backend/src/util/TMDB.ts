@@ -52,8 +52,8 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
                 id: item.id,
                 title: item.title,
                 description: item.overview,
-                posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "movie",
                 releaseDate: item.release_date,
                 voteAverage: item.vote_average,
@@ -70,8 +70,8 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
             id: item.id,
             title: item.name,
             description: item.overview,
-            posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-            backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+            posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+            backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
             type: "series",
             releaseDate: item.first_air_date, // release_date is first_air_date for series
             voteAverage: item.vote_average,
@@ -95,8 +95,8 @@ const findMediaByTitle = async (title: string) => {
                 id: movie.id,
                 title: movie.title,
                 description: movie.overview,
-                posterUrl: movie.poster_path ? `${config.tmdbPosterUrl}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: movie.backdrop_path ? `${config.tmdbSmallBackdropUrl}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "movie",
                 releaseDate: movie.release_date,
                 voteAverage: movie.vote_average,
@@ -110,8 +110,8 @@ const findMediaByTitle = async (title: string) => {
                 id: movie.id,
                 title: movie.name,
                 description: movie.overview,
-                posterUrl: movie.poster_path ? `${config.tmdbPosterUrl}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: movie.backdrop_path ? `${config.tmdbSmallBackdropUrl}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "series",
                 releaseDate: movie.first_air_date,
                 voteAverage: movie.vote_average,
@@ -167,8 +167,8 @@ const fetchMoviesByGenre = async (genreId: number, page: number) => {
             title: item.title,
             type: "movie",
             description: item.overview,
-            posterUrl: item.poster_path ? `${config.tmdbPosterUrl}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-            backdropUrl: item.backdrop_path ? `${config.tmdbSmallBackdropUrl}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+            posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+            backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
             releaseDate: item.release_date,
             voteAverage: item.vote_average,
             votes: item.vote_count
@@ -195,7 +195,7 @@ const getCredits = async (id: string, type: string) => {
             creditId: cast.credit_id,
             order: cast.order,
             character: cast.character,
-            profilePath: cast.profile_path ? `${config.tmdbPosterUrl}${cast.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Profile"
+            profilePath: cast.profile_path ? `${config.tmdbImageLarge}${cast.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Profile"
         }
     });
 
@@ -211,13 +211,78 @@ const getCredits = async (id: string, type: string) => {
             creditId: crew.credit_id,
             department: crew.department,
             job: crew.job,
-            profilePath: crew.profile_path ? `${config.tmdbPosterUrl}${crew.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Profile"
+            profilePath: crew.profile_path ? `${config.tmdbImageLarge}${crew.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Profile"
         }
     });
     response.cast = cast;
     response.crew = crew;
 
     return response;
+};
+
+const getMediaImages = async (id: string, type: string) => {
+    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/images`);
+    if (!response) return null;
+
+    response.backdrops = response.backdrops.map((backdrop: any) => {
+        return {
+            aspectRatio: backdrop.aspect_ratio,
+            previewFilePath: backdrop.file_path ? `${config.tmdbImageLarge}${backdrop.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            originalFilePath: backdrop.file_path ? `${config.tmdbImageOriginal}${backdrop.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            height: backdrop.height,
+            width: backdrop.width,
+            iso6391: backdrop.iso_639_1,
+            voteAverage: backdrop.vote_average,
+            voteCount: backdrop.vote_count
+        }
+    });
+    response.posters = response.posters.map((poster: any) => {
+        return {
+            aspectRatio: poster.aspect_ratio,
+            previewFilePath: poster.file_path ? `${config.tmdbImageLarge}${poster.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            originalFilePath: poster.file_path ? `${config.tmdbImageOriginal}${poster.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            height: poster.height,
+            width: poster.width,
+            iso6391: poster.iso_639_1,
+            voteAverage: poster.vote_average,
+            voteCount: poster.vote_count
+        }
+    });
+    response.logos = response.logos.map((logo: any) => {
+        return {
+            aspectRatio: logo.aspect_ratio,
+            filePath: logo.file_path ? `${config.tmdbImageLarge}${logo.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            height: logo.height,
+            width: logo.width,
+            iso6391: logo.iso_639_1,
+            voteAverage: logo.vote_average,
+            voteCount: logo.vote_count
+        }
+    });
+    return response;
+};
+
+const getMediaVideos = async (id: string, type: string) => {
+    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/videos?i`);
+    if (!response) return null;
+
+    response.results = response.results.map((video: any) => {
+        return {
+            id: video.id,
+            iso6391: video.iso_639_1,
+            iso31661: video.iso_3166_1,
+            key: video.key,
+            name: video.name,
+            site: video.site,
+            size: video.size,
+            type: video.type,
+            official: video.official,
+            publishedAt: video.published_at,
+            thumbnail: `https://img.youtube.com/vi/${video.key}/hqdefault.jpg`
+        }
+    });
+
+    return response.results;
 };
 
 /**
@@ -236,5 +301,7 @@ export {
     findMediaByTitle, 
     makeTMDBRequest, 
     fetchMoviesByGenre,
-    getCredits
+    getCredits,
+    getMediaImages,
+    getMediaVideos
 };
