@@ -264,7 +264,7 @@ function Videos({ type, id }: { type: string, id: string }) {
                 </div>
             </Modal>
             {videos.map((video: any) => (
-                <div className="video-card">
+                <div key={video.key} className="video-card">
                     <div className="video-thumbnail" onClick={() => handleSelectVideo(video.key, video.name)}>
                         <span className="play-btn material-icons">
                             play_circle_outline
@@ -565,7 +565,7 @@ export default function Media() {
                     </div>
                     
                     <div className="film-content-main">
-                        <TabHandler tabs={tabs}/>
+                        <TabHandler tabs={tabs} key={ type + id }/>
                     </div>
                 </div>
             </>
