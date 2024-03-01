@@ -36,7 +36,6 @@ jobs:
         with:
           name: node-app
           path: ../release.zip
-        if-no-files-found: warn
 
   deploy:
     runs-on: ubuntu-latest
