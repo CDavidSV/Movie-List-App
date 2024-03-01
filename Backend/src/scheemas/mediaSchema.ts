@@ -13,5 +13,5 @@ const MediaSchema = new Schema({
     backdrop_url: { type: String, required: false },
 });
 
-MediaSchema.index({ media_id: 1 });
+MediaSchema.index({ media_id: 1, type: 1 });
 export default model("Media", MediaSchema);

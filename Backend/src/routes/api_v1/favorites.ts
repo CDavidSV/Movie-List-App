@@ -5,6 +5,7 @@ import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../u
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 import Joi from "joi";
+import userSchema from "../../scheemas/userSchema";
 
 const getFavorites = async (req: express.Request, res: express.Response) => {
     const last_id = req.query.last_id;
@@ -13,12 +14,9 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
     if (last_id) mongoQuery._id = { $lt: last_id };
 
     favoritesSchema.aggregate([
-        {
-            $match: mongoQuery
-        },
-        {
-            $sort: { rank: 1 }
-        },
+        { $match: mongoQuery },
+        { $sort: { rank: 1 } },
+        { $limit: 100 },
         {   
             $lookup: {
                 from: 'media',
@@ -33,7 +31,9 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                                 ]
                             }
                         }
-                    }
+                    },
+                    { $limit: 1 },
+                    { $project: { _id: 0, title: 1, description: 1, poster_url: 1, backdrop_url: 1, episode_count: 1 } }
                 ],
                 as: 'media'
             }
@@ -53,12 +53,19 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                                 ]
                             }
                         }
+                    },
+                    { $limit: 1 },
+                    {
+                        $group: {
+                            _id: null,
+                            exists: { $sum: 1 }
+                        }
                     }
                 ],
                 as: 'watchlisted'
             }
         }
-    ]).limit(100).then((response) => {
+    ]).then((response) => {
         const favorites = response.map((favorite) => {
             if (favorite.media.length < 1) return {
                 id: favorite._id,
@@ -69,9 +76,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 description: "No description available",
                 posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
                 backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                releaseDate: "NA",
-                runtime: 0,
-                watchlisted: favorite.watchlisted.length >= 1 ? true : false
+                watchlisted: favorite.watchlisted >= 1 ? true : false
             };
             return {
                 id: favorite._id,
@@ -82,9 +87,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 description: favorite.media[0].description,
                 posterUrl: favorite.media[0].poster_url ? `${config.tmdbImageLarge}${favorite.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
                 backdropUrl: favorite.media[0].backdrop_url ? `${config.tmdbImageLarge}${favorite.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                releaseDate: favorite.media[0].release_date ? favorite.media[0].release_date : "NA",
-                runtime: favorite.media[0].runtime ? favorite.media[0].runtime : 0,
-                watchlisted: favorite.watchlisted.length >= 1 ? true : false
+                watchlisted: favorite.watchlisted >= 1 ? true : false
             }
         });
 
@@ -105,11 +108,13 @@ const addFavorite = async (req: express.Request, res: express.Response) => {
 
     try {
         // Validate id and get the latest favorite saved
-        const [mediaData, lastFavorite] = await Promise.all([
+        const [mediaData, lastFavorite, userExists] = await Promise.all([
             findMediaById(media_id as string, type as string),
             favoritesSchema.findOne({ user_id: req.user!.id }, { rank: 1 }).sort({ rank: -1 }),
+            userSchema.exists({ _id: req.user!.id })
         ]);
 
+        if (!userExists) return sendResponse(res, { status: 404, message: "User not found" });
         if (!mediaData || !lastFavorite) return sendResponse(res, { status: 404, message: "Media not found" });
 
         // Calculate the new rank for the new favorite.

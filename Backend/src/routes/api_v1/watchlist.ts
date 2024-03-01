@@ -6,6 +6,7 @@ import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 import Series from "../../Models/Series";
 import Movie from "../../Models/Movie";
+import userSchema from "../../scheemas/userSchema";
 
 const watchlistStatus = new Map([
     [0, "Watching"],
@@ -28,12 +29,9 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
     if (cursor) match.updated_date = { $lt: cursor };
 
     watchlistSchema.aggregate([
-        {
-            $match: match
-        },
-        {
-            $sort: sort
-        },
+        { $match: match },
+        { $sort: sort },
+        { $limit: 100 },
         {   
             $lookup: {
                 from: 'media',
@@ -48,7 +46,9 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                                 ]
                             }
                         }
-                    }
+                    },
+                    { $limit: 1 },
+                    { $project: { _id: 0, title: 1, description: 1, poster_url: 1, backdrop_url: 1, episode_count: 1 } }
                 ],
                 as: 'media'
             }
@@ -68,12 +68,19 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                                 ]
                             }
                         }
+                    },
+                    { $limit: 1 },
+                    {
+                        $group: {
+                            _id: null,
+                            exists: { $sum: 1 }
+                        }
                     }
                 ],
                 as: 'favorited'
             }
         }
-    ]).limit(100).then((result) => {
+    ]).then((result) => {
         const watchlist = result.map((item) => {
             if (item.media.length < 1) return {
                 id: item._id,
@@ -83,10 +90,8 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 description: "No description available",
                 posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
                 backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                releaseDate: "NA",
-                runtime: 0,
                 type: item.type,
-                favorited: item.favorited.length >= 1 ? true : false,
+                favorited: item.favorited >= 1 ? true : false,
                 status: watchlistStatus.get(item.status),
                 progress: item.progress,
                 totalProgress: 0
@@ -99,10 +104,8 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 description: item.media[0].description,
                 posterUrl: item.media[0].poster_url ? `${config.tmdbImageLarge}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
                 backdropUrl: item.media[0].backdrop_url ? `${config.tmdbImageXLarge}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                releaseDate: item.media[0].release_date ? item.media[0].release_date : "NA",
-                runtime: item.media[0].runtime ? item.media[0].runtime : 0,
                 type: item.type,
-                favorited: item.favorited.length >= 1 ? true : false,
+                favorited: item.favorited >= 1 ? true : false,
                 status: watchlistStatus.get(item.status),
                 progress: item.progress,
                 totalProgress: item.type === 'movie' ? 1 : item.media[0].episode_count
@@ -133,7 +136,8 @@ const updateWatchlist = async (req: express.Request, res: express.Response) => {
 
     // Validate id and get the latest favorite saved
     try {
-        const mediaData = await findMediaById(media_id as string, type);
+        const [mediaData, userExists] = await Promise.all([findMediaById(media_id as string, type), userSchema.exists({ _id: req.user!.id })]);
+        if (!userExists) return sendResponse(res, { status: 404, message: "User not found" });
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
         
         // Check progress

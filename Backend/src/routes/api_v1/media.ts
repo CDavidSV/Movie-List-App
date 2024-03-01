@@ -215,6 +215,10 @@ const getVideos = async (req: express.Request, res: express.Response) => {
     sendResponse(res, { status: 200, message: "Videos fetched successfully", responsePayload: videos });
 };
 
+const getMoviesHomeCarousel = async (req: express.Request, res: express.Response) => {
+
+};
+
 export { 
     getPopularMovies, 
     getUpcomingMovies, 
@@ -229,5 +233,6 @@ export {
     getCast,
     getCrew,
     getImages,
-    getVideos
+    getVideos,
+    getMoviesHomeCarousel
 };

@@ -234,7 +234,6 @@ function Videos({ type, id }: { type: string, id: string }) {
 
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/videos`).then((response) => {
-            console.log(response.data.responseData);
             setVideos(response.data.responseData);
         });
     }, [type, id]);

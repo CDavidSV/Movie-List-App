@@ -4,6 +4,7 @@ import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 import Joi from "joi";
+import userSchema from "../../scheemas/userSchema";
 
 const getHistory = async (req: Request, res: Response) => {
     const cursor = new Date(Number(req.query.cursor));
@@ -12,12 +13,9 @@ const getHistory = async (req: Request, res: Response) => {
     if (cursor && !isNaN(cursor.getTime())) matchStr.date_updated = { $lt: cursor };
 
     historySchema.aggregate([
-        {
-            $match: matchStr
-        },
-        {
-            $sort: { date_updated: -1 }
-        },
+        { $match: matchStr },
+        { $sort: { date_updated: -1 } },
+        { $limit: 100 },
         {   
             $lookup: {
                 from: 'media',
@@ -32,7 +30,9 @@ const getHistory = async (req: Request, res: Response) => {
                                 ]
                             }
                         }
-                    }
+                    },
+                    { $limit: 1 },
+                    { $project: { _id: 0, title: 1, description: 1, poster_url: 1, backdrop_url: 1 } }
                 ],
                 as: 'media'
             }
@@ -51,6 +51,13 @@ const getHistory = async (req: Request, res: Response) => {
                                     { $eq: ['$type', '$$type'] }
                                 ]
                             }
+                        }
+                    },
+                    { $limit: 1 },
+                    {
+                        $group: {
+                            _id: null,
+                            exists: { $sum: 1 }
                         }
                     }
                 ],
@@ -72,12 +79,19 @@ const getHistory = async (req: Request, res: Response) => {
                                 ]
                             }
                         }
+                    },
+                    { $limit: 1 },
+                    {
+                        $group: {
+                            _id: null,
+                            exists: { $sum: 1 }
+                        }
                     }
                 ],
                 as: 'favorited'
             }
         }
-    ]).limit(100).then((response) => {
+    ]).then((response) => {
         const history = response.map((item) => {
             if (item.media.length < 1) return {
                 id: item._id,
@@ -88,10 +102,8 @@ const getHistory = async (req: Request, res: Response) => {
                 description: "No description available",
                 posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
                 backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                releaseDate: "NA",
-                runtime: 0,
-                watchlisted: item.watchlisted.length >= 1 ? true : false,
-                favorited: item.favorited.length >= 1 ? true : false
+                watchlisted: item.watchlisted >= 1 ? true : false,
+                favorited: item.favorited >= 1 ? true : false
             };
             return {
                 id: item._id,
@@ -102,10 +114,8 @@ const getHistory = async (req: Request, res: Response) => {
                 description: item.media[0].description,
                 posterUrl: item.media[0].poster_url ? `${config.tmdbImageLarge}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
                 backdropUrl: item.media[0].backdrop_url ? `${config.tmdbImageLarge}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
-                releaseate: item.media[0].release_date ? item.media[0].release_date : "NA",
-                runtime: item.media[0].runtime ? item.media[0].runtime : 0,
-                watchlisted: item.watchlisted.length >= 1 ? true : false,
-                favorited: item.favorited.length >= 1 ? true : false
+                watchlisted: item.watchlisted >= 1 ? true : false,
+                favorited: item.favorited >= 1 ? true : false
             }
         });
 
@@ -130,7 +140,9 @@ const addHistory = async (req: Request, res: Response) => {
 
     // Add history
     try {
-        const media = await findMediaById(media_id as string, type as string);
+        const [media, userExists] = await Promise.all([findMediaById(media_id as string, type as string), userSchema.exists({ _id: req.user!.id })]);
+
+        if (!userExists) return sendResponse(res, { status: 404, message: "User not found" });
         if (!media) sendResponse(res, { status: 404, message: "Media not found" });
 
         const currDate = new Date();
