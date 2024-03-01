@@ -64,6 +64,11 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 ],
                 as: 'watchlisted'
             }
+        },
+        {
+            $addFields: {
+                watchlisted: { $arrayElemAt: ['$watchlisted.exists', 0] }
+            }
         }
     ]).then((response) => {
         const favorites = response.map((favorite) => {

@@ -90,6 +90,12 @@ const getHistory = async (req: Request, res: Response) => {
                 ],
                 as: 'favorited'
             }
+        },
+        {
+            $addFields: {
+                favorited: { $arrayElemAt: ['$favorited.exists', 0] },
+                watchlisted: { $arrayElemAt: ['$watchlisted.exists', 0] }
+            }
         }
     ]).then((response) => {
         const history = response.map((item) => {
