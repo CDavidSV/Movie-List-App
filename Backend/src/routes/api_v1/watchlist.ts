@@ -1,12 +1,12 @@
 import express from "express";
 import watchlistSchema from "../../scheemas/watchlistSchema";
-import { validateJsonBody } from "../../util/validateJson";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 import Series from "../../Models/Series";
 import Movie from "../../Models/Movie";
 import userSchema from "../../scheemas/userSchema";
+import Joi from "joi";
 
 const watchlistStatus = new Map([
     [0, "Watching"],
@@ -126,35 +126,33 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
 };
 
 const updateWatchlist = async (req: express.Request, res: express.Response) => {
-    let { media_id, status, progress, type } = req.body;
-    const registerSchema = {
-        media_id: { type: "string", required: true },
-        status: { type: "number", required: true },
-        progress: { type: "number", required: true },
-        type: { type: "string", required: true }
-    }
+    const registerSchema = Joi.object({
+        media_id: Joi.string().required(),
+        status: Joi.number().required().min(0).max(5),
+        progress: Joi.number().required(),
+        type: Joi.string().required()
+    });
 
-    const missingFields = validateJsonBody(req.body, registerSchema);
-    if (!missingFields) return sendResponse(res, { status: 400, message: "Invalid request body" });
-    if (status < 0 || status > 5) return sendResponse(res, { status: 400, message: "Invalid status" });
-    if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid type" });
+    const { value, error } = registerSchema.validate(req.body);
+    if (error) return sendResponse(res, { status: 400, message: error.message });
+    if (!isValidMediaType(value.type)) return sendResponse(res, { status: 400, message: "Invalid type" });
 
     // Validate id and get the latest favorite saved
     try {
-        const [mediaData, userExists] = await Promise.all([findMediaById(media_id as string, type), userSchema.exists({ _id: req.user!.id })]);
+        const [mediaData, userExists] = await Promise.all([findMediaById(value.media_id as string, value.type), userSchema.exists({ _id: req.user!.id })]);
         if (!userExists) return sendResponse(res, { status: 404, message: "User not found" });
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
         
         // Check progress
-        if (progress < 0) progress = 0;
-        if (mediaData instanceof Series && progress > mediaData.numberOfEpisodes) { 
-            progress = mediaData.numberOfEpisodes;
-        } else if (mediaData instanceof Movie && progress > 1) {
-            progress = 1;
+        if (value.progress < 0) value.progress = 0;
+        if (mediaData instanceof Series && value.progress > mediaData.numberOfEpisodes) { 
+            value.progress = mediaData.numberOfEpisodes;
+        } else if (mediaData instanceof Movie && value.progress > 1) {
+            value.progress = 1;
         }
 
         // Save to database
-        const watchlistItem = await watchlistSchema.findOneAndUpdate({ user_id: req.user!.id, media_id, type: type  }, { status, progress, updated_date: Date.now(), type: type }, { upsert: true, setDefaultsOnInsert: true, new: true });
+        const watchlistItem = await watchlistSchema.findOneAndUpdate({ user_id: req.user!.id, media_id: value.media_id, type: value.type  }, { status: value.status, progress: value.progress, updated_date: Date.now(), type: value.type }, { upsert: true, setDefaultsOnInsert: true, new: true });
         
         sendResponse(res, { status: 200, message: "Updated watchlist item", responsePayload: { id: watchlistItem?._id.toString() } });
     } catch (err) {

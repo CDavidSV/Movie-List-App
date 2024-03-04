@@ -7,5 +7,5 @@ const historySchema = new Schema({
     date_updated: { type: Date, required: true }
 });
 
-historySchema.index({ user_id: 1, type: 1, media_id: 1 }, { unique: true });
+historySchema.index({ user_id: 1, date_updated: 1 });
 export default model("History", historySchema);

@@ -1,7 +1,6 @@
 import express from "express";
 import { User } from "../../Models/interfaces";
 import UserSchema from "../../scheemas/userSchema";
-import { validateJsonBody } from "../../util/validateJson";
 import hashPassword from "../../util/hashPassword";
 import { generateNewAccessToken, verifyToken } from "../../util/jwt";
 import SHA256 from "crypto-js/sha256";
@@ -10,38 +9,34 @@ import config from "../../config/config";
 import { sendResponse } from "../../util/apiHandler";
 import userSchema from "../../scheemas/userSchema";
 import userSessionsSchema from "../../scheemas/userSessionsSchema";
+import Joi from "joi";
 
 const registerUser = async (req: express.Request, res: express.Response) => {
-    const { username, password, email, favorite_genres } = req.body;
+    const registerSchema = Joi.object({
+        username: Joi.string().required().min(3).max(20),
+        password: Joi.string().required().min(8).max(50),
+        email: Joi.string().required().email(),
+        favorite_genres: Joi.array().optional()
+    });
 
-    const registerSchema = {
-        username: { type: "string", required: true },
-        password: { type: "string", required: true },
-        email: { type: "string", required: true },
-        favorite_genres: { type: "array", required: false }
-    }
-
-    const missingFields = validateJsonBody(req.body, registerSchema);
-    if (!missingFields) return sendResponse(res, { status: 400, message: "Invalid request body" });
-
-    if (password.length < 8 || password.length > 50) return sendResponse(res, { status: 400, message: "Password must be between 8 and 50 characters long" });
-    if (username.length < 3 || username.length > 20) return sendResponse(res, { status: 400, message: "Username must be between 3 and 20 characters long" });
+    const { value, error } = registerSchema.validate(req.body);
+    if (error) return sendResponse(res, { status: 400, message: error.message });
 
     // Hash password with random salt.
-    const hashResult = hashPassword(password);
+    const hashResult = hashPassword(value.password);
 
     try {
         // Check if username already exists.
-        const user = await UserSchema.findOne({ "$or": [{ email }, { username }] }, { username: 1, email: 1 });
-        if (user && user.username === username) return sendResponse(res, { status: 400, message: "Username already in use" });
-        if (user && user.email === email) return sendResponse(res, { status: 400, message: "Email already in use" });
+        const user = await UserSchema.findOne({ "$or": [{ email: value.email }, { username: value.username }] }, { username: 1, email: 1 });
+        if (user && user.username === value.username) return sendResponse(res, { status: 400, message: "Username already in use" });
+        if (user && user.email === value.email) return sendResponse(res, { status: 400, message: "Email already in use" });
 
         // Create new user.
         const newUser = await UserSchema.create(
             { 
-                username, 
-                email, 
-                favorite_genres, 
+                username: value.username, 
+                email: value.email, 
+                favorite_genres: value.favorite_genres || [], 
                 verified: false, 
                 password_hash: hashResult.hashedPassword, 
                 password_salt: hashResult.salt,
