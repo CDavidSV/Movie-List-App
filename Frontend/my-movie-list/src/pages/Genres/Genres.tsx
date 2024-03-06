@@ -21,9 +21,11 @@ export default function Genres() {
         setLoading(true);
         
         mml_api.get(`api/v1/media/movies/genres?name=${genreName}`).then((response) => {
+            setLoading(false);
+            setMedia(response.data.responseData);
+            
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type})), (films: any) => {
                 setMedia(films);
-                setLoading(false);
             });
         });
     }, [navigate]);

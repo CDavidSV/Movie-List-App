@@ -4,9 +4,7 @@ import './filmSlider.css';
 import FilmCardSkeleton from '../film-card-skeleton-component/film-card-skeleton';
 import React from 'react';
 
-const MemoizedFilmCard = React.memo(FilmCard);
-
-export default function FilmSlider (props: FilmSliderProps) {
+export default React.memo(function FilmSlider (props: FilmSliderProps) {
     const slider = useRef<HTMLDivElement>(null);
     const [buttonStates, setButtonStates] = useState({ left: false, right: false });
     let timeout: NodeJS.Timeout | null = null;
@@ -80,7 +78,7 @@ export default function FilmSlider (props: FilmSliderProps) {
             </div> 
             <div ref={slider} className="slider">
                 {props.filmArr.length > 0 ? props.filmArr.map((movie) => (
-                    <MemoizedFilmCard 
+                    <FilmCard 
                         key={`${movie.filmData.id}.${movie.filmData.type}`} 
                         filmData={{
                             id: movie.filmData.id,
@@ -104,4 +102,4 @@ export default function FilmSlider (props: FilmSliderProps) {
         </div>
     </>
     );
-}
+});

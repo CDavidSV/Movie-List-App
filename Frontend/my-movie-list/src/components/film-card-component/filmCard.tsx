@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
-import './filmCard.css';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { shortenNumber, saveSearchResult } from '../../helpers/util.helpers';
 import FavoriteButton from '../favorite-button-component/favorite-button';
 import WatchlistButton from '../watchlist-button-component/watchlist-button';
 import { PersonalListsContext } from '../../contexts/PersonalListsContext';
+import React from 'react';
+import './filmCard.css';
 
-export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmData }: FilmCardProps) {
+export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchResult, filmData }: FilmCardProps) {
     const hoverContentRef = useRef<HTMLDivElement>(null);
     const [personalListsState, setPersonalListsState] = useState<{ inWatchlist: boolean, inFavorites: boolean }>({ inWatchlist, inFavorites });
     const { watchlistState, favoriteState } = useContext(PersonalListsContext);
@@ -33,14 +34,28 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
         const newWatchlistState = watchlistState.get(`${filmData.id}.${filmData.type}`);
         const newFavoriteState = favoriteState.get(`${filmData.id}.${filmData.type}`);
 
+        const inPersonalListsObj = { inWatchlist: false, inFavorites: false };
         if (newWatchlistState !== undefined) {
-            setPersonalListsState({ ...personalListsState, inWatchlist: newWatchlistState });
+            inPersonalListsObj.inWatchlist = newWatchlistState;
         }
 
         if (newFavoriteState !== undefined) {
-            setPersonalListsState({ ...personalListsState, inFavorites: newFavoriteState });
+            inPersonalListsObj.inFavorites = newFavoriteState;
         }
+        setPersonalListsState(inPersonalListsObj);
     }, [watchlistState, favoriteState]);
+
+    useEffect(() => {
+        const inPersonalListsObj = { inWatchlist: false, inFavorites: false };
+        if (inWatchlist !== undefined) {
+            inPersonalListsObj.inWatchlist = inWatchlist;
+        }
+
+        if (inFavorites !== undefined) {
+            inPersonalListsObj.inFavorites = inFavorites;
+        }
+        setPersonalListsState(inPersonalListsObj);
+    }, [inWatchlist, inFavorites]);
 
     return (
         <div onMouseEnter={activateHover} onMouseOut={deactivateHover} className="film-card">
@@ -93,4 +108,4 @@ export default function FilmCard({ inWatchlist, inFavorites, searchResult, filmD
             </div>
         </div>
     );
-}
+});

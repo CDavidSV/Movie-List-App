@@ -36,18 +36,21 @@ export default function Home() {
         document.title = "My Movie List";
 
         mml_api.get("api/v1/media/movies/popular").then((response) => {
+            setPopularMovies(parseFilmData(response.data.responseData));
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setPopularMovies(parseFilmData(films));
             });
         });
 
         mml_api.get("api/v1/media/movies/upcoming").then((response) => {
+            setUpcoming(parseFilmData(response.data.responseData));
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setUpcoming(parseFilmData(films));
             });
         });
 
         mml_api.get("api/v1/media/movies/top-rated").then((response) => {
+            setTopRated(parseFilmData(response.data.responseData));
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setTopRated(parseFilmData(films));
             });

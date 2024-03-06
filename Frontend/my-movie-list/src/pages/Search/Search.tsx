@@ -44,8 +44,8 @@ export default function Browse() {
         setLoading(true);
 
         mml_api.get(`api/v1/media/search?title=${query}`).then((response) => {
+            console.log(1);
             setLoading(false);
-            setMedia([]);
             window.history.pushState({}, "", `/search?query=${query}`);
             
             if (response.data.responseData.length > 0) getSavedItems(response.data.responseData, response.data.responseData.map((media: any) => ({ id: media.id, type: media.type })), (media: any) => setMedia(media));

@@ -13,9 +13,11 @@ export default function Movies() {
         setLoading(true);
 
         mml_api.get(`api/v1/media/movies/popular?page=${page}`).then((response) => {
+            setLoading(false);
+            setMovies([...movies, ...response.data.responseData]);
+
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setMovies([...movies, ...films]);
-                setLoading(false);
             });
         });
     }
