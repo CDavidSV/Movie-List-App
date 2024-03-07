@@ -111,3 +111,23 @@
     flex-direction: column;
     gap: 10px;
 }
+
+@media screen and (max-width: 480px) {
+    .profile-config-tabs {
+        flex-direction: column;
+    }
+
+    .profile-tab-select-menu {
+        display: block;
+    }
+
+    .profile-tabs-list {
+        flex-direction: row;
+        padding: 0;
+        text-align: center;
+    }
+
+    .profile-tabs {
+        width: 100%;
+    }
+}
