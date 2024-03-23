@@ -12,6 +12,7 @@ interface CustomMediaResponse {
     description: string;
     posterUrl: string;
     backdropUrl: string;
+    logoUrl?: string;
     type: string;
     releaseDate: string;
     voteAverage: number;

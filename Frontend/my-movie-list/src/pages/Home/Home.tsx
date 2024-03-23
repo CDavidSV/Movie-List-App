@@ -35,6 +35,10 @@ export default function Home() {
     useEffect((() => {
         document.title = "My Movie List";
 
+        mml_api.get("api/v1/media/movies/home-carousel").then((response) => {
+            console.log(response.data.responseData);
+        });
+
         mml_api.get("api/v1/media/movies/popular").then((response) => {
             setPopularMovies(parseFilmData(response.data.responseData));
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {

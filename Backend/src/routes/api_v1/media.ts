@@ -216,7 +216,28 @@ const getVideos = async (req: express.Request, res: express.Response) => {
 };
 
 const getMoviesHomeCarousel = async (req: express.Request, res: express.Response) => {
+    const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
 
+    let response = await fetchMedia("movie", "upcoming", page as number);
+    if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
+    
+    const imageRequests = [];
+    for (let i = 0; i < 5; i++) {
+        const randomIndex = Math.floor(Math.random() * response.length);
+
+        response[i] = response[randomIndex];
+        imageRequests.push(getMediaImages(response[randomIndex].id.toString(), 'movie'));
+    }
+    response = response.slice(0, 5);
+    
+    const imageResponses = await Promise.all(imageRequests);
+    if (!imageResponses) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
+
+    imageResponses.forEach((imageResponse, index) => {
+        if (response) response[index].logoUrl = imageResponse && imageResponse.logos ? imageResponse.logos[0].originalFilePath : "https://via.placeholder.com/350x100.png?text=No+Logo";
+    });
+    
+    sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
 };
 
 export { 
