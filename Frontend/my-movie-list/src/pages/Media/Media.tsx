@@ -9,8 +9,8 @@ import { isLoggedIn } from "../../helpers/session.helpers";
 import FilmSlider from "../../components/film-slider-component/filmSlider";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import PageNotFound from "../PageNotFound/PageNotFound";
-import "./media.css";
 import Modal from "../../components/modal-component/modal";
+import "./media.css";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (

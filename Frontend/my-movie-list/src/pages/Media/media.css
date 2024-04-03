@@ -107,7 +107,7 @@
     width: 225px;
     background: var(--secondary-background-color);
     padding: 10px 15px;
-
+    height: 100%;
 }
 
 .sidebar-section .title {
