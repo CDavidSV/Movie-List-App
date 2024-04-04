@@ -82,3 +82,8 @@ interface WatchlistItemProps {
     type: string
     removeItemFromWatchlist: (id: string, type: string, index: number) => void
 }
+
+interface UploadImageProps {
+    width: number;
+    height: number;
+}

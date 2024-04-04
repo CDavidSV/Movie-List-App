@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import InputField from '../../components/inputField-component/inputField';
 import Modal from '../../components/modal-component/modal';
 import { mml_api_protected } from '../../axios/mml_api_intances';
+import UploadImage from '../../components/upload-image/upload-image';
 import "./myprofile.css";
 
 function ChangeUsername ({ username }: { username: string }) {
@@ -253,6 +254,7 @@ export default function MyProfile() {
     const navigate = useNavigate();
     const sessionData = getSessionData();
     const [selectedTab, setSelectedTab] = useState<number>(0);
+    const [modalsState, setModalsState] = useState<{ pfpModal: boolean, bannerModal: boolean }>({ pfpModal: false, bannerModal: false })
 
     useEffect(() => {
         document.title = "Profile | My Movie List";
@@ -276,6 +278,10 @@ export default function MyProfile() {
                 <div className="profile-general-data">
                     <div className="profile-picture">
                         <img src={defaultPfp} alt="profile_picture" />
+                        <div onClick={() => setModalsState({ ...modalsState, pfpModal: true})} className="upload_pfp"><span style={{}} className="material-icons">photo_camera</span></div>
+                        <Modal open={modalsState.pfpModal} onClose={() => setModalsState({ ...modalsState, pfpModal: false })}>
+                            <UploadImage />
+                        </Modal>
                     </div>
                     <div className="user-info">
                         <h4>{sessionData.username}</h4>

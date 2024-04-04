@@ -13,6 +13,7 @@
 }
 
 .profile-picture {
+    position: relative;
     height: 100%;
     width: 100%;
     transform: translateY(-25%);
@@ -24,6 +25,21 @@
     display: flex;
     justify-content: center;
     align-self: center;
+}
+
+.upload_pfp {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: rgb(48, 48, 48);
+    border: 5px solid var(--background-color);
+    padding: 8px;
+    border-radius: 100%;
+    aspect-ratio: 1;
+    cursor: pointer;
 }
 
 .profile-picture img {
