@@ -7,7 +7,7 @@ interface GlobalContextProps {
     updateUsername: (username: string) => void;
     updateUserData: () => void | SessionData;
     clearSessionData: () => void;
-    setSessionData: (email: string, username: string, expiresIn: number, profilePicturePath?: string) => void;
+    setSessionData: (email: string, username: string, expiresIn: number, profilePicturePath?: string, profileBannerPath?: string) => void;
     getSavedItems: (films: any[], media: { id: string, type: string }[], callback: (films: any) => void) => void;
     setFavorite: (id: string, type: string) => Promise<void>;
     removeFavorite: (id: string, type: string) => Promise<void>;
