@@ -3,8 +3,13 @@ import Movie from '../Models/Movie';
 import Series from '../Models/Series';
 import config from '../config/config';
 import saveMovie from './mediaHandler';
+import { Genre } from '../Models/interfaces';
+import { set } from 'mongoose';
 
 const tmdb_token = process.env.TMDB_ACCESS_TOKEN;
+
+const genres: { movies: Genre[], series: Genre[] } = { movies: [], series: [] };
+let clearGenresTimeout: NodeJS.Timeout | null = null;
 
 interface CustomMediaResponse {
     id: number;
@@ -14,6 +19,7 @@ interface CustomMediaResponse {
     backdropUrl: string;
     logoUrl?: string;
     type: string;
+    genres: string[];
     releaseDate: string;
     voteAverage: number;
     votes: number;
@@ -54,8 +60,9 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
                 title: item.title,
                 description: item.overview,
                 posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                backdropUrl: item.backdrop_path ? `${config.tmdbImageOriginal}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "movie",
+                genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
                 releaseDate: item.release_date,
                 voteAverage: item.vote_average,
                 votes: item.vote_count
@@ -74,6 +81,7 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
             posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
             backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
             type: "series",
+            genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "series")),
             releaseDate: item.first_air_date, // release_date is first_air_date for series
             voteAverage: item.vote_average,
             votes: item.vote_count
@@ -99,6 +107,7 @@ const findMediaByTitle = async (title: string) => {
                 posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
                 backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "movie",
+                genres: movie.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
                 releaseDate: movie.release_date,
                 voteAverage: movie.vote_average,
                 votes: movie.vote_count
@@ -114,6 +123,7 @@ const findMediaByTitle = async (title: string) => {
                 posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
                 backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "series",
+                genres: movie.genre_ids.map((genreId: number) => getGenreName(genreId, "series")),
                 releaseDate: movie.first_air_date,
                 voteAverage: movie.vote_average,
                 votes: movie.vote_count
@@ -170,6 +180,7 @@ const fetchMoviesByGenre = async (genreId: number, page: number) => {
             description: item.overview,
             posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
             backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+            genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
             releaseDate: item.release_date,
             voteAverage: item.vote_average,
             votes: item.vote_count
@@ -222,7 +233,7 @@ const getCredits = async (id: string, type: string) => {
 };
 
 const getMediaImages = async (id: string, type: string) => {
-    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/images`);
+    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/images?include_image_language=en,null&language=en-US&include_video=false`);
     if (!response) return null;
 
     response.backdrops = response.backdrops.map((backdrop: any) => {
@@ -287,6 +298,40 @@ const getMediaVideos = async (id: string, type: string) => {
     return response.results;
 };
 
+const fetchGenres = async () => {
+    const [seriesGenres, movieGenres] = await Promise.all([
+        makeTMDBRequest(`/genre/tv/list?language=en`),
+        makeTMDBRequest(`/genre/movie/list?language=en`)
+    ]);
+    if (!seriesGenres || !movieGenres) throw new Error("Failed to fetch genres");
+
+    genres.movies = movieGenres.genres;
+    genres.series = seriesGenres.genres;
+
+    if (clearGenresTimeout) clearTimeout(clearGenresTimeout);
+    clearGenresTimeout = setTimeout(async () => {
+        try {
+            await fetchGenres();
+        } catch (err) {
+            console.error("Failed to refetch genres: ".red, err);
+        }
+    }, 1000 * 60 * 60 * 24);
+};
+
+const getGenreName = (genreId: number, type: string) => {
+    if (!isValidMediaType(type)) return null;
+    if (!genres) return null;
+
+    let genre: Genre | undefined;
+    if (type === "movie") {
+        genre = genres.movies.find((genre: Genre) => genre.id === genreId);
+    } else if (type === "series") {
+        genre = genres.series.find((genre: Genre) => genre.id === genreId);
+    }
+
+    return genre ? genre.name : null;
+};
+
 /**
  * 
  * @param type Valid types are "movie" and "series"
@@ -305,5 +350,7 @@ export {
     fetchMoviesByGenre,
     getCredits,
     getMediaImages,
-    getMediaVideos
+    getMediaVideos,
+    getGenreName,
+    fetchGenres
 };

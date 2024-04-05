@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
-import { mml_api_protected } from "../../axios/mml_api_intances";
 import NotFound from "../../components/not-found-component/not-found";
 import Modal from "../../components/modal-component/modal";
+import { GlobalContext } from "../../contexts/GlobalContext";
 
 export default function History() {
     const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [cursor, setCursor] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const { mml_api_protected } = useContext(GlobalContext);
 
     useEffect(() => {
         document.title = "History | My Movie List";

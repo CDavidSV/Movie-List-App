@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import InputField from "../../components/inputField-component/inputField";
 import FilmCard from "../../components/film-card-component/filmCard";
 import "./search.css";
-import { mml_api } from "../../axios/mml_api_intances";
-import { getSavedItems, removeSearchResultHistoryItem } from "../../helpers/util.helpers";
+import { removeSearchResultHistoryItem } from "../../helpers/util.helpers";
 import { getSearchResultsHistory } from "../../helpers/util.helpers";
 import { Link } from "react-router-dom";
+import { GlobalContext } from "../../contexts/GlobalContext";
 
 function PrevSearchResultCard(props: { name: string, url: string, remove: React.MouseEventHandler }) {
     return (
@@ -26,6 +26,7 @@ export default function Browse() {
     const [timeoutFunc, setTimeoutFunc] = useState<NodeJS.Timeout | null>(null);
     const [searchHistory, setSearchHistory] = useState<SearchResultItem[]>(getSearchResultsHistory());
     const [defaultValue, setDefaultValue] = useState<string>("");
+    const { getSavedItems, mml_api } = useContext(GlobalContext);
     const cooldown = 400;
 
     useEffect(() => {

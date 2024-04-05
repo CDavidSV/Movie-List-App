@@ -1,6 +1,3 @@
-import { mml_api_protected } from "../axios/mml_api_intances";
-import { isLoggedIn } from "./session.helpers";
-
 const shortenNumber = (num: number) => {
     if (num < 1000) return num.toString();
 
@@ -21,55 +18,6 @@ const shortenNumber = (num: number) => {
 
     return shortenedNumStr;
 };
-
-const getSavedItems = (films: any[], media: { id: string, type: string }[], callback: (films: any) => void) => {
-    // Check first if the user is logged in
-    if (!isLoggedIn()) return callback(films);
-
-    const requestMedia = media.map((item) => {
-        return {
-            media_id: item.id,
-            type: item.type
-        };
-    });
-
-    mml_api_protected.post('api/v1/user/in-personal-lists', requestMedia).then((response) => {
-        const { responseData } = response.data;
-        films.forEach((film) => {
-            if (film.id in responseData) {
-                film.inWatchlist = responseData[film.id].watchlist;
-                film.inFavorites = responseData[film.id].favorite;
-            } else {
-                film.inWatchlist = false;
-                film.inFavorites = false;
-            }
-        });
-        callback(films);
-    }).catch(() => {
-        callback(films);
-    });
-};
-
-const setFavorite = async (id: string, type: string) => {
-    await mml_api_protected.post(`api/v1/favorites/add?media_id=${id}&type=${type}`);
-};
-
-const removeFavorite = async (id: string, type: string) => {
-    await mml_api_protected.delete(`api/v1/favorites/remove?media_id=${id}&type=${type}`);
-};
-
-const setWatchlist = async (id: string, type: string, status: number = 1, progress: number = 0) => {
-    await mml_api_protected.post(`api/v1/watchlist/update`, {
-        media_id: id.toString(),
-        status: status,
-        progress: progress,
-        type: type
-    });
-};
-
-const removeFromWatchlist = async (id: string, type: string) => {
-    await mml_api_protected.delete(`api/v1/watchlist/remove?media_id=${id}&type=${type}`);
-}
 
 const saveSearchResult = (name: string, id: string, type: string,  url: string) => {
     const searchResultHistory: SearchResultItem[] | undefined = JSON.parse(localStorage.getItem('searchResultsHistory')!);
@@ -123,16 +71,6 @@ const clearSearchResultsHistory = () => {
     localStorage.removeItem('searchResultsHistory');
 };
 
-const saveToHistory = (id: string, type: string) => {
-    // Save the selected film to the users history
-    if (!isLoggedIn()) return;
-
-    mml_api_protected.post("api/v1/history/add", {
-        media_id: id,
-        type: type
-    });
-};
-
 const calculateMovieRuntime = (runtimeInMinutes: number) => {
     const hours = Math.floor(runtimeInMinutes / 60);
     const remainingMinutes = runtimeInMinutes % 60;
@@ -141,15 +79,9 @@ const calculateMovieRuntime = (runtimeInMinutes: number) => {
 };
 
 export { 
-    shortenNumber, 
-    getSavedItems, 
-    setFavorite, 
-    removeFavorite, 
-    setWatchlist, 
-    removeFromWatchlist, 
+    shortenNumber,
     saveSearchResult, 
-    getSearchResultsHistory, 
-    saveToHistory, 
+    getSearchResultsHistory,
     removeSearchResultHistoryItem, 
     clearSearchResultsHistory,
     calculateMovieRuntime

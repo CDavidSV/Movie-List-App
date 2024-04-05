@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { mml_api_protected } from "../../axios/mml_api_intances";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { removeFavorite } from "../../helpers/util.helpers";
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DraggableStateSnapshot } from "react-beautiful-dnd";
 import WatchlistButton from "../../components/watchlist-button-component/watchlist-button";
 import Modal from "../../components/modal-component/modal";
 import "./favorites.css";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
+import { GlobalContext } from "../../contexts/GlobalContext";
 
 function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: any, removeItem: Function, provided: DraggableProvided, snapshot: DraggableStateSnapshot}) {
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const { removeFavorite } = useContext(GlobalContext);
     
     const removeFromFavorites = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -60,6 +60,7 @@ export default function Favorites() {
     const [favorites, setFavorites] = useState<any[]>([]);
     const [lastId, setLastId] = useState<number | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const { mml_api_protected } = useContext(GlobalContext);
 
     useInfiniteScroll(() => getNextPage(), loading, !lastId);
 

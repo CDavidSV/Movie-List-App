@@ -1,15 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { mml_api, mml_api_protected } from "../../axios/mml_api_intances";
-import { calculateMovieRuntime, getSavedItems, saveToHistory, setWatchlist } from "../../helpers/util.helpers";
+import { calculateMovieRuntime } from "../../helpers/util.helpers";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
 import PersonCard from "../../components/person-card-component/person-card";
-import { isLoggedIn } from "../../helpers/session.helpers";
-import FilmSlider from "../../components/film-slider-component/filmSlider";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import FilmSlider from "../../components/film-slider-component/filmSlider";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import Modal from "../../components/modal-component/modal";
+import { MediaContext } from "../../contexts/MediaContext";
 import "./media.css";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
@@ -27,10 +26,11 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
     const [isWatchlisted, setIsWatchlisted] = useState<boolean>(false);
     const [inFavorites, setInFavorites] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
+    const { loggedIn, mml_api_protected, setWatchlist } = useContext(GlobalContext);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isLoggedIn()) return;
+        if (!loggedIn) return;
 
         mml_api_protected.post(`/api/v1/user/status-in-personal-lists?media_id=${props.mediaId}&type=${props.type}`).then((response) => {
             const responseData = response.data.responseData;
@@ -98,7 +98,7 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
 
     return (
         <div className="film-interaction-container">
-            {isLoggedIn() ? 
+            {loggedIn ? 
                 <div className={loading ? "film-interaction disabled" : "film-interaction"}>
                     <FavoriteButton size="medium" mediaId={props.mediaId} type={props.type} isFavorite={inFavorites}/>
                     {isWatchlisted ?
@@ -183,6 +183,7 @@ function Images({ type, id }: { type: string, id: string }) {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [selectedImage, setSelectedImage] = useState<string>("");
     const [selectedImages, setSelectedImages] = useState<any[]>([]);
+    const { mml_api } = useContext(GlobalContext);
 
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/images`).then((response) => {
@@ -231,6 +232,7 @@ function Videos({ type, id }: { type: string, id: string }) {
     const [videos, setVideos] = useState<any[]>([]);
     const [selectedVideo, setSelectedVideo] = useState<{ name: string, key: string } | null>();
     const [showModal, setShowModal] = useState<boolean>(false);
+    const { mml_api } = useContext(GlobalContext);
 
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/videos`).then((response) => {
@@ -282,6 +284,7 @@ function Videos({ type, id }: { type: string, id: string }) {
 
 function Cast({ type, id }: { type: string, id: string }) {
     const [cast, setCast] = useState<any[]>([]);
+    const { mml_api } = useContext(GlobalContext);
 
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/cast`).then((response) => {
@@ -306,6 +309,7 @@ function Cast({ type, id }: { type: string, id: string }) {
 
 function Crew({ type, id }: { type: string, id: string }) {
     const [crew, setCrew] = useState<{ name: string, members: any[] }[]>([]);
+    const { mml_api } = useContext(GlobalContext);
 
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/crew`).then((response) => {
@@ -383,7 +387,8 @@ export default function Media() {
     const [mediaData, setMediaData] = useState<any>(null);
     const [facts, setFacts] = useState<string>("");
     const [recommendations, setRecommendations] = useState<FilmCardProps[]>([]);
-    const getMediaData = useContext(GlobalContext).getMediaData;
+    const { loggedIn, getSavedItems, saveToHistory } = useContext(GlobalContext);
+    const { getMediaData } = useContext(MediaContext);
     const navigate = useNavigate();
     
     // I case no id or type is provided
@@ -459,7 +464,7 @@ export default function Media() {
             // Scroll to top of page
             window.scrollTo(0, 0);
 
-            saveToHistory(mediaData.id.toString(), type as string);
+            saveToHistory(mediaData.id.toString(), type as string, loggedIn);
         });
     }, [navigate]);
 

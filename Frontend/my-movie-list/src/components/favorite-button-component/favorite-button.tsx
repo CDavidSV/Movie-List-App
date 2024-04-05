@@ -1,15 +1,15 @@
-import { isLoggedIn } from "../../helpers/session.helpers";
 import { useContext, useEffect, useState } from "react";
-import { removeFavorite, setFavorite } from "../../helpers/util.helpers";
 import { useNavigate } from "react-router-dom";
 import Modal from "../modal-component/modal";
 import { PersonalListsContext } from "../../contexts/PersonalListsContext";
+import { GlobalContext } from "../../contexts/GlobalContext";
 
 export default function FavoriteButton(props: { size: string, isFavorite: boolean, mediaId: string, type: string }) {
     const [isFavorite, setIsFavorite] = useState<boolean>(props.isFavorite);
     const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
     const navigate = useNavigate();
     const { handleFavoriteState } = useContext(PersonalListsContext);
+    const { loggedIn, removeFavorite, setFavorite } = useContext(GlobalContext);
 
     useEffect(() => {
         setIsFavorite(props.isFavorite);
@@ -18,7 +18,7 @@ export default function FavoriteButton(props: { size: string, isFavorite: boolea
     const handleFavoriteClick = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!isLoggedIn()) {
+        if (!loggedIn) {
             setLoginModalOpen(true);
             return;
         };

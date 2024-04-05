@@ -34,15 +34,11 @@ export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchRe
         const newWatchlistState = watchlistState.get(`${filmData.id}.${filmData.type}`);
         const newFavoriteState = favoriteState.get(`${filmData.id}.${filmData.type}`);
 
-        const inPersonalListsObj = { inWatchlist: false, inFavorites: false };
-        if (newWatchlistState !== undefined) {
-            inPersonalListsObj.inWatchlist = newWatchlistState;
-        }
-
-        if (newFavoriteState !== undefined) {
-            inPersonalListsObj.inFavorites = newFavoriteState;
-        }
-        setPersonalListsState(inPersonalListsObj);
+        setPersonalListsState(prevState => ({
+            ...prevState,
+            inWatchlist: newWatchlistState !== undefined ? newWatchlistState : prevState.inWatchlist,
+            inFavorites: newFavoriteState !== undefined ? newFavoriteState : prevState.inFavorites
+        }));
     }, [watchlistState, favoriteState]);
 
     useEffect(() => {

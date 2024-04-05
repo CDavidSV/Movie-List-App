@@ -1,15 +1,15 @@
 import { useContext, useEffect, useState } from "react";
-import { isLoggedIn } from "../../helpers/session.helpers";
-import { removeFromWatchlist, setWatchlist } from "../../helpers/util.helpers";
 import { useNavigate } from "react-router-dom";
 import Modal from "../modal-component/modal";
 import { PersonalListsContext } from "../../contexts/PersonalListsContext";
+import { GlobalContext } from "../../contexts/GlobalContext";
 
 export default function WatchlistButton(props: { size: string, isWatchlisted: boolean, mediaId: string, type: string }) {
     const [isWatchlisted, setIsWatchlisted] = useState<boolean>(props.isWatchlisted);
     const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
     const { handleWatchlistState } = useContext(PersonalListsContext);
     const navigate = useNavigate();
+    const { loggedIn, removeFromWatchlist, setWatchlist } = useContext(GlobalContext);
 
     useEffect(() => {
         setIsWatchlisted(props.isWatchlisted);
@@ -18,7 +18,7 @@ export default function WatchlistButton(props: { size: string, isWatchlisted: bo
     const handleWatchlistClick = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!isLoggedIn()) {
+        if (!loggedIn) {
             setLoginModalOpen(true);
             return;
         };

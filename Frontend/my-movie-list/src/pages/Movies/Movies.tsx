@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import { mml_api } from "../../axios/mml_api_intances";
-import { getSavedItems } from "../../helpers/util.helpers";
+import { useContext, useEffect, useState } from "react";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
+import { GlobalContext } from "../../contexts/GlobalContext";
 
 export default function Movies() {
     const [movies, setMovies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
+    const { getSavedItems, mml_api } = useContext(GlobalContext);
 
     const getMovies = (page: number) => {
         setLoading(true);

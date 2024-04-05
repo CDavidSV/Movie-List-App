@@ -3,17 +3,19 @@ import Cropper from 'cropperjs';
 import "cropperjs/dist/cropper.css";
 import './upload-image.css';
 
-export default function UploadImage() {
+export default function UploadImage(props: UploadImageProps) {
     const [selectedImage, setSelectedImage] = useState<string | ArrayBuffer | null>(null);
     const [message, setMessage] = useState<string>('Drag here to upload');
     const cropperRef = useRef<HTMLImageElement>(null);
+    let cropper: Cropper;
 
     useEffect(() => {
         if (!selectedImage || !cropperRef.current) return;
 
-        new Cropper(cropperRef.current, {
-            initialAspectRatio: 1,
-            aspectRatio: 1,
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(cropperRef.current, {
+            aspectRatio: props.aspectRatio,
             viewMode: 1,
             minCropBoxHeight: 100,
             minCropBoxWidth: 100,
@@ -21,25 +23,21 @@ export default function UploadImage() {
             responsive: true,
             autoCropArea: 1,
             checkOrientation: false,
-            guides: true,
-            crop: (event) => {
-                console.log(event.detail.x);
-                console.log(event.detail.y);
-            }
+            guides: true
         });
     }, [selectedImage]);
 
     const validateImage = (file: File) => {
         const fileSize = file.size / 1000 / 1000;
         
-        if (fileSize > 8) {
-            setMessage('File size cannot exceeds 8MB');
+        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (validTypes.indexOf(file.type) === -1) {
+            setMessage('Invalid file type. Only JPEG, PNG, and JPG are allowed');
             return;
         }
 
-        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (validTypes.indexOf(file.type) === -1) {
-            setMessage('Invalid file type. Only JPEG, PNG, JPG are allowed');
+        if (fileSize > 8) {
+            setMessage('File size cannot exceed 8MB');
             return;
         }
 
@@ -60,6 +58,15 @@ export default function UploadImage() {
         }
 
         validateImage(e.dataTransfer.files[0]);
+    }
+
+    const getCroppedImage = () => {
+        if (!cropper) return;
+        const canvas = cropper.getCroppedCanvas();
+
+        if (!canvas) return;
+
+        props.onCrop(canvas.toDataURL());
     }
 
     return (
@@ -83,9 +90,9 @@ export default function UploadImage() {
                 <h3>Upload Image</h3>
                 <p>{message}</p>
             </div>
-            <div style={!selectedImage ? { display: "none" } : { overflow: "hidden", height: "300px" }}>
-                <img ref={cropperRef} src={selectedImage as string} alt="profile-picture"/>
-                <button style={{ marginTop: "10px", width: "100%" }} className="button primary">Upload</button>
+            <div style={!selectedImage ? { display: "none" } : { minWidth: "200px"}}>
+                <img style={{ height: "600px", maxWidth: "100%", display: "100%" }} ref={cropperRef} src={selectedImage as string} alt="profile-picture"/>
+                <button onClick={() => getCroppedImage()} style={{ marginTop: "10px", width: "100%" }} className="button primary">Upload</button>
             </div>
         </div>
     );

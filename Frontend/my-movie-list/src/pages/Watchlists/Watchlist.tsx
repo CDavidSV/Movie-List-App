@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
-import { mml_api_protected } from "../../axios/mml_api_intances";
+import { useContext, useEffect, useState } from "react";
 import NotFound from "../../components/not-found-component/not-found";
-import { setWatchlist, removeFromWatchlist } from "../../helpers/util.helpers";
 import "./watchlist.css";
 import { Link } from "react-router-dom";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
@@ -9,11 +7,13 @@ import FavoriteButton from "../../components/favorite-button-component/favorite-
 import Modal from "../../components/modal-component/modal";
 import axios, { CancelTokenSource } from "axios";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
+import { GlobalContext } from "../../contexts/GlobalContext";
 
 function WatchlistItem(props: WatchlistItemProps) {
     const [status, setStatus] = useState<string>("plan-to-watch");
     const [itemProgress, setItemProgress] = useState<{ progress: number, totalProgress: number }>({ progress: props.progress, totalProgress: props.total_progress });
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const { setWatchlist } = useContext(GlobalContext);
 
     useEffect(() => {
         switch (props.status) {
@@ -109,6 +109,7 @@ export default function Watchlist() {
     const [watchlist, setWatchlist] = useState<any[]>([]);
     const [source, setSource] = useState<CancelTokenSource | null>(null);
     const [cursor, setCursor] = useState<number | null>(null);
+    const { removeFromWatchlist, mml_api_protected } = useContext(GlobalContext);
 
     useInfiniteScroll(() => getNextPage(), loading, !cursor);
 

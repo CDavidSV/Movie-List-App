@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import defaultPfp from '../../assets/images/profile-default.png';
-import { getSessionData, clearSessionData } from '../../helpers/session.helpers';
 import { useNavigate } from 'react-router-dom';
 import InputField from '../../components/inputField-component/inputField';
 import Modal from '../../components/modal-component/modal';
-import { mml_api_protected } from '../../axios/mml_api_intances';
 import UploadImage from '../../components/upload-image/upload-image';
+import { GlobalContext } from '../../contexts/GlobalContext';
+import config from '../../config/config';
 import "./myprofile.css";
 
 function ChangeUsername ({ username }: { username: string }) {
@@ -14,6 +14,9 @@ function ChangeUsername ({ username }: { username: string }) {
     const [saveDisabled, setsaveDisabled] = useState<boolean>(true);
     const [message, setMessage] = useState<string>("");
     const [error, setError] = useState<boolean>(false);
+    const { userData, mml_api_protected } = useContext(GlobalContext);
+
+    const { updateUsername } = useContext(GlobalContext);
 
     const changeUsername = (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,13 +25,14 @@ function ChangeUsername ({ username }: { username: string }) {
 
         setsaveDisabled(true);
         mml_api_protected.post('/api/v1/user/change-username', { username: newUsername }).then(() => {
-            const oldSessionData = getSessionData();
+            const oldSessionData = userData;
 
             if (oldSessionData) {
                 oldSessionData.username = newUsername;
                 localStorage.setItem('sessionData', JSON.stringify(oldSessionData));
                 setMessage("Username changed successfully.");
                 setOldUsername(newUsername);
+                updateUsername(newUsername);
 
                 setTimeout(() => {
                     setMessage("");
@@ -79,6 +83,7 @@ function AccDelPassConf({ onCancel }: { onCancel: () => void }) {
     const [password, setPassword] = useState<string>("");
     const [message, setMessage] = useState<string>("");
     const [confirmDisabled, setConfirmDisabled] = useState<boolean>(true);
+    const { clearSessionData, mml_api_protected } = useContext(GlobalContext);
 
     const attemptAccountDeletion = (e: React.FormEvent) => {
         e.preventDefault();
@@ -129,6 +134,7 @@ function ChangePasswordTab() {
     const [message, setMessage] = useState<string>("");
     const [error, setError] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const { mml_api_protected } = useContext(GlobalContext);
 
     const attemptPasswordChange = (e: React.FormEvent) => {
         e.preventDefault();
@@ -215,9 +221,9 @@ function ChangePasswordTab() {
 }
 
 function GeneralTab() {
-    const sessionData = getSessionData();
     const [accountDeletionModal, setAccountDeletionModal] = useState<boolean>(false);
     const [accountDeletionPassModal, setAccountDeletionPassModal] = useState<boolean>(false);
+    const { userData } = useContext(GlobalContext);
 
     return (
         <div className="profile-page-tab">
@@ -239,7 +245,7 @@ function GeneralTab() {
             </Modal>
             <div>
                 <h4 style={{margin: "0 0 15px 0"}}>Change Username</h4>
-                <ChangeUsername username={sessionData ? sessionData.username : ''}/>
+                <ChangeUsername username={userData ? userData.username : ''}/>
                 <div style={{marginTop: "40px"}}>
                     <h4 style={{margin: "0"}}>Account Removal</h4>
                     <p style={{margin: "0 0 10px 0", opacity: "0.5", fontSize: "0.8rem"}}>This will delete your account and all data associated with it. This action cannot be undone.</p>
@@ -252,14 +258,14 @@ function GeneralTab() {
 
 export default function MyProfile() {
     const navigate = useNavigate();
-    const sessionData = getSessionData();
+    const { userData, updateUserData, mml_api_protected } = useContext(GlobalContext);
     const [selectedTab, setSelectedTab] = useState<number>(0);
     const [modalsState, setModalsState] = useState<{ pfpModal: boolean, bannerModal: boolean }>({ pfpModal: false, bannerModal: false })
 
     useEffect(() => {
         document.title = "Profile | My Movie List";
 
-        if (!sessionData) {
+        if (!userData) {
             navigate('/login');
         }
     }, []);
@@ -268,24 +274,35 @@ export default function MyProfile() {
         setSelectedTab(parseInt(e.currentTarget.id));
     }
 
+    const onPfpChange = async (newPfp: string) => {
+        const formData = new FormData();
+        const blob = await fetch(newPfp).then((res) => res.blob());
+        formData.append('image', blob);
+
+        mml_api_protected.post('/api/v1/user/change-profile-picture', formData, { headers: { "Content-Type": "multipart/form-data" } }).then(() => {
+            setModalsState({ ...modalsState, pfpModal: false });
+            updateUserData();
+        });
+    }
+
     const tabs = [<GeneralTab/>, <ChangePasswordTab />];
     
-    // TODO: Implement a way to change the user's profile picture and banner
+    // TODO: Implement a way to change the user's banner
     return (
         <div className="content">
             <div className="profile-wallpaper"></div>
             <div className="content-wrapper">
                 <div className="profile-general-data">
                     <div className="profile-picture">
-                        <img src={defaultPfp} alt="profile_picture" />
-                        <div onClick={() => setModalsState({ ...modalsState, pfpModal: true})} className="upload_pfp"><span style={{}} className="material-icons">photo_camera</span></div>
+                        <img src={userData && userData.profilePicturePath ? `${config.apiURL}${userData.profilePicturePath}` : defaultPfp} alt="profile_picture" />
+                        <div onClick={() => setModalsState({ ...modalsState, pfpModal: true })} className="upload_pfp"><span style={{}} className="material-icons">photo_camera</span></div>
                         <Modal open={modalsState.pfpModal} onClose={() => setModalsState({ ...modalsState, pfpModal: false })}>
-                            <UploadImage />
+                            <UploadImage onCrop={onPfpChange} aspectRatio={1}/>
                         </Modal>
                     </div>
                     <div className="user-info">
-                        <h4>{sessionData.username}</h4>
-                        <p>{sessionData.email}</p>
+                        <h4>{userData && userData.username}</h4>
+                        <p>{userData && userData.email}</p>
                     </div>
                 </div>
                 <div className="profile-config-tabs">

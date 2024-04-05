@@ -50,7 +50,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(deserializeUser);
-app.use('/image', express.static(path.join(__dirname, 'public/images'))); // Serve images (profile pictures, banners, etc.)
+app.use('/images', express.static(path.join(__dirname, 'public/images'))); // Serve images (profile pictures, banners, etc.)
 // Register routes
 app.use(routes);
 

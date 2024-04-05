@@ -1,5 +1,6 @@
+import { useContext } from "react";
+import { GlobalContext } from "../../contexts/GlobalContext";
 import "./footer.css";
-import { isLoggedIn } from "../../helpers/session.helpers";
 
 function FooterLink({ icon, text, link }: { icon?: string, text: string, link: string }) {
     return (
@@ -11,6 +12,8 @@ function FooterLink({ icon, text, link }: { icon?: string, text: string, link: s
 }
 
 export default function Footer() {
+    const { loggedIn } = useContext(GlobalContext);
+
     return (
         <footer className="page-footer">
             <div className="main-footer">
@@ -22,7 +25,7 @@ export default function Footer() {
                 </div>
                 <div className="footer-section">
                     <h4>Account</h4>
-                    {isLoggedIn() ? <>
+                    {!loggedIn ? <>
                             <FooterLink text="My Profile" link="/profile"/>
                             {/* <FooterLink text="My Lists" link="/my-lists"/> */}
                             <FooterLink text="Favorites" link="/favorites"/>

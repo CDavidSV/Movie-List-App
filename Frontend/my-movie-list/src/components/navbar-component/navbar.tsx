@@ -1,13 +1,14 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 import { NavLink } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import defaultPfp from '../../assets/images/profile-default.png';
 import Logo from '../../assets/logos/mml_logo.svg?react';
 import LogoWithName from '../../assets/logos/mml_logo_with_name.svg?react';
 import useRouteChange from '../../hooks/useRouteChange';
-import { getSessionData, isLoggedIn, logOut } from '../../helpers/session.helpers';
+import { GlobalContext } from '../../contexts/GlobalContext';
 import './navbar.css';
+import config from '../../config/config';
 
 const genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
 
@@ -72,11 +73,7 @@ function GenresDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpen
 
 function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpen: boolean) => void}) {
     const { node, menuState, toggleMenu } = useDropdown(handleMenuStateChange);
-    const [sessionData, setSessionData] = useState<SessionData | null>(null);
-
-    useEffect(() => {
-        setSessionData(getSessionData());
-    }, []);
+    const { logOut, userData } = useContext(GlobalContext);
 
     return (
         <div 
@@ -89,17 +86,17 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
             >
             <div className="select-button" onClick={toggleMenu}>
                 <div className="profile-img">
-                    <img src={defaultPfp} alt="profile-picture"/>
+                    <img src={userData && userData.profilePicturePath ? `${config.apiURL}${userData.profilePicturePath}` : defaultPfp} alt="profile-picture"/>
                 </div>
                 <span className={menuState ? "select-arrow select-active" : "select-arrow"}></span>
             </div>
-            { sessionData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
+            { userData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
                 <div className="menu-profile-section">
                     <div className="menu-user-profile-item">
-                        <img src={defaultPfp} alt="profile-picture"/>
+                        <img src={userData && userData.profilePicturePath ? `${config.apiURL}${userData.profilePicturePath}` : defaultPfp} alt="profile-picture"/>
                         <div className="profile-name">
-                            <p>{sessionData.username || "Username"}</p>
-                            <p>{sessionData.email || "Email"}</p>
+                            <p>{userData.username || "Username"}</p>
+                            <p>{userData.email || "Email"}</p>
                         </div>
                     </div>
                 </div>
@@ -137,7 +134,7 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
                     </NavLink>
                 </div>
             </div>}
-            {!sessionData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
+            {!userData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
             <div className="menu-profile-section">   
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/login">
                         <span className="material-icons">login</span>
@@ -203,6 +200,7 @@ function HanburgerMenu({handleMenuStateChange}: {handleMenuStateChange: (isOpen:
 
 export default function Navbar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const { loggedIn } = useContext(GlobalContext);
 
     const handleMenuStateChange = (isOpen: boolean) => {
         setDropdownOpen(isOpen);
@@ -236,7 +234,7 @@ export default function Navbar() {
                     <NavLink to="/search" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
                         <span className="material-icons">search</span>     
                     </NavLink>
-                    {isLoggedIn() && 
+                    {loggedIn && 
                         <NavLink to="/watchlist" className={({ isActive }) => isActive ? "header-hoverable lists-icon selected " : "header-hoverable lists-icon"}>
                             <span className="material-icons">bookmark_border</span>     
                         </NavLink>

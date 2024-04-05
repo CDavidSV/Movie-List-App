@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PageNotFound from "../PageNotFound/PageNotFound";
-import { mml_api } from "../../axios/mml_api_intances";
-import { getSavedItems } from "../../helpers/util.helpers";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
+import { GlobalContext } from "../../contexts/GlobalContext";
 
 export default function Genres() {
     const { genreName } = useParams<{ genreName: string }>();
     const [media, setMedia] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [page, setPage] = useState<number>(1);
+    const { getSavedItems, mml_api } = useContext(GlobalContext);
     const navigate = useNavigate();
 
     useEffect(() => {

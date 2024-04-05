@@ -4,7 +4,8 @@ import { Route, BrowserRouter, Routes, useLocation, matchPath } from 'react-rout
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
-import MediaDataProvider from './contexts/GlobalContext';
+import GlobalProvider from './contexts/GlobalContext';
+import MediaProvider from './contexts/MediaContext';
 import "./index.css";
 
 const Home = lazy(() => import('./pages/Home/Home'));
@@ -72,10 +73,12 @@ function App() {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <MediaDataProvider>
-      <BrowserRouter>
-        <App/>
-      </BrowserRouter>
-    </MediaDataProvider>
+    <GlobalProvider>
+      <MediaProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </MediaProvider>
+    </GlobalProvider>
   </React.StrictMode>,
 )

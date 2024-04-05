@@ -40,6 +40,7 @@ interface SessionData {
     username: string;
     expiresIn: number;
     setAt: number;
+    profilePicturePath?: string;
 }
 
 interface SearchResultItem {
@@ -84,6 +85,19 @@ interface WatchlistItemProps {
 }
 
 interface UploadImageProps {
-    width: number;
-    height: number;
+    aspectRatio: number;
+    onCrop: (croppedImage: string) => void;
+}
+
+interface SliderItem {
+    backdropUrl: string;
+    description: string;
+    id: number;
+    logoUrl: string;
+    posterUrl: string;
+    releaseDate: string;
+    title: string;
+    type: string;
+    voteAverage: number;
+    votes: number;
 }

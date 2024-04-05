@@ -1,6 +1,6 @@
 import express from 'express';
 import { sendResponse } from '../../util/apiHandler';
-import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre, getCredits, getMediaImages, getMediaVideos } from '../../util/TMDB';
+import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre, getCredits, getMediaImages, getMediaVideos, getGenreName } from '../../util/TMDB';
 import Movie from '../../Models/Movie';
 import Series from '../../Models/Series';
 import config from '../../config/config';
@@ -234,7 +234,7 @@ const getMoviesHomeCarousel = async (req: express.Request, res: express.Response
     if (!imageResponses) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
 
     imageResponses.forEach((imageResponse, index) => {
-        if (response) response[index].logoUrl = imageResponse && imageResponse.logos ? imageResponse.logos[0].originalFilePath : "https://via.placeholder.com/350x100.png?text=No+Logo";
+        if (response) response[index].logoUrl = imageResponse && imageResponse.logos && imageResponse.logos.length > 0 ? imageResponse.logos[0].previewFilePath : "https://via.placeholder.com/350x100.png?text=No+Logo";
     });
     
     sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });

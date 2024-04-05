@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom';
 import InputField from '../../components/inputField-component/inputField';
-import { mml_api } from '../../axios/mml_api_intances';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { setSessionData } from '../../helpers/session.helpers';
+import { useContext, useState } from 'react';
+import { GlobalContext } from '../../contexts/GlobalContext';
 
 export default function Login() {
     const [loginData, setLoginData] = useState<LoginData | null>(null);
@@ -11,6 +10,7 @@ export default function Login() {
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { setSessionData, mml_api } = useContext(GlobalContext);
 
     document.title = "Log In | My Movie List";
 
@@ -23,7 +23,7 @@ export default function Login() {
         setLoading(true);
         mml_api.post("/auth/login", loginData, { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
         .then((response) => {
-            setSessionData(response.data.responseData.userEmail, response.data.responseData.username, response.data.responseData.expiresIn);
+            setSessionData(response.data.responseData.userEmail, response.data.responseData.username, response.data.responseData.expiresIn, response.data.responseData.profilePicturePath);
             // If login is successful, store user data and redirect to home page
             navigate("/");
         }).catch((err) => {

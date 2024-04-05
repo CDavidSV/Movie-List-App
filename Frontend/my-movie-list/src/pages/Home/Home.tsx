@@ -1,16 +1,17 @@
-import { useState, useEffect } from "react";
-import { mml_api, mml_api_protected } from "../../axios/mml_api_intances";
+import { useState, useEffect, useContext } from "react";
 import FilmSlider from "../../components/film-slider-component/filmSlider";
-import { getSavedItems } from "../../helpers/util.helpers";
-import "./home.css";
-import { isLoggedIn } from "../../helpers/session.helpers";
 import PersonalListsProvider from "../../contexts/PersonalListsContext";
+import HomeCarousel from "../../components/home-carousel-component/home-carousel";
+import { GlobalContext } from "../../contexts/GlobalContext";
+import "./home.css";
 
 export default function Home() {
     const [popularMovies, setPopularMovies] = useState<FilmCardProps[]>([]);
     const [upcoming, setUpcoming] = useState<FilmCardProps[]>([]);
     const [topRated, setTopRated] = useState<FilmCardProps[]>([]);
     const [watchlist, setWatchlist] = useState<FilmCardProps[]>([]);
+    const [carouselData, setCarouselData] = useState<SliderItem[]>([]);
+    const { loggedIn, mml_api, mml_api_protected, getSavedItems } = useContext(GlobalContext);
 
     const parseFilmData = (film: any): FilmCardProps[] => {
         return film.map((film: any) => {
@@ -36,7 +37,7 @@ export default function Home() {
         document.title = "My Movie List";
 
         mml_api.get("api/v1/media/movies/home-carousel").then((response) => {
-            console.log(response.data.responseData);
+            setCarouselData(response.data.responseData);
         });
 
         mml_api.get("api/v1/media/movies/popular").then((response) => {
@@ -60,7 +61,7 @@ export default function Home() {
             });
         });
 
-        if (!isLoggedIn()) return;
+        if (!loggedIn) return;
 
         mml_api_protected.get(`api/v1/watchlist?status=3`).then((response) => {
             setWatchlist(response.data.responseData.watchlist.map((film: any) => {
@@ -85,10 +86,13 @@ export default function Home() {
         <PersonalListsProvider>
             <div className="content">
                 <div className="sliders-container">
-                    <FilmSlider title="Popular" filmArr={popularMovies}/>
-                    <FilmSlider title="Upcoming" filmArr={upcoming}/>
-                    {watchlist.length > 0 && <FilmSlider title="Your Watchlist" filmArr={watchlist}/>}
-                    <FilmSlider title="Top Rated" filmArr={topRated}/>
+                    { carouselData.length > 0 && <HomeCarousel items={carouselData}/> }
+                    <div style={{ top: "-200px", position: "relative" }}>
+                        <FilmSlider title="Popular" filmArr={popularMovies}/>
+                        <FilmSlider title="Upcoming" filmArr={upcoming}/>
+                        {watchlist.length > 0 && <FilmSlider title="Your Watchlist" filmArr={watchlist}/>}
+                        <FilmSlider title="Top Rated" filmArr={topRated}/>
+                    </div>
                 </div>
             </div>
         </PersonalListsProvider>

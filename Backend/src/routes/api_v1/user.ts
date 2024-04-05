@@ -9,6 +9,9 @@ import { SHA256 } from "crypto-js";
 import historySchema from "../../scheemas/historySchema";
 import userSessionsSchema from "../../scheemas/userSessionsSchema";
 import Joi from "joi";
+import fs from "fs";
+import { v4 as uuid } from 'uuid';
+import path from "path";
 
 const getuserInfo = async (req: Request, res: Response) => {
     const userId = req.params.id;
@@ -47,8 +50,8 @@ const getMeUserInfo = async (req: Request, res: Response) => {
         email: 1,
         verified: 1,
         joined_at: 1,
-        profile_picture_url: 1,
-        profile_banner_url: 1,
+        profile_picture_path: 1,
+        profile_banner_path: 1,
         _id: 0
     }).then(user => {
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
@@ -152,6 +155,20 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
 
 const uploadProfilePicture = async (req: Request, res: Response) => {
     if (!req.file) return sendResponse(res, { status: 400, message: "Invalid request. No image provided" });
+
+    const file = req.file.buffer;
+    if (file.length > 8000000) return sendResponse(res, { status: 400, message: "Invalid request. File size cannot exceed 8MB" });
+
+    
+    try {
+        const filename = `${uuid()}.${req.file.mimetype.split("/")[1]}`;
+        
+        await userSchema.updateOne({ _id: req.user!.id }, { profile_picture_path: `/images/${filename}` });
+        fs.writeFileSync(path.join(__dirname, `../../public/images/${filename}`), file);
+    } catch (err) {
+        console.error(err);
+        return sendResponse(res, { status: 500, message: "Error uploading profile picture" });
+    }
 
     sendResponse(res, { status: 200, message: "Profile picture uploaded successfully", responsePayload: { imageUrl: req.file.path } });
 };
