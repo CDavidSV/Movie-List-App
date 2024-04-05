@@ -16,6 +16,7 @@
     height: 100%;
     padding: 20px;
     text-align: center;
+    transition: ease 0.2s;
 }
 
 .upload-image-box:hover {

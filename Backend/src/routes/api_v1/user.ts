@@ -12,6 +12,7 @@ import Joi from "joi";
 import fs from "fs";
 import { v4 as uuid } from 'uuid';
 import path from "path";
+import sharp from "sharp";
 
 const getuserInfo = async (req: Request, res: Response) => {
     const userId = req.params.id;
@@ -155,16 +156,26 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
 
 const uploadProfilePicture = async (req: Request, res: Response) => {
     if (!req.file) return sendResponse(res, { status: 400, message: "Invalid request. No image provided" });
-
-    const file = req.file.buffer;
-    if (file.length > 8000000) return sendResponse(res, { status: 400, message: "Invalid request. File size cannot exceed 8MB" });
-
+    const buffer = req.file.buffer;
     
     try {
+        // The image needs to have an aspect ratio of 1:1
+        const imgMetadata = await sharp(buffer).metadata();
+    
+        if (imgMetadata.width !== imgMetadata.height) return sendResponse(res, { status: 400, message: "Invalid image. The image must have an aspect ratio of 1:1" });
+
         const filename = `${uuid()}.${req.file.mimetype.split("/")[1]}`;
+
+        // Check if the user already has a profile picture and delete it if they do.
+        const user = await userSchema.findById(req.user!.id);
+        if (user && user.profile_picture_path) {
+            fs.unlink(path.join(__dirname, `../../public${user.profile_picture_path}`), (err) => {
+                if (err) console.error(err);
+            });
+        }
         
         await userSchema.updateOne({ _id: req.user!.id }, { profile_picture_path: `/images/${filename}` });
-        fs.writeFileSync(path.join(__dirname, `../../public/images/${filename}`), file);
+        fs.writeFileSync(path.join(__dirname, `../../public/images/${filename}`), buffer);
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error uploading profile picture" });
@@ -175,6 +186,30 @@ const uploadProfilePicture = async (req: Request, res: Response) => {
 
 const uploadBannerPicture = async (req: Request, res: Response) => {
     if (!req.file) return sendResponse(res, { status: 400, message: "Invalid request. No image provided" });
+    const buffer = req.file.buffer;
+    
+    try {
+        // The image needs to have an aspect ratio of 16:9
+        const imgMetadata = await sharp(buffer).metadata();
+
+        if (Math.abs(imgMetadata.width! / imgMetadata.height! - 16 / 9) > 0.2) return sendResponse(res, { status: 400, message: "Invalid image. The image must have an aspect ratio of 16:9" });
+
+        const filename = `${uuid()}.${req.file.mimetype.split("/")[1]}`;
+
+        // Check if the user already has a profile picture and delete it if they do.
+        const user = await userSchema.findById(req.user!.id);
+        if (user && user.profile_banner_path) {
+            fs.unlink(path.join(__dirname, `../../public${user.profile_banner_path}`), (err) => {
+                if (err) console.error(err);
+            });
+        }
+        
+        await userSchema.updateOne({ _id: req.user!.id }, { profile_banner_path: `/images/${filename}` });
+        fs.writeFileSync(path.join(__dirname, `../../public/images/${filename}`), buffer);
+    } catch (err) {
+        console.error(err);
+        return sendResponse(res, { status: 500, message: "Error uploading banner image" });
+    }
 
     sendResponse(res, { status: 200, message: "Banner uploaded successfully", responsePayload: { imageUrl: req.file.path } });
 };

@@ -36,7 +36,7 @@ export default function UploadImage(props: UploadImageProps) {
             return;
         }
 
-        if (fileSize > 8) {
+        if (fileSize > props.maxImageSizeInMb) {
             setMessage('File size cannot exceed 8MB');
             return;
         }
@@ -66,7 +66,7 @@ export default function UploadImage(props: UploadImageProps) {
 
         if (!canvas) return;
 
-        props.onCrop(canvas.toDataURL());
+        props.onCrop(canvas.toDataURL('image/jpeg', 0.9));
     }
 
     return (
@@ -90,8 +90,8 @@ export default function UploadImage(props: UploadImageProps) {
                 <h3>Upload Image</h3>
                 <p>{message}</p>
             </div>
-            <div style={!selectedImage ? { display: "none" } : { minWidth: "200px"}}>
-                <img style={{ height: "600px", maxWidth: "100%", display: "100%" }} ref={cropperRef} src={selectedImage as string} alt="profile-picture"/>
+            <div style={!selectedImage ? { display: "none" } : { minWidth: "200px" }}>
+                <img style={{ height: props.height, maxWidth: "100%", display: "100%" }} ref={cropperRef} src={selectedImage as string} alt="profile-picture"/>
                 <button onClick={() => getCroppedImage()} style={{ marginTop: "10px", width: "100%" }} className="button primary">Upload</button>
             </div>
         </div>

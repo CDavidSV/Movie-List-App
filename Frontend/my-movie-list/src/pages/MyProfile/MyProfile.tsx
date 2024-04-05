@@ -285,19 +285,36 @@ export default function MyProfile() {
         });
     }
 
+    const onBannerChange = async (newBanner: string) => {
+        const formData = new FormData();
+        const blob = await fetch(newBanner).then((res) => res.blob());
+        formData.append('image', blob);
+
+        mml_api_protected.post('/api/v1/user/change-profile-banner', formData, { headers: { "Content-Type": "multipart/form-data" } }).then(() => {
+            setModalsState({ ...modalsState, bannerModal: false });
+            updateUserData();
+        });
+    }
+
     const tabs = [<GeneralTab/>, <ChangePasswordTab />];
     
     // TODO: Implement a way to change the user's banner
     return (
         <div className="content">
-            <div className="profile-wallpaper"></div>
+            <div className="profile-wallpaper">
+                {userData && userData.profileBannerPath && <img src={`${config.apiURL}${userData.profileBannerPath}`} alt="profile_banner" />}
+                <div onClick={() => setModalsState({ ...modalsState, bannerModal: true })} className="upload_banner"><span style={{}} className="material-icons">image</span></div>
+                <Modal open={modalsState.bannerModal} onClose={() => setModalsState({ ...modalsState, bannerModal: false })}>
+                    <UploadImage onCrop={onBannerChange} aspectRatio={16 / 9} height="35vh" maxImageSizeInMb={16}/>
+                </Modal>
+            </div>
             <div className="content-wrapper">
                 <div className="profile-general-data">
                     <div className="profile-picture">
                         <img src={userData && userData.profilePicturePath ? `${config.apiURL}${userData.profilePicturePath}` : defaultPfp} alt="profile_picture" />
                         <div onClick={() => setModalsState({ ...modalsState, pfpModal: true })} className="upload_pfp"><span style={{}} className="material-icons">photo_camera</span></div>
                         <Modal open={modalsState.pfpModal} onClose={() => setModalsState({ ...modalsState, pfpModal: false })}>
-                            <UploadImage onCrop={onPfpChange} aspectRatio={1}/>
+                            <UploadImage onCrop={onPfpChange} aspectRatio={1} height="50vh" maxImageSizeInMb={8}/>
                         </Modal>
                     </div>
                     <div className="user-info">

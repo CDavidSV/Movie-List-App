@@ -8,6 +8,7 @@ import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies,
 import { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getuserInfo, uploadBannerPicture } from "./user";
 import upload from "../../config/multer.config";
 import requireUser from "../../middlewares/requireUser";
+import createMulterInstance from "../../config/multer.config";
 
 const router: express.Router = express.Router();
 
@@ -34,8 +35,8 @@ router.post('list/:id/reorder', requireUser, () => { });
 router.get("/me", requireUser, getMeUserInfo);
 router.post("/user/in-personal-lists", requireUser, hasMedia);
 router.post("/user/status-in-personal-lists", requireUser, getStatusInPersonalLists);
-router.post("/user/change-profile-picture", requireUser, upload.single('image'), uploadProfilePicture);
-router.post("/user/change-profile-banner", requireUser, upload.single('image'), uploadBannerPicture);
+router.post("/user/change-profile-picture", requireUser, createMulterInstance(8).single('image'), uploadProfilePicture);
+router.post("/user/change-profile-banner", requireUser, createMulterInstance(16).single('image'), uploadBannerPicture);
 router.post("/user/change-username", requireUser, changeUsername);
 router.delete("/user/delete-account", requireUser, deleteAccount);
 router.get("/user/:id", requireUser, getuserInfo);

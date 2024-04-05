@@ -1,7 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { createContext, useEffect, useState } from "react";
 import config from "../config/config";
-import { get } from "http";
 
 interface GlobalContextProps {
     userData: SessionData | null;
@@ -146,7 +145,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         return JSON.parse(localStorage.getItem('sessionData')!) as SessionData;
     };
 
-    const setSessionData = (email: string, username: string, expiresIn: number, profilePicturePath?: string) => {
+    const setSessionData = (email: string, username: string, expiresIn: number, profilePicturePath?: string, profileBannerPath?: string) => {
         setLoggedIn(true);
 
         const sessionData = {
@@ -158,6 +157,10 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
     
         if (profilePicturePath) {
             sessionData.profilePicturePath = profilePicturePath;
+        }
+
+        if (profileBannerPath) {
+            sessionData.profileBannerPath = profileBannerPath;
         }
     
         localStorage.setItem('sessionData', JSON.stringify(sessionData));
@@ -179,7 +182,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         if (!sessionData) return;
 
         mml_api_protected.get("/api/v1/me").then((res) => {
-            sessionData = { ...sessionData, username: res.data.responseData.username, profilePicturePath: res.data.responseData.profile_picture_path, email: res.data.responseData.email };
+            sessionData = { ...sessionData, username: res.data.responseData.username, profilePicturePath: res.data.responseData.profile_picture_path, profileBannerPath: res.data.responseData.profile_banner_path, email: res.data.responseData.email };
             localStorage.setItem('sessionData', JSON.stringify(sessionData));
 
             setUserData(sessionData);

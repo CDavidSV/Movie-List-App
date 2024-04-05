@@ -1,7 +1,14 @@
 import multer from "multer";
 
 // Multer config
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const createMulterInstance = (limit: number) => {
+    const storage = multer.memoryStorage();
+    return multer({
+        storage: storage,
+        limits: {
+            fileSize: limit * 1024 * 1024,
+        },
+    });
+};
 
-export default upload;
+export default createMulterInstance;

@@ -1,7 +1,17 @@
 .profile-wallpaper {
+    position: relative;
     height: 300px;
     width: 100%;
     background-color: var(--background-hover-color);
+}
+
+.profile-wallpaper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
 }
 
 .profile-general-data {
@@ -36,6 +46,20 @@
     right: 0;
     background: rgb(48, 48, 48);
     border: 5px solid var(--background-color);
+    padding: 8px;
+    border-radius: 100%;
+    aspect-ratio: 1;
+    cursor: pointer;
+}
+
+.upload_banner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgb(48, 48, 48);
     padding: 8px;
     border-radius: 100%;
     aspect-ratio: 1;

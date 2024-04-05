@@ -41,6 +41,7 @@ interface SessionData {
     expiresIn: number;
     setAt: number;
     profilePicturePath?: string;
+    profileBannerPath?: string;
 }
 
 interface SearchResultItem {
@@ -86,6 +87,8 @@ interface WatchlistItemProps {
 
 interface UploadImageProps {
     aspectRatio: number;
+    height: string;
+    maxImageSizeInMb: number;
     onCrop: (croppedImage: string) => void;
 }
 

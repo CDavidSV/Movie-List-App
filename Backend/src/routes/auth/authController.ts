@@ -129,6 +129,7 @@ const loginUser = async (req: express.Request, res: express.Response) => {
                 userId: user._id.toString(),
                 expiresIn: session.tokenExpirations.accessTokenExpitation,
                 profilePicturePath: user.profile_picture_path,
+                profileBannerPath: user.profile_banner_path
             }
         });
     } catch {
