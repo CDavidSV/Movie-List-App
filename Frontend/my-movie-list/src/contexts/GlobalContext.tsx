@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import config from "../config/config";
 
 interface GlobalContextProps {
@@ -41,6 +41,7 @@ export const GlobalContext = createContext<GlobalContextProps>({
 export default function GlobalProvider({ children }: { children: React.ReactNode }) {
     const [userData, setUserData] = useState<SessionData | null>(null);
     const [loggedIn, setLoggedIn] = useState(false);
+    const firstUpdate = useRef(true);
 
     useEffect(() => {
         const sessionData = getSessionData();
@@ -48,9 +49,23 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
             setUserData(sessionData);
             setLoggedIn(true);
         }
-
-        updateUserData();
     }, []);
+
+    useEffect(() => {
+        if (!firstUpdate.current) return;
+
+        if (!userData) return;
+
+        mml_api_protected.get("/api/v1/me").then((res) => {
+            const sessionData = { ...userData, username: res.data.responseData.username, profilePicturePath: res.data.responseData.profile_picture_path, profileBannerPath: res.data.responseData.profile_banner_path, email: res.data.responseData.email };
+            localStorage.setItem('sessionData', JSON.stringify(sessionData));
+
+            firstUpdate.current = false;
+            setUserData(sessionData);
+        }).catch((err) => {
+            console.error("Error fetching user data: ", err);
+        });
+    }, [userData]);
 
     const mml_api_protected = axios.create({
         baseURL: config.apiURL,
@@ -94,7 +109,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
                     const { responseData } = response.data
             
                     // Update the session data
-                    setSessionData(userData.email, userData.username, responseData.expiresIn);
+                    setSessionData(userData.email, userData.username, responseData.expiresIn, userData.profilePicturePath, userData.profileBannerPath);
                     processQueue(null);
                     return config;
                 }
@@ -177,12 +192,10 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
     }  
 
     const updateUserData = () => {
-        let sessionData = getSessionData();
-
-        if (!sessionData) return;
+        if (!userData) return;
 
         mml_api_protected.get("/api/v1/me").then((res) => {
-            sessionData = { ...sessionData, username: res.data.responseData.username, profilePicturePath: res.data.responseData.profile_picture_path, profileBannerPath: res.data.responseData.profile_banner_path, email: res.data.responseData.email };
+            const sessionData = { ...userData, username: res.data.responseData.username, profilePicturePath: res.data.responseData.profile_picture_path, profileBannerPath: res.data.responseData.profile_banner_path, email: res.data.responseData.email };
             localStorage.setItem('sessionData', JSON.stringify(sessionData));
 
             setUserData(sessionData);
