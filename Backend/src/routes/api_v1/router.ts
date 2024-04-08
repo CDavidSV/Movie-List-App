@@ -6,7 +6,6 @@ import { getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchl
 import { getHistory, addHistory, removeHistory, clearHistory } from "./history";
 import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMoviesByGenre, getTopRatedSeries, getUpcomingSeries, getCast, getCrew, getImages, getVideos, getMoviesHomeCarousel } from "./media";
 import { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getuserInfo, uploadBannerPicture } from "./user";
-import upload from "../../config/multer.config";
 import requireUser from "../../middlewares/requireUser";
 import createMulterInstance from "../../config/multer.config";
 
