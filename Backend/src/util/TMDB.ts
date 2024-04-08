@@ -3,27 +3,12 @@ import Movie from '../Models/Movie';
 import Series from '../Models/Series';
 import config from '../config/config';
 import saveMovie from './mediaHandler';
-import { Genre } from '../Models/interfaces';
-import { set } from 'mongoose';
+import { CustomMediaResponse, Genre } from '../Models/interfaces';
 
 const tmdb_token = process.env.TMDB_ACCESS_TOKEN;
 
 const genres: { movies: Genre[], series: Genre[] } = { movies: [], series: [] };
 let clearGenresTimeout: NodeJS.Timeout | null = null;
-
-interface CustomMediaResponse {
-    id: number;
-    title: string;
-    description: string;
-    posterUrl: string;
-    backdropUrl: string;
-    logoUrl?: string;
-    type: string;
-    genres: string[];
-    releaseDate: string;
-    voteAverage: number;
-    votes: number;
-}
 
 const makeTMDBRequest = async (url: string) => {
     return await axios({

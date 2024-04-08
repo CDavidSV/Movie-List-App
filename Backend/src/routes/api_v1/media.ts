@@ -4,6 +4,7 @@ import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDB
 import Movie from '../../Models/Movie';
 import Series from '../../Models/Series';
 import config from '../../config/config';
+import { CustomMediaResponse } from '../../Models/interfaces';
 
 interface MovieResponse extends Movie {
     watchlist?: any;
@@ -222,22 +223,23 @@ const getMoviesHomeCarousel = async (req: express.Request, res: express.Response
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
     
     const imageRequests = [];
+    const carouselItems: CustomMediaResponse[] | null = [];
     for (let i = 0; i < 5; i++) {
         const randomIndex = Math.floor(Math.random() * response.length);
 
-        response[i] = response[randomIndex];
+        carouselItems.push(response[randomIndex]);
         imageRequests.push(getMediaImages(response[randomIndex].id.toString(), 'movie'));
+        response.splice(randomIndex, 1);
     }
-    response = response.slice(0, 5);
     
     const imageResponses = await Promise.all(imageRequests);
     if (!imageResponses) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
 
     imageResponses.forEach((imageResponse, index) => {
-        if (response) response[index].logoUrl = imageResponse && imageResponse.logos && imageResponse.logos.length > 0 ? imageResponse.logos[0].previewFilePath : "https://via.placeholder.com/350x100.png?text=No+Logo";
+        if (carouselItems) carouselItems[index].logoUrl = imageResponse && imageResponse.logos && imageResponse.logos.length > 0 ? imageResponse.logos[0].previewFilePath : "https://via.placeholder.com/350x100.png?text=No+Logo";
     });
     
-    sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
+    sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: carouselItems });
 };
 
 export { 

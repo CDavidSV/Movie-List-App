@@ -140,6 +140,20 @@ interface Recomendation {
     numberOfEpisodes?: number;
 }
 
+interface CustomMediaResponse {
+    id: number;
+    title: string;
+    description: string;
+    posterUrl: string;
+    backdropUrl: string;
+    logoUrl?: string;
+    type: string;
+    genres: string[];
+    releaseDate: string;
+    voteAverage: number;
+    votes: number;
+}
+
 export { 
     User,
     APIResponse,
@@ -155,5 +169,6 @@ export {
     Video,
     CastMember,
     CrewMember,
-    Recomendation
+    Recomendation,
+    CustomMediaResponse
 };
