@@ -1,10 +1,16 @@
 .home-carousel {
     position: relative;
-    display: flex;
-    flex-direction: row;
     width: 100%;
     height: 90vh;
-    transition: ease 1s;
+}
+
+.carousel-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
 }
 
 .slide {
@@ -13,7 +19,6 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 50px;
     flex-shrink: 0;
 }
 
@@ -28,9 +33,6 @@
 }
 
 .slide-backdrop-img {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;

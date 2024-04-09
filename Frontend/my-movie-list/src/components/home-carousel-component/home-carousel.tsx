@@ -21,18 +21,37 @@ function Slide(props: SliderItem) {
   );
 }
 
+function SliderPagination(props: { slide: number, slides: number }) {
+  return (
+    <div>
+      {props.slide} / {props.slides}
+    </div>
+  );
+}
+
 export default function HomeCarousel({ items }: { items: SliderItem[] }) {
   const [slide, setSlide] = useState(0);
   const [slides, setSlides] = useState<SliderItem[]>(items);
   const carouselRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const firstUpdate = useRef(true);
-  const cooldownSec = 10;
+  const firstUpdate = useRef<boolean>(true);
+  const cooldownSec = 2;
+  const currentSlideCooldown = useRef<number>(Date.now());
+  const remainingCooldown = useRef<number>(0);
   
+  const stopAutoSlide = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current!);
+
+    remainingCooldown.current = currentSlideCooldown.current - Date.now();
+  }
+
+  const resumeAutoSlide = () => {
+    timeoutRef.current = setTimeout(handleAutoSlide, remainingCooldown.current);
+  }
+
   const handleAutoSlide = useCallback(() => {
     setSlide((prevSlide) => {
       const newSlide = prevSlide < slides.length - 1 ? prevSlide + 1 : 1;
-      console.log('new slide', newSlide);
 
       if (timeoutRef.current) clearTimeout(timeoutRef.current!);
 
@@ -44,6 +63,7 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
         timeoutRef.current = setTimeout(() => handleAutoSlide(), cooldownSec * 1000);
       }
       
+      currentSlideCooldown.current = Date.now() + cooldownSec * 1000;
       return newSlide;
     });
 
@@ -63,12 +83,17 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
   }, [handleAutoSlide]);
 
   return (
-    <div ref={carouselRef} className="home-carousel" style={carouselRef.current ? {transform: `translateX(-${slide * 100}%)`} : {}}>
-      {slides.map((item, index) => (
-        <div key={`${item.id}-${item.title}-${index}`} className="slide">
-          <img className="slide-backdrop-img" src={item.backdropUrl} alt={`backdrop-${item.title}`} />
-        </div>
-      ))}
+    <div className="home-carousel">
+      <div style={{ zIndex: 1 }}>
+        <SliderPagination slide={slide} slides={items.length}/>
+      </div>
+      <div onMouseOver={stopAutoSlide} onMouseLeave={resumeAutoSlide} ref={carouselRef} className="carousel-container" style={carouselRef.current ? {transform: `translateX(-${slide * 100}%)`} : {}}>
+        {slides.map((item, index) => (
+          <div key={`${item.id}-${item.title}-${index}`} className="slide">
+            <img className="slide-backdrop-img" src={item.backdropUrl} alt={`backdrop-${item.title}`} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
