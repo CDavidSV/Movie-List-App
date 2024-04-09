@@ -51,7 +51,7 @@
     background-color: #383838;
     background: linear-gradient(90deg, rgba(56, 56, 56, 0.1) 0%, rgba(56, 56, 56, 0.3) 50%, rgba(56, 56, 56, 0.1) 100%);
     animation: wave 2s linear infinite;
-    background-size: 200% 100%;
+    background-size: 300% 100%;
     border-radius: 5px;
 }
 
