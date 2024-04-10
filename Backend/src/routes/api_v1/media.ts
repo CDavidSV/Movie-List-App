@@ -224,7 +224,7 @@ const getMoviesHomeCarousel = async (req: express.Request, res: express.Response
     
     const imageRequests = [];
     const carouselItems: CustomMediaResponse[] | null = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
         const randomIndex = Math.floor(Math.random() * response.length);
 
         carouselItems.push(response[randomIndex]);

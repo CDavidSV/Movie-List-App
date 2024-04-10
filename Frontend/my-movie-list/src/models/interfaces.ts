@@ -103,4 +103,6 @@ interface SliderItem {
     type: string;
     voteAverage: number;
     votes: number;
+    inWatchlist?: boolean;
+    inFavorites?: boolean;
 }

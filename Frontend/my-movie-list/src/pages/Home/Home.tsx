@@ -38,6 +38,9 @@ export default function Home() {
 
         mml_api.get("api/v1/media/movies/home-carousel").then((response) => {
             setCarouselData(response.data.responseData);
+            getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
+                setCarouselData(films);
+            });
         });
 
         mml_api.get("api/v1/media/movies/popular").then((response) => {

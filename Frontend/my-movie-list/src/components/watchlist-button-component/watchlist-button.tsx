@@ -50,7 +50,7 @@ export default function WatchlistButton(props: { size: string, isWatchlisted: bo
     return (
         <>
             <Modal open={loginModalOpen} onClose={() => setLoginModalOpen(false)}>
-                <h2 style={{textAlign: "center"}}>Login Required</h2>
+                <h2 style={{ textAlign: "center" }}>Login Required</h2>
                 <p>You must be logged in to add this film to your watchlist.</p>
                 <div className="modal-buttons">
                     <button className="button primary" onClick={() => navigate("/login")}>Login</button>
