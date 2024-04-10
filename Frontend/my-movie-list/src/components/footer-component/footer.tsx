@@ -25,7 +25,7 @@ export default function Footer() {
                 </div>
                 <div className="footer-section">
                     <h4>Account</h4>
-                    {!loggedIn ? <>
+                    {loggedIn ? <>
                             <FooterLink text="My Profile" link="/profile"/>
                             {/* <FooterLink text="My Lists" link="/my-lists"/> */}
                             <FooterLink text="Favorites" link="/favorites"/>
