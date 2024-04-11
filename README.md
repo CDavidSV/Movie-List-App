@@ -32,7 +32,7 @@ To get a local copy up and running follow these simple steps.
 
 ## Prerequisites
 
-- Ensure you have [Node.js](https://nodejs.org/) installed on your machine.
+- Ensure you have [Node.js](https://nodejs.org/) installed on your machine if you are running it without Docker.
 - [Docker](https://www.docker.com/) is not required but can make setup easier.
 - [MongoDB](https://www.mongodb.com/) is required, either locally or hosted on a cloud service.
 
