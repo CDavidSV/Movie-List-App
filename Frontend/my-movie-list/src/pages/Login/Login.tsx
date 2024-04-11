@@ -3,6 +3,7 @@ import InputField from '../../components/inputField-component/inputField';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useState } from 'react';
 import { GlobalContext } from '../../contexts/GlobalContext';
+import { Navigate } from 'react-router-dom';
 
 export default function Login() {
     const [loginData, setLoginData] = useState<LoginData | null>(null);
@@ -10,7 +11,7 @@ export default function Login() {
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { setSessionData, mml_api } = useContext(GlobalContext);
+    const { setSessionData, mml_api, loggedIn } = useContext(GlobalContext);
 
     document.title = "Log In | My Movie List";
 
@@ -30,6 +31,10 @@ export default function Login() {
             setLoginError("invalid");
             setErrorMessage(err.response.data.message);
         }).finally(() => setLoading(false));
+    }
+
+    if (loggedIn) {
+        return <Navigate to="/" />
     }
 
     return (

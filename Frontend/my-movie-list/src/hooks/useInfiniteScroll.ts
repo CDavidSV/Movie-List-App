@@ -13,7 +13,6 @@ const useInfiniteScroll = (loadData: () => void, isLoading: boolean, isDisabled?
 
             if (isLoading) return;
             loadData();
-            console.log("loading");
         }
     }
 

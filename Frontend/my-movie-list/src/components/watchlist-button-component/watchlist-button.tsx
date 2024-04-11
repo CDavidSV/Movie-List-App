@@ -7,9 +7,16 @@ import { GlobalContext } from "../../contexts/GlobalContext";
 export default function WatchlistButton(props: { size: string, isWatchlisted: boolean, mediaId: string, type: string }) {
     const [isWatchlisted, setIsWatchlisted] = useState<boolean>(props.isWatchlisted);
     const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
-    const { handleWatchlistState } = useContext(PersonalListsContext);
-    const navigate = useNavigate();
+    const { handleWatchlistState, watchlistState } = useContext(PersonalListsContext);
     const { loggedIn, removeFromWatchlist, setWatchlist } = useContext(GlobalContext);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const newState = watchlistState.get(`${props.mediaId}.${props.type}`);
+        if (newState === undefined) return;
+
+        setIsWatchlisted(newState);
+    }, [watchlistState]);
 
     useEffect(() => {
         setIsWatchlisted(props.isWatchlisted);
@@ -38,7 +45,7 @@ export default function WatchlistButton(props: { size: string, isWatchlisted: bo
 
         setIsWatchlisted(true);
         handleWatchlistState(props.mediaId, props.type, true);
-
+        
         setWatchlist(props.mediaId, props.type)
         .catch(() => {
             // Reset the state if the request fails
@@ -57,7 +64,7 @@ export default function WatchlistButton(props: { size: string, isWatchlisted: bo
                     <button className="button primary" onClick={() => navigate("signup")}>Create Account</button>
                 </div>
             </Modal>
-            <span className={`material-icons icon-btn blue ${props.size}`} onClick={handleWatchlistClick}>{!isWatchlisted ? "bookmark_border" : "bookmark"}</span>
+            <span style={{ userSelect: "none" }} className={`material-icons icon-btn blue ${props.size}`} onClick={handleWatchlistClick}>{!isWatchlisted ? "bookmark_border" : "bookmark"}</span>
         </>
     );
 }

@@ -8,8 +8,15 @@ export default function FavoriteButton(props: { size: string, isFavorite: boolea
     const [isFavorite, setIsFavorite] = useState<boolean>(props.isFavorite);
     const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
     const navigate = useNavigate();
-    const { handleFavoriteState } = useContext(PersonalListsContext);
+    const { handleFavoriteState, favoriteState } = useContext(PersonalListsContext);
     const { loggedIn, removeFavorite, setFavorite } = useContext(GlobalContext);
+
+    useEffect(() => {
+        const newState = favoriteState.get(`${props.mediaId}.${props.type}`);
+        if (newState === undefined) return;
+
+        setIsFavorite(newState);
+    }, [favoriteState]);
 
     useEffect(() => {
         setIsFavorite(props.isFavorite);
@@ -54,7 +61,7 @@ export default function FavoriteButton(props: { size: string, isFavorite: boolea
                     <button className="button primary" onClick={() => navigate("signup")}>Create Account</button>
                 </div>
             </Modal>
-            <span className={`material-icons icon-btn blue ${props.size}`} onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>
+            <span style={{ userSelect: "none" }} className={`material-icons icon-btn blue ${props.size}`} onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>
         </>
     );
 }

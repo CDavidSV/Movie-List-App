@@ -90,7 +90,7 @@ export default function Home() {
             <div className="content">
                 <div className="sliders-container">
                     { carouselData.length > 0 ? <HomeCarousel items={carouselData}/> : <div className="skeleton-carousel"></div> }
-                    <div style={{ top: "-125px", position: "relative" }}>
+                    <div style={{ top: "-125px", position: "relative", zIndex: 3 }}>
                         <FilmSlider title="Popular" filmArr={popularMovies}/>
                         <FilmSlider title="Upcoming" filmArr={upcoming}/>
                         {watchlist.length > 0 && <FilmSlider title="Your Watchlist" filmArr={watchlist}/>}

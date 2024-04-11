@@ -45,7 +45,6 @@ export default function Browse() {
         setLoading(true);
 
         mml_api.get(`api/v1/media/search?title=${query}`).then((response) => {
-            console.log(1);
             setLoading(false);
             window.history.pushState({}, "", `/search?query=${query}`);
             

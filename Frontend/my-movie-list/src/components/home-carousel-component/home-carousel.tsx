@@ -1,9 +1,10 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import WatchlistButton from '../watchlist-button-component/watchlist-button';
 import FavoriteButton from '../favorite-button-component/favorite-button';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../../contexts/GlobalContext';
 import './home-carousel.css';
+import { saveSearchResult, shortenNumber } from '../../helpers/util.helpers';
 
 const getPageNumber = (slide: number, totalSlides: number) => {
   if (slide === 1 || totalSlides === slide) return 1;
@@ -11,7 +12,7 @@ const getPageNumber = (slide: number, totalSlides: number) => {
   return slide;
 }
 
-function SliderPagination(props: { slide: number, slides: number, cooldownSec: number, widthPercentage: number, onStop: () => void, onResume: () => void, changeSlide: (slide: number) => void }) {
+function SliderPagination(props: { slide: number, slides: number, cooldownSec: number, widthPercentage: number, stopped: boolean, onStop: () => void, onResume: () => void, changeSlide: (slide: number) => void }) {
   const [hovered, setHovered] = useState<boolean>(false);
 
   const mouseOver = () => {
@@ -29,10 +30,10 @@ function SliderPagination(props: { slide: number, slides: number, cooldownSec: n
       {Array.from(Array(props.slides).keys()).map((_, index) => (
         <div 
         onClick={() => props.changeSlide(index + 1)}
-        onMouseOver={mouseOver} 
-        onMouseLeave={mouseLeave} 
+        onMouseEnter={mouseOver} 
+        onMouseOut={mouseLeave} 
         key={index} 
-        className={`pagination-pill${index + 1 === getPageNumber(props.slide, props.slides + 1) ? ` active${hovered ? " hovered" : ""}` : ""}`}>
+        className={`pagination-pill${index + 1 === getPageNumber(props.slide, props.slides + 1) ? ` active${hovered || props.stopped ? " hovered" : ""}` : ""}`}>
           <span className="pagination-pill-completion" style={index + 1 === getPageNumber(props.slide, props.slides + 1) ? {transform: `translateX(-${props.widthPercentage}%)`} : {}}></span>
         </div>
       ))}
@@ -41,91 +42,44 @@ function SliderPagination(props: { slide: number, slides: number, cooldownSec: n
 }
 
 export default function HomeCarousel({ items }: { items: SliderItem[] }) {
-  const [slides, setSlides] = useState<SliderItem[]>([]);
-  const [completion, setCompletion] = useState<number>(-100);
-  const stoppedRef = useRef<boolean>(false);
+  const cooldownSec = 12;
   const carouselRef = useRef<HTMLDivElement>(null);
-  const firstUpdate = useRef<boolean>(true);
-  const cooldownSec = 10;
+  const stoppedRef = useRef<boolean>(false);
   const timeUntilNextSlide = useRef<number>(cooldownSec * 1000);
   const nextSlideTime = useRef<number>(Date.now() + cooldownSec * 1000);
-  const currentSlide = useRef<number>(1);
   const remainingTimeRef = useRef<number>(0);
+  const disabledButtons = useRef<boolean>(false);
+
+  const [activeSlide, setActiveSlide] = useState<number>(1);
+  const [slides, setSlides] = useState<SliderItem[]>([]);
+  const [completion, setCompletion] = useState<number>(-100);
+  const [buttonHovered, setButtonHovered] = useState<boolean>(false);
+  
   const navigate = useNavigate();
   const { loggedIn } = useContext(GlobalContext);
 
   const changeToCustomSlide = (slide: number) => {
+    if (disabledButtons.current) return;
+    
     setCompletion(0);
-
-    const prevSlide = currentSlide.current;
-    currentSlide.current = slide;
-
-    if (prevSlide === slides.length - 1) {
-      carouselRef.current!.style.transition = 'none';
-      carouselRef.current!.style.transform = `translateX(-${1 * 100}%)`;
-    } else {
-      carouselRef.current!.style.transition = 'transform 1s ease';
-      carouselRef.current!.style.transform = `translateX(-${slide * 100}%)`;
-    }
-
-    nextSlideTime.current = Date.now() + cooldownSec * 1000;
+    disabledButtons.current = true;
+    carouselRef.current!.style.transition = `transform 1s ease`;
+    carouselRef.current!.style.transform = `translateX(-${slide * 100}%)`;
+    remainingTimeRef.current = cooldownSec * 1000;
+    setActiveSlide(slide);
   };
 
-  const nextSlide = () => {
-    setCompletion(0);
-
-    const prevSlide = currentSlide.current;
-    const newSlide = prevSlide < slides.length - 1 ? prevSlide + 1 : 2;
-
-    currentSlide.current = newSlide;
-    
-    if (prevSlide === slides.length - 1) {
-      carouselRef.current!.style.transition = 'none';
-      carouselRef.current!.style.transform = `translateX(-${1 * 100}%)`;
-      setTimeout(() => {
-        carouselRef.current!.style.transition = `transform 1s ease`;
-        carouselRef.current!.style.transform = `translateX(-${newSlide * 100}%)`;
-      }, 50);
-    } else {
-      carouselRef.current!.style.transition = `transform 1s ease`;
-      carouselRef.current!.style.transform = `translateX(-${newSlide * 100}%)`;
-    }
-
-    nextSlideTime.current = Date.now() + cooldownSec * 1000;
-  }
-
-  const prevSlide = () => {
-    setCompletion(0);
-
-    const prevSlide = currentSlide.current;
-    const newSlide = prevSlide > 0 ? prevSlide - 1 : slides.length - 3;
-
-    currentSlide.current = newSlide;
-    
-    if (prevSlide === 0) {
-      carouselRef.current!.style.transition = 'none';
-      carouselRef.current!.style.transform = `translateX(-${(slides.length - 2) * 100}%)`;
-      setTimeout(() => {
-        carouselRef.current!.style.transition = `transform 1s ease`;
-        carouselRef.current!.style.transform = `translateX(-${newSlide * 100}%)`;
-      }, 50);
-    } else {
-      carouselRef.current!.style.transition = `transform 1s ease`;
-      carouselRef.current!.style.transform = `translateX(-${newSlide * 100}%)`;
-    }
-
-    nextSlideTime.current = Date.now() + cooldownSec * 1000;
-  }
-
   const handleStopAutoSlide = () => {
+    setButtonHovered(true);
     stoppedRef.current = true;
     remainingTimeRef.current = nextSlideTime.current - Date.now();
   }
 
   const handleResumeAutoSlide = () => {
+    setButtonHovered(false);
     stoppedRef.current = false;
     nextSlideTime.current = Date.now() + remainingTimeRef.current;
-    requestAnimationFrame(handleAutoSlide);
+    handleAutoSlide();
   }
 
   const handleAutoSlide = () => {
@@ -133,48 +87,76 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
 
     timeUntilNextSlide.current = nextSlideTime.current - Date.now();
     setCompletion((timeUntilNextSlide.current / (cooldownSec * 1000)) * 100);
-
-    if (timeUntilNextSlide.current > 0) return requestAnimationFrame(handleAutoSlide);
-
-    const prevSlide = currentSlide.current;
-    const newSlide = prevSlide < slides.length - 1 ? prevSlide + 1 : 1;
-
-    nextSlideTime.current = Date.now() + cooldownSec * 1000;
-    currentSlide.current = newSlide;
     
-    if (prevSlide === slides.length - 1) {
-      carouselRef.current!.style.transition = 'none';
-      carouselRef.current!.style.transform = `translateX(-${1 * 100}%)`;
-      timeUntilNextSlide.current = 0;
-      nextSlideTime.current = Date.now();
-    } else {
+    if (timeUntilNextSlide.current > 0) return requestAnimationFrame(handleAutoSlide);
+    
+    disabledButtons.current = true;
+    nextSlideTime.current = Date.now() + cooldownSec * 1000;
+
+    setActiveSlide(prevActiveSlide => {
+      const nextSlide = prevActiveSlide + 1;
       carouselRef.current!.style.transition = `transform 1s ease`;
-      carouselRef.current!.style.transform = `translateX(-${newSlide * 100}%)`;
-    }
+      carouselRef.current!.style.transform = `translateX(-${nextSlide * 100}%)`;
+
+      return nextSlide;
+    });
     
     requestAnimationFrame(handleAutoSlide);
   };
 
-  useEffect(() => { 
-    if (firstUpdate.current) {
-      setSlides([items[items.length - 1], ...items, items[0]]);
-      firstUpdate.current = false;
+  const handleSlideButton = (direction: 'left' | 'right') => {  
+    changeToCustomSlide(activeSlide + (direction === 'right' ? 1 : -1));
+  }
+
+  const onTransitionEnd = () => {
+    if (activeSlide === slides.length - 1) {
+      carouselRef.current!.style.transition = 'none';
+      carouselRef.current!.style.transform = `translateX(-100%)`;
+      setActiveSlide(1);
     }
 
-    if (slides.length === 0) return;
-    requestAnimationFrame(handleAutoSlide);
+    if (activeSlide === 0) {
+      carouselRef.current!.style.transition = 'none';
+      carouselRef.current!.style.transform = `translateX(-${slides.length - 2}00%)`;
+      setActiveSlide(slides.length - 2);
+    }
+
+    disabledButtons.current = false;
+  }
+
+  const saveSearch = (item: SliderItem) => {
+    saveSearchResult(item.title, item.id.toString(), item.type, `/media/${item.type}/${item.id}`)
+  }
+
+  useEffect(() => { 
+    setSlides([items[items.length - 1], ...items, items[0]]);
+  }, [items]);
+  
+  useEffect(() => {
+      if (!carouselRef.current || slides.length === 0) return;
+
+      handleAutoSlide();
   }, [slides]);
 
   return (
     <div className="home-carousel">
       <div className="carousel-layout">
         <>
-          {slides.map((item, index) => (
+          {slides.length > 0 && items.map((item, index) => (
             <div 
             key={`${item.title}-${index}`} 
-            className={`slide-content-wrapper${index === currentSlide.current ? ' active' : ''}`}>
+            className={`slide-content-wrapper${index + 1 === getPageNumber(activeSlide, slides.length - 1) ? ' active' : ''}`}>
               <div className="slide-logo">
+                <Link
+                  className="media-link"
+                  onClick={() => saveSearch(item)}
+                  onAuxClick={() => saveSearch(item)}
+                  to={`/media/${item.type}/${item.id}`}/>
                 <img src={item.logoUrl} alt={`logo-${item.title}`} loading="lazy" />
+              </div>
+              <div className="title-details">
+                <p>{`${item.releaseDate} • ${item.genres.join(", ")}`}</p>
+                <p>{item.voteAverage.toFixed(1)}★ ({shortenNumber(item.votes)})</p>
               </div>
               <div className="slide-general-info">
                 <p>{item.description}</p>
@@ -201,10 +183,11 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
           ))}
           {slides.length > 0 && (
             <SliderPagination 
-              slide={currentSlide.current} 
+              slide={activeSlide} 
               slides={items.length} 
               cooldownSec={cooldownSec} 
-              widthPercentage={completion} 
+              widthPercentage={completion}
+              stopped={buttonHovered}
               onStop={handleStopAutoSlide} 
               onResume={handleResumeAutoSlide}
               changeSlide={changeToCustomSlide}
@@ -212,12 +195,34 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
           )}
         </>
       </div>
-      <div ref={carouselRef} className="carousel-container" style={{transform: `translateX(-${1 * 100}%)`}}>
+      <div 
+      onMouseOver={handleStopAutoSlide}
+      onMouseLeave={handleResumeAutoSlide}
+      onClick={() => handleSlideButton('left')}
+      className="carousel-button left">
+        <span 
+        style={{ pointerEvents: "none" }}
+        className="material-icons">
+          arrow_back_ios
+        </span>
+      </div>
+      <div ref={carouselRef} onTransitionEnd={onTransitionEnd} className="carousel-container" style={{transform: `translateX(-${1 * 100}%)`}}>
         {slides.map((item, index) => (
           <div key={`${item.backdropUrl}-${index}`} className="slide">
             <img className="slide-backdrop-img" src={item.backdropUrl} alt={`backdrop-${item.title}`} />
           </div>
         ))}
+      </div>
+      <div
+      onMouseOver={handleStopAutoSlide}
+      onMouseLeave={handleResumeAutoSlide}
+      onClick={() => handleSlideButton('right')}
+      className="carousel-button right">
+        <span
+        style={{ pointerEvents: "none" }}
+        className="material-icons">
+          arrow_forward_ios
+        </span>
       </div>
     </div>
   );

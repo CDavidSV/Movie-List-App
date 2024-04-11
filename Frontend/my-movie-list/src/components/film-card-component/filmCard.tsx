@@ -1,16 +1,13 @@
 import { Link } from 'react-router-dom';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { shortenNumber, saveSearchResult } from '../../helpers/util.helpers';
 import FavoriteButton from '../favorite-button-component/favorite-button';
 import WatchlistButton from '../watchlist-button-component/watchlist-button';
-import { PersonalListsContext } from '../../contexts/PersonalListsContext';
 import React from 'react';
 import './filmCard.css';
 
 export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchResult, filmData }: FilmCardProps) {
     const hoverContentRef = useRef<HTMLDivElement>(null);
-    const [personalListsState, setPersonalListsState] = useState<{ inWatchlist: boolean, inFavorites: boolean }>({ inWatchlist, inFavorites });
-    const { watchlistState, favoriteState } = useContext(PersonalListsContext);
 
     const activateHover = () => {         
         hoverContentRef.current?.classList.add("active");
@@ -27,31 +24,8 @@ export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchRe
     const saveSearch = () => {
         if (!searchResult) return;
 
-        saveSearchResult(filmData.title, filmData.id.toString(), filmData.type, `/media/${filmData.type}/${filmData.id}`)
+        saveSearchResult(filmData.title, filmData.id.toString(), filmData.type, `/media/${filmData.type}/${filmData.id}`);
     }
-
-    useEffect(() => {
-        const newWatchlistState = watchlistState.get(`${filmData.id}.${filmData.type}`);
-        const newFavoriteState = favoriteState.get(`${filmData.id}.${filmData.type}`);
-
-        setPersonalListsState(prevState => ({
-            ...prevState,
-            inWatchlist: newWatchlistState !== undefined ? newWatchlistState : prevState.inWatchlist,
-            inFavorites: newFavoriteState !== undefined ? newFavoriteState : prevState.inFavorites
-        }));
-    }, [watchlistState, favoriteState]);
-
-    useEffect(() => {
-        const inPersonalListsObj = { inWatchlist: false, inFavorites: false };
-        if (inWatchlist !== undefined) {
-            inPersonalListsObj.inWatchlist = inWatchlist;
-        }
-
-        if (inFavorites !== undefined) {
-            inPersonalListsObj.inFavorites = inFavorites;
-        }
-        setPersonalListsState(inPersonalListsObj);
-    }, [inWatchlist, inFavorites]);
 
     return (
         <div onMouseEnter={activateHover} onMouseOut={deactivateHover} className="film-card">
@@ -91,12 +65,12 @@ export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchRe
                     <div className="card-hover-info-content-buttons">
                         <WatchlistButton 
                             size='small'
-                            isWatchlisted={personalListsState.inWatchlist}
+                            isWatchlisted={inWatchlist}
                             mediaId={filmData.id.toString()}
                             type={filmData.type}/>  
                         <FavoriteButton 
                             size='small'
-                            isFavorite={personalListsState.inFavorites}
+                            isFavorite={inFavorites}
                             mediaId={filmData.id.toString()}
                             type={filmData.type}/>
                     </div>

@@ -95,6 +95,7 @@ interface UploadImageProps {
 interface SliderItem {
     backdropUrl: string;
     description: string;
+    genres: string[];
     id: number;
     logoUrl: string;
     posterUrl: string;
