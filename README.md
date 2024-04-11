@@ -12,11 +12,17 @@ An Interactive Movie app that allows you to create lists and keep track of the m
 # Images
 
 ![1](https://github.com/CDavidSV/Movie-List-App/assets/88672259/0ae02d58-4215-4274-9665-2a13e7c7b6e0)
+
 ![2](https://github.com/CDavidSV/Movie-List-App/assets/88672259/aeb303ed-debf-4f4e-88aa-866dbf0821db)
+
 ![3](https://github.com/CDavidSV/Movie-List-App/assets/88672259/5a66c224-6012-449d-a9f8-74b9dc27297a)
+
 ![4](https://github.com/CDavidSV/Movie-List-App/assets/88672259/213607b9-acf1-477d-a1b0-727f60288ce9)
+
 ![5](https://github.com/CDavidSV/Movie-List-App/assets/88672259/bcc52db7-c40d-4069-9eb2-d4ad73bfd679)
+
 ![6](https://github.com/CDavidSV/Movie-List-App/assets/88672259/cc73c844-7cbb-43d9-ab8c-ad4e5abd1980)
+
 ![7](https://github.com/CDavidSV/Movie-List-App/assets/88672259/56cfc03c-4fa4-4751-9790-bafe8ae5c1a4)
 
 # Getting Started
