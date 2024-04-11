@@ -6,6 +6,7 @@ An Interactive Movie app that allows you to create lists and keep track of the m
 - **Browse Movies and Series**: Dive into an extensive library of movies and TV series, thanks to the TMDB API :).
 - **Watchlist Management**: Easily add movies and series to your watchlist, track your progress, and update your completion status.
 - **Favorites**: Curate a list of your all-time favorite movies and series, and rearrange them based on your preferences.
+- **Customize your profile**: Change your username, add a profile picture or a banner.
 - **Detailed Information**: Click on any movie or series to access detailed information, including cast, crew, images, videos, and more.
 - **Search Functionality**: Quickly find movies or series.
 
