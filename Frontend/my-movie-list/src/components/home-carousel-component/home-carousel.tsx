@@ -3,8 +3,8 @@ import WatchlistButton from '../watchlist-button-component/watchlist-button';
 import FavoriteButton from '../favorite-button-component/favorite-button';
 import { Link, useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../../contexts/GlobalContext';
-import './home-carousel.css';
 import { saveSearchResult, shortenNumber } from '../../helpers/util.helpers';
+import './home-carousel.css';
 
 const getPageNumber = (slide: number, totalSlides: number) => {
   if (slide === 1 || totalSlides === slide) return 1;
@@ -88,7 +88,10 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
     timeUntilNextSlide.current = nextSlideTime.current - Date.now();
     setCompletion((timeUntilNextSlide.current / (cooldownSec * 1000)) * 100);
     
-    if (timeUntilNextSlide.current > 0) return requestAnimationFrame(handleAutoSlide);
+    if (timeUntilNextSlide.current > 0) { 
+      setTimeout(handleAutoSlide, 50);
+      return;
+    }
     
     disabledButtons.current = true;
     nextSlideTime.current = Date.now() + cooldownSec * 1000;
@@ -101,7 +104,7 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
       return nextSlide;
     });
     
-    requestAnimationFrame(handleAutoSlide);
+    setTimeout(handleAutoSlide, 50);
   };
 
   const handleSlideButton = (direction: 'left' | 'right') => {  
@@ -128,8 +131,18 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
     saveSearchResult(item.title, item.id.toString(), item.type, `/media/${item.type}/${item.id}`)
   }
 
+  const handleVisibilityChange = () => {
+    document.hidden ? handleStopAutoSlide() : handleResumeAutoSlide();
+  }
+
   useEffect(() => { 
     setSlides([items[items.length - 1], ...items, items[0]]);
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    }
   }, [items]);
   
   useEffect(() => {

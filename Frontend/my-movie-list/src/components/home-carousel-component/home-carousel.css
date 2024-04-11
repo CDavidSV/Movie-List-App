@@ -44,8 +44,8 @@
     position: relative;
     display: grid;
     z-index: 1;
+    padding: 0 80px 0 80px;
     height: 100%;
-    padding: 80px 80px 0 80px;
 }
 
 .slide-content-wrapper {
@@ -72,13 +72,13 @@
 
 .slide-logo {
     position: relative;
-    max-height: 300px;
+    max-height: 200px;
     max-width: 700px;
+    margin-top: 25px;
 }
 
 .slide-logo .media-link {
     display: block;
-    position: block;
     width: 100%;
     height: 100%;
     z-index: 2;
@@ -143,7 +143,7 @@
     display: flex;
     flex-direction: row;
     gap: 30px;
-    margin-bottom: 20px;
+    margin: 20px 0 20px 0;
 }
 
 .carousel-button {
@@ -178,11 +178,7 @@
 
 @media screen and (max-width: 600px) {
     .carousel-layout {
-        padding: 0 80px 0 80px;
-    }
-
-    .slide-content-wrapper { 
-        justify-content: center;
+        height: 80%;
     }
 
     .pagination-pill {
@@ -192,5 +188,30 @@
 
     .pagination-pill.active {
         width: 40px;
+    }
+
+    .slide-general-info {
+        display: -webkit-box;
+        -webkit-line-clamp: 10;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+@media screen and (max-height: 900px) {
+    .slide-general-info {
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+@media screen and (max-height: 700px) {
+    .slide-general-info {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 }
