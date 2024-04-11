@@ -122,8 +122,8 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
 
     try {
         const [watchlistItem, favoriteItem, mediaData] = await Promise.all([
-            watchlistSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { id: { $toString: "_id" }, status: 1, progress: 1, updated_date: 1, added_date: 1, _id: 0 }),
-            favoritesSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { id: { $toString: "_id" }, date_added: 1, _id: 0 }),
+            watchlistSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { id: { $toString: "$_id" }, status: 1, progress: 1, updated_date: 1, added_date: 1, _id: 0 }),
+            favoritesSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { id: { $toString: "$_id" }, date_added: 1, _id: 0 }),
             findMediaById(media_id as string, type as string)
         ]);
 
