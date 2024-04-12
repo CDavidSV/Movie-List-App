@@ -23,6 +23,17 @@ export default function Modal({ open, onClose, children, style }: { open: boolea
             setModalState("closed");
         }, 300);
     }, [open]);
+
+    useEffect(() => {
+        document.addEventListener("keydown", handleKeyPress);
+        return () => document.removeEventListener("keydown", handleKeyPress);
+    }, []);
+
+    const handleKeyPress = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+            onClose();
+        }
+    }
     
     if (modalState === "closed") return null;
     
