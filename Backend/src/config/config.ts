@@ -28,6 +28,7 @@ const config: Config = {
     domain: '.localhost',
     refreshTokenDomain: '.localhost',
     allowedDevDomains: ['http://localhost:5173'],
+    allowedProdDomains: ['https://white-stone-02077ca1e.5.azurestaticapps.net/'],
     tmdbImageSmall: 'https://image.tmdb.org/t/p/w185',
     tmdbImageMedium: 'https://image.tmdb.org/t/p/w300',
     tmdbImageLarge: 'https://image.tmdb.org/t/p/w500',
