@@ -13,10 +13,10 @@ const corsConfig = (req: Request, callback: Function) => {
 
     let allowedDomains;
     switch (config.environment) {
-        case 'prod':
+        case 'production':
             allowedDomains = config.allowedProdDomains;
             break;
-        case 'dev':
+        case 'development':
             corsOptions.origin = headerOrigin;
             return callback(null, corsOptions);
     }
