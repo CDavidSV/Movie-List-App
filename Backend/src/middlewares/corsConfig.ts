@@ -17,9 +17,6 @@ const corsConfig = (req: Request, callback: Function) => {
             allowedDomains = config.allowedProdDomains;
             break;
         case 'dev':
-            allowedDomains = config.allowedDevDomains;
-            break;
-        case 'local':
             corsOptions.origin = headerOrigin;
             return callback(null, corsOptions);
     }

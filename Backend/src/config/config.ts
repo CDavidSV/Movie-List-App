@@ -1,11 +1,7 @@
-enum Environment {
-    PROD = 'prod',
-    DEV = 'dev',
-    LOCAL = 'local'
-}
+const environment = 'dev';
 
 interface Config {
-    environment: Environment,
+    environment: 'dev' | 'prod',
     port: number,
     domain?: string,
     refreshTokenDomain?: string,
@@ -25,12 +21,12 @@ interface Config {
 
 // Local config options.
 const config: Config = {
-    environment: Environment.LOCAL, // dev, prod or local
-    port: 3000,
+    environment: environment,
+    port: environment === 'dev' ? 3000 : 5172,
     expiration30Days: 2592000000,
     expiration1Hour: 3600000,
-    cookieSecure: false,
-    cookieSameSite: 'none',
+    cookieSecure: environment === 'dev' ? false : true,
+    cookieSameSite: environment === 'dev' ? 'none' : 'strict',
     domain: '.localhost',
     refreshTokenDomain: '.localhost',
     allowedDevDomains: ['http://localhost:5173'],
