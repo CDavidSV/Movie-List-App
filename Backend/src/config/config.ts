@@ -1,7 +1,5 @@
-const environment = 'dev';
-
 interface Config {
-    environment: 'dev' | 'prod',
+    environment: string | undefined,
     port: number,
     domain?: string,
     refreshTokenDomain?: string,
@@ -21,12 +19,12 @@ interface Config {
 
 // Local config options.
 const config: Config = {
-    environment: environment,
-    port: environment === 'dev' ? 3000 : 5172,
+    environment: process.env.NODE_ENV,
+    port: process.env.NODE_ENV === 'development' ? 3000 : 8080,
     expiration30Days: 2592000000,
     expiration1Hour: 3600000,
-    cookieSecure: environment === 'dev' ? false : true,
-    cookieSameSite: environment === 'dev' ? 'none' : 'strict',
+    cookieSecure: process.env.NODE_ENV === 'development' ? false : true,
+    cookieSameSite: process.env.NODE_ENV === 'development' ? 'none' : 'strict',
     domain: '.localhost',
     refreshTokenDomain: '.localhost',
     allowedDevDomains: ['http://localhost:5173'],

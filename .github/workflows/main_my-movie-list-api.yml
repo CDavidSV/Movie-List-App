@@ -24,7 +24,8 @@ jobs:
       - name: npm install, build, and test
         run: |
           cd Backend
-          npm install
+          npm install --production
+          npm run build
 
       - name: Zip artifact for deployment
         run: | 
