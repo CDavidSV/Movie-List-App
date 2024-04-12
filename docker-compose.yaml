@@ -11,6 +11,6 @@ services:
       # REFRESH_TOKEN_KEY:
       - NODE_ENV=production
   frontend:
-    build: ./Frontend/my-movie-list
+    build: ./Frontend
     ports:
       - "80:80"
