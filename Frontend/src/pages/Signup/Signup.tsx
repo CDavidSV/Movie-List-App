@@ -33,7 +33,11 @@ export default function SignUp() {
         setErrorMessage("");
         setLoading(true);
         mml_api.post("/auth/register", 
-        signUpData, 
+        {
+            email: signUpData!.email,
+            username: signUpData!.username,
+            password: signUpData!.password
+        }, 
         { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
         .then((response) => {
             setSessionData(response.data.responseData.userEmail, response.data.responseData.username, response.data.responseData.expiresIn);
