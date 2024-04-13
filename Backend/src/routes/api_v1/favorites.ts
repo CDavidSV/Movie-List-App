@@ -120,7 +120,7 @@ const addFavorite = async (req: express.Request, res: express.Response) => {
         ]);
 
         if (!userExists) return sendResponse(res, { status: 404, message: "User not found" });
-        if (!mediaData || !lastFavorite) return sendResponse(res, { status: 404, message: "Media not found" });
+        if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
 
         // Calculate the new rank for the new favorite.
         const newRank = lastFavorite ? getNextLexoRank(lastFavorite.rank) : getNextLexoRank();
