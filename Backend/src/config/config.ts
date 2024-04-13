@@ -25,8 +25,8 @@ const config: Config = {
     expiration1Hour: 3600000,
     cookieSecure: process.env.NODE_ENV === 'development' ? false : true,
     cookieSameSite: 'none',
-    domain: process.env.NODE_ENV === 'development' ? '.localhost' : '.my-movie-list-api.azurewebsites.net',
-    refreshTokenDomain: process.env.NODE_ENV === 'development' ? '.localhost' : '.my-movie-list-api.azurewebsites.net',
+    domain: undefined, // For now because I have no custom domain :(
+    refreshTokenDomain: undefined, // For now because I have no custom domain :(
     allowedDevDomains: ['http://localhost:5173'],
     allowedProdDomains: ['https://white-stone-02077ca1e.5.azurestaticapps.net'],
     tmdbImageSmall: 'https://image.tmdb.org/t/p/w185',
