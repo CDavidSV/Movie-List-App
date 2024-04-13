@@ -24,7 +24,7 @@ const config: Config = {
     expiration30Days: 2592000000,
     expiration1Hour: 3600000,
     cookieSecure: process.env.NODE_ENV === 'development' ? false : true,
-    cookieSameSite: process.env.NODE_ENV === 'development' ? 'none' : 'strict',
+    cookieSameSite: 'none',
     domain: process.env.NODE_ENV === 'development' ? '.localhost' : '.my-movie-list-api.azurewebsites.net',
     refreshTokenDomain: process.env.NODE_ENV === 'development' ? '.localhost' : '.my-movie-list-api.azurewebsites.net',
     allowedDevDomains: ['http://localhost:5173'],
