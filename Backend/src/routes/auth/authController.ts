@@ -51,17 +51,26 @@ const registerUser = async (req: express.Request, res: express.Response) => {
         res.cookie("a_t", session.accessToken,
             {
                 httpOnly: true,
+                domain: config.domain,
+                sameSite: config.cookieSameSite,
+                secure: config.cookieSecure,
                 maxAge: session.tokenExpirations.accessTokenExpitation
             }
         );
         res.cookie("r_t", session.refreshToken,
             {
                 httpOnly: true,
+                sameSite: config.cookieSameSite,
+                secure: config.cookieSecure,
+                domain: config.refreshTokenDomain,
                 maxAge: session.tokenExpirations.refreshTokenExpiration
             }
         );
         res.cookie("s_id", session.sessionId,
             {
+                domain: config.domain,
+                sameSite: config.cookieSameSite,
+                secure: config.cookieSecure,
                 maxAge: session.tokenExpirations.refreshTokenExpiration
             }
         );
@@ -105,17 +114,26 @@ const loginUser = async (req: express.Request, res: express.Response) => {
         res.cookie("a_t", session.accessToken,
             {
                 httpOnly: true,
+                domain: config.domain,
+                sameSite: config.cookieSameSite,
+                secure: config.cookieSecure,
                 maxAge: session.tokenExpirations.accessTokenExpitation
             }
         );
         res.cookie("r_t", session.refreshToken,
             {
                 httpOnly: true,
+                sameSite: config.cookieSameSite,
+                secure: config.cookieSecure,
+                domain: config.refreshTokenDomain,
                 maxAge: session.tokenExpirations.refreshTokenExpiration
             }
         );
         res.cookie("s_id", session.sessionId,
             {
+                domain: config.domain,
+                sameSite: config.cookieSameSite,
+                secure: config.cookieSecure,
                 maxAge: session.tokenExpirations.refreshTokenExpiration
             }
         );
@@ -152,12 +170,18 @@ const refreshToken = async (req: express.Request, res: express.Response) => {
     res.cookie("a_t", tokens.newAccessToken,
         {
             httpOnly: true,
+            domain: config.domain,
+            sameSite: config.cookieSameSite,
+            secure: config.cookieSecure,
             maxAge: config.expiration1Hour
         }
     );
     res.cookie("r_t", tokens.newRefreshToken,
         {
             httpOnly: true,
+            domain: config.domain,
+            sameSite: config.cookieSameSite,
+            secure: config.cookieSecure,
             maxAge: config.expiration30Days
         }
     );
@@ -178,9 +202,9 @@ const revokeSession = async (req: express.Request, res: express.Response) => {
     invalidateSession((payload as User).sessionId);
 
     // Update cookies.
-    res.clearCookie("a_t");
-    res.clearCookie("r_t");
-    res.clearCookie("s_id");
+    res.clearCookie("a_t", { domain: config.domain });
+    res.clearCookie("r_t", { domain: config.refreshTokenDomain });
+    res.clearCookie("s_id", { domain: config.domain });
 
     sendResponse(res, { status: 200, message: "Session invalidated" });
 };

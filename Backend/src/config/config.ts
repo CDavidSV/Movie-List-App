@@ -4,7 +4,7 @@ interface Config {
     domain?: string,
     refreshTokenDomain?: string,
     cookieSecure?: boolean,
-    cookieSameSite?: string,
+    cookieSameSite?: "none" | "lax" | "strict",
     expiration30Days: number,
     expiration1Hour: number
     allowedProdDomains?: string[],

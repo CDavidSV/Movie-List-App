@@ -13,6 +13,7 @@ import fs from "fs";
 import { v4 as uuid } from 'uuid';
 import path from "path";
 import sharp from "sharp";
+import config from "config/config";
 
 const getuserInfo = async (req: Request, res: Response) => {
     const userId = req.params.id;
@@ -263,9 +264,9 @@ const deleteAccount = async (req: Request, res: Response) => {
         ]);
 
         // Update cookies.
-        res.clearCookie("a_t");
-        res.clearCookie("r_t");
-        res.clearCookie("s_id");
+        res.clearCookie("a_t", { domain: config.domain });
+        res.clearCookie("r_t", { domain: config.refreshTokenDomain });
+        res.clearCookie("s_id", { domain: config.domain });
         
         return sendResponse(res, { status: 200, message: "Account deleted successfully" });
     } catch (err) {
