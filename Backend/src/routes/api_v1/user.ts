@@ -13,7 +13,7 @@ import fs from "fs";
 import { v4 as uuid } from 'uuid';
 import path from "path";
 import sharp from "sharp";
-import config from "config/config";
+import config from "../../config/config";
 
 const getuserInfo = async (req: Request, res: Response) => {
     const userId = req.params.id;
