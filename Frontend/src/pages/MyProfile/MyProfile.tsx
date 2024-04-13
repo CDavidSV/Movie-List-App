@@ -5,7 +5,6 @@ import InputField from '../../components/inputField-component/inputField';
 import Modal from '../../components/modal-component/modal';
 import UploadImage from '../../components/upload-image/upload-image';
 import { GlobalContext } from '../../contexts/GlobalContext';
-import config from '../../config/config';
 import "./myprofile.css";
 
 function ChangeUsername ({ username }: { username: string }) {
@@ -302,7 +301,7 @@ export default function MyProfile() {
     return (
         <div className="content">
             <div className="profile-wallpaper">
-                {userData && userData.profileBannerPath && <img src={`${config.apiURL}${userData.profileBannerPath}`} alt="profile_banner" />}
+                {userData && userData.profileBannerUrl && <img src={`${userData.profileBannerUrl}`} alt="profile_banner" />}
                 <div onClick={() => setModalsState({ ...modalsState, bannerModal: true })} className="upload_banner"><span style={{}} className="material-icons">image</span></div>
                 <Modal open={modalsState.bannerModal} onClose={() => setModalsState({ ...modalsState, bannerModal: false })}>
                     <UploadImage onCrop={onBannerChange} aspectRatio={16 / 9} height="35vh" maxImageSizeInMb={16}/>
@@ -311,7 +310,7 @@ export default function MyProfile() {
             <div className="content-wrapper">
                 <div className="profile-general-data">
                     <div className="profile-picture">
-                        <img src={userData && userData.profilePicturePath ? `${config.apiURL}${userData.profilePicturePath}` : defaultPfp} alt="profile_picture" />
+                        <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile_picture" />
                         <div onClick={() => setModalsState({ ...modalsState, pfpModal: true })} className="upload_pfp"><span style={{}} className="material-icons">photo_camera</span></div>
                         <Modal open={modalsState.pfpModal} onClose={() => setModalsState({ ...modalsState, pfpModal: false })}>
                             <UploadImage onCrop={onPfpChange} aspectRatio={1} height="50vh" maxImageSizeInMb={8}/>

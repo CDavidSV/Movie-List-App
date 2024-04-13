@@ -146,8 +146,8 @@ const loginUser = async (req: express.Request, res: express.Response) => {
                 userEmail: user.email,
                 userId: user._id.toString(),
                 expiresIn: session.tokenExpirations.accessTokenExpitation,
-                profilePicturePath: user.profile_picture_path,
-                profileBannerPath: user.profile_banner_path
+                profilePictureUrl: user.profile_picture_url,
+                profileBannerUrl: user.profile_banner_url
             }
         });
     } catch {

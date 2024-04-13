@@ -7,7 +7,7 @@ interface GlobalContextProps {
     updateUsername: (username: string) => void;
     updateUserData: () => void | SessionData;
     clearSessionData: () => void;
-    setSessionData: (email: string, username: string, expiresIn: number, profilePicturePath?: string, profileBannerPath?: string) => void;
+    setSessionData: (email: string, username: string, expiresIn: number, profilePictureUrl?: string, profileBannerUrl?: string) => void;
     getSavedItems: (films: any[], media: { id: string, type: string }[], callback: (films: any) => void) => void;
     setFavorite: (id: string, type: string) => Promise<void>;
     removeFavorite: (id: string, type: string) => Promise<void>;
@@ -57,7 +57,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         if (!userData) return;
 
         mml_api_protected.get("/api/v1/me").then((res) => {
-            const sessionData = { ...userData, username: res.data.responseData.username, profilePicturePath: res.data.responseData.profile_picture_path, profileBannerPath: res.data.responseData.profile_banner_path, email: res.data.responseData.email };
+            const sessionData = { ...userData, username: res.data.responseData.username, profilePictureUrl: res.data.responseData.profile_picture_url, profileBannerUrl: res.data.responseData.profile_banner_url, email: res.data.responseData.email };
             localStorage.setItem('sessionData', JSON.stringify(sessionData));
 
             firstUpdate.current = false;
@@ -109,7 +109,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
                     const { responseData } = response.data
             
                     // Update the session data
-                    setSessionData(userData.email, userData.username, responseData.expiresIn, userData.profilePicturePath, userData.profileBannerPath);
+                    setSessionData(userData.email, userData.username, responseData.expiresIn, userData.profilePictureUrl, userData.profileBannerUrl);
                     processQueue(null);
                     return config;
                 }
@@ -160,7 +160,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         return JSON.parse(localStorage.getItem('sessionData')!) as SessionData;
     };
 
-    const setSessionData = (email: string, username: string, expiresIn: number, profilePicturePath?: string, profileBannerPath?: string) => {
+    const setSessionData = (email: string, username: string, expiresIn: number, profilePictureUrl?: string, profileBannerUrl?: string) => {
         setLoggedIn(true);
 
         const sessionData = {
@@ -170,12 +170,12 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
             setAt: Date.now(),
         } as SessionData;
     
-        if (profilePicturePath) {
-            sessionData.profilePicturePath = profilePicturePath;
+        if (profilePictureUrl) {
+            sessionData.profilePictureUrl = profilePictureUrl;
         }
 
-        if (profileBannerPath) {
-            sessionData.profileBannerPath = profileBannerPath;
+        if (profileBannerUrl) {
+            sessionData.profileBannerUrl = profileBannerUrl;
         }
     
         localStorage.setItem('sessionData', JSON.stringify(sessionData));
@@ -195,7 +195,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         if (!userData) return;
 
         mml_api_protected.get("/api/v1/me").then((res) => {
-            const sessionData = { ...userData, username: res.data.responseData.username, profilePicturePath: res.data.responseData.profile_picture_path, profileBannerPath: res.data.responseData.profile_banner_path, email: res.data.responseData.email };
+            const sessionData = { ...userData, username: res.data.responseData.username, profilePictureUrl: res.data.responseData.profile_picture_url, profileBannerUrl: res.data.responseData.profile_banner_utl, email: res.data.responseData.email };
             localStorage.setItem('sessionData', JSON.stringify(sessionData));
 
             setUserData(sessionData);

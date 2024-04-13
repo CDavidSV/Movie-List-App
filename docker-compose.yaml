@@ -2,9 +2,12 @@ services:
   backend:
     build: ./Backend
     ports:
-      - "3000:3000"
+      - "8080:8080"
     environment:
       # MONGO_URI:
+      # SAS_TOKEN:
+      # ACCOUNT_NAME:
+      # CONTAINER_NAME:
       # TMDB_API_KEY:
       # TMDB_ACCESS_TOKEN:
       # ACCESS_TOKEN_KEY:
@@ -15,4 +18,4 @@ services:
     ports:
       - "80:80"
     environment:
-      # VITE_API_URL_PROD
+      VITE_API_URL_PROD: http://localhost:8080 # Change this to your backend URL if you are hosting it on a different server

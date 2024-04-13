@@ -40,8 +40,8 @@ interface SessionData {
     username: string;
     expiresIn: number;
     setAt: number;
-    profilePicturePath?: string;
-    profileBannerPath?: string;
+    profilePictureUrl?: string;
+    profileBannerUrl?: string;
 }
 
 interface SearchResultItem {

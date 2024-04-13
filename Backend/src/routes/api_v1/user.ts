@@ -14,6 +14,8 @@ import { v4 as uuid } from 'uuid';
 import path from "path";
 import sharp from "sharp";
 import config from "../../config/config";
+import containerClient from "../../config/azure-blob-storage";
+import { Readable } from "stream";
 
 const getuserInfo = async (req: Request, res: Response) => {
     const userId = req.params.id;
@@ -52,8 +54,8 @@ const getMeUserInfo = async (req: Request, res: Response) => {
         email: 1,
         verified: 1,
         joined_at: 1,
-        profile_picture_path: 1,
-        profile_banner_path: 1,
+        profile_picture_url: 1,
+        profile_banner_url: 1,
         _id: 0
     }).then(user => {
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
@@ -169,14 +171,14 @@ const uploadProfilePicture = async (req: Request, res: Response) => {
 
         // Check if the user already has a profile picture and delete it if they do.
         const user = await userSchema.findById(req.user!.id);
-        if (user && user.profile_picture_path) {
-            fs.unlink(path.join(__dirname, `../../public${user.profile_picture_path}`), (err) => {
-                if (err) console.error(err);
-            });
+        if (user && user.profile_picture_url) {
+            const oldProfilePicture = containerClient.getBlockBlobClient(user.profile_picture_url.split("/").pop()!);
+            oldProfilePicture.delete().catch(err => console.error(err));
         }
         
-        await userSchema.updateOne({ _id: req.user!.id }, { profile_picture_path: `/images/${filename}` });
-        fs.writeFileSync(path.join(__dirname, `../../public/images/${filename}`), buffer);
+        const blobClient = containerClient.getBlockBlobClient(filename);
+        await blobClient.uploadStream(Readable.from(buffer), undefined, undefined, { blobHTTPHeaders: { blobContentType: req.file.mimetype } });
+        await userSchema.updateOne({ _id: req.user!.id }, { profile_picture_url: blobClient.url.split("?")[0] });
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error uploading profile picture" });
@@ -199,14 +201,14 @@ const uploadBannerPicture = async (req: Request, res: Response) => {
 
         // Check if the user already has a profile picture and delete it if they do.
         const user = await userSchema.findById(req.user!.id);
-        if (user && user.profile_banner_path) {
-            fs.unlink(path.join(__dirname, `../../public${user.profile_banner_path}`), (err) => {
-                if (err) console.error(err);
-            });
+        if (user && user.profile_banner_url) {
+            const oldBannerPicture = containerClient.getBlockBlobClient(user.profile_banner_url.split("/").pop()!);
+            oldBannerPicture.delete().catch(err => console.error(err));
         }
         
-        await userSchema.updateOne({ _id: req.user!.id }, { profile_banner_path: `/images/${filename}` });
-        fs.writeFileSync(path.join(__dirname, `../../public/images/${filename}`), buffer);
+        const blobClient = containerClient.getBlockBlobClient(filename);
+        await blobClient.uploadStream(Readable.from(buffer), undefined, undefined, { blobHTTPHeaders: { blobContentType: req.file.mimetype } });
+        await userSchema.updateOne({ _id: req.user!.id }, { profile_banner_url: blobClient.url.split("?")[0] });
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error uploading banner image" });
