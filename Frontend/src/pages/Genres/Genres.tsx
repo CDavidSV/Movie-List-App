@@ -24,7 +24,6 @@ export default function Genres() {
         
         mml_api.get(`api/v1/media/movies/genres?name=${genreName}`).then((response) => {
             setLoading(false);
-            setMedia(response.data.responseData);
             
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type})), (films: any) => {
                 setMedia(films);
@@ -33,7 +32,7 @@ export default function Genres() {
             toast.open("Error loading genre", "error");
             navigate("/genres");
         });
-    }, [navigate]);
+    }, [navigate, genreName]);
 
 
     const getNextPage = () => {
