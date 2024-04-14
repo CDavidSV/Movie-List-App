@@ -28,7 +28,7 @@ const config: Config = {
     domain: process.env.NODE_ENV === 'development' ? 'localhost' : process.env.SITE_DOMAIN,
     refreshTokenDomain: process.env.NODE_ENV === 'development' ? 'localhost' : process.env.API_DOMAIN,
     allowedDevDomains: ['http://localhost:5173', 'http://localhost'],
-    allowedProdDomains: ['https://white-stone-02077ca1e.5.azurestaticapps.net'],
+    allowedProdDomains: ['https://www.mymovielist.cdavidsv.dev'],
     tmdbImageSmall: 'https://image.tmdb.org/t/p/w185',
     tmdbImageMedium: 'https://image.tmdb.org/t/p/w300',
     tmdbImageLarge: 'https://image.tmdb.org/t/p/w500',
