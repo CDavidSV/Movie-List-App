@@ -10,6 +10,7 @@ import PageNotFound from "../PageNotFound/PageNotFound";
 import Modal from "../../components/modal-component/modal";
 import { MediaContext } from "../../contexts/MediaContext";
 import "./media.css";
+import { ToastContext } from "../../contexts/ToastContext";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -27,6 +28,7 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
     const [inFavorites, setInFavorites] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
     const { loggedIn, mml_api_protected, setWatchlist } = useContext(GlobalContext);
+    const toast = useContext(ToastContext);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -49,6 +51,9 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
                 setInFavorites(true);
             }
             setLoading(false);
+        }).catch(() => {    
+            setLoading(false);
+            toast.open("Error loading watchlist status", "error");
         });
     }, []);
 
@@ -183,12 +188,15 @@ function Images({ type, id }: { type: string, id: string }) {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [selectedImage, setSelectedImage] = useState<string>("");
     const [selectedImages, setSelectedImages] = useState<any[]>([]);
+    const toast = useContext(ToastContext);
     const { mml_api } = useContext(GlobalContext);
 
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/images`).then((response) => {
             setImages(response.data.responseData);
             setSelectedImages(response.data.responseData.backdrops);
+        }).catch(() => {
+            toast.open("Error loading images", "error");
         });
     }, [type, id]);
 
@@ -232,11 +240,14 @@ function Videos({ type, id }: { type: string, id: string }) {
     const [videos, setVideos] = useState<any[]>([]);
     const [selectedVideo, setSelectedVideo] = useState<{ name: string, key: string } | null>();
     const [showModal, setShowModal] = useState<boolean>(false);
+    const toast = useContext(ToastContext);
     const { mml_api } = useContext(GlobalContext);
 
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/videos`).then((response) => {
             setVideos(response.data.responseData);
+        }).catch(() => {
+            toast.open("Error loading videos", "error");
         });
     }, [type, id]);
 
@@ -284,11 +295,14 @@ function Videos({ type, id }: { type: string, id: string }) {
 
 function Cast({ type, id }: { type: string, id: string }) {
     const [cast, setCast] = useState<any[]>([]);
+    const toast = useContext(ToastContext);
     const { mml_api } = useContext(GlobalContext);
 
     useEffect(() => {
         mml_api.get(`/api/v1/media/${type}/${id}/cast`).then((response) => {
             setCast(response.data.responseData);
+        }).catch(() => {
+            toast.open("Error loading cast data", "error");
         });
     }, [type, id]);
 
@@ -309,6 +323,7 @@ function Cast({ type, id }: { type: string, id: string }) {
 
 function Crew({ type, id }: { type: string, id: string }) {
     const [crew, setCrew] = useState<{ name: string, members: any[] }[]>([]);
+    const toast = useContext(ToastContext);
     const { mml_api } = useContext(GlobalContext);
 
     useEffect(() => {
@@ -324,6 +339,8 @@ function Crew({ type, id }: { type: string, id: string }) {
             });
 
             setCrew(Array.from(crew.values()));
+        }).catch(() => {
+            toast.open("Error loading crew data", "error");
         });
     }, [type, id]);
 

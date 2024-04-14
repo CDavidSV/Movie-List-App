@@ -24,7 +24,7 @@
 }
 
 :root {
-    --nav-height: 8vh;
+    --nav-height: 85px;
     --primary-color: #2d8db7;
     --secondary-color: #68cbdb;
     --tertiary-color: #226d8d;
@@ -344,6 +344,16 @@ button:disabled, button:disabled:hover {
     gap: 10px;
 }
 
+.toasts {
+    position: fixed;
+    top: calc(var(--nav-height) + 10px);
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
 .spinning-loader {
     height: 100%;
     aspect-ratio: 1;
@@ -426,5 +436,13 @@ button:disabled, button:disabled:hover {
 
     .logo-desktop {
         display: none;
+    }
+
+    .login-form {
+        background: transparent;
+    }
+    
+    .signup-form {
+        background: transparent;
     }
 }

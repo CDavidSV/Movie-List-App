@@ -6,6 +6,7 @@ import { removeSearchResultHistoryItem } from "../../helpers/util.helpers";
 import { getSearchResultsHistory } from "../../helpers/util.helpers";
 import { Link } from "react-router-dom";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { ToastContext } from "../../contexts/ToastContext";
 
 function PrevSearchResultCard(props: { name: string, url: string, remove: React.MouseEventHandler }) {
     return (
@@ -27,6 +28,7 @@ export default function Browse() {
     const [searchHistory, setSearchHistory] = useState<SearchResultItem[]>(getSearchResultsHistory());
     const [defaultValue, setDefaultValue] = useState<string>("");
     const { getSavedItems, mml_api } = useContext(GlobalContext);
+    const toast = useContext(ToastContext);
     const cooldown = 400;
 
     useEffect(() => {
@@ -49,6 +51,9 @@ export default function Browse() {
             window.history.pushState({}, "", `/search?query=${query}`);
             
             if (response.data.responseData.length > 0) getSavedItems(response.data.responseData, response.data.responseData.map((media: any) => ({ id: media.id, type: media.type })), (media: any) => setMedia(media));
+        }).catch(() => {
+            toast.open("Error fetching search results", "error");
+            setLoading(false);
         });
     }
 

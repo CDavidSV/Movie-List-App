@@ -6,15 +6,15 @@ import './upload-image.css';
 export default function UploadImage(props: UploadImageProps) {
     const [selectedImage, setSelectedImage] = useState<string | ArrayBuffer | null>(null);
     const [message, setMessage] = useState<string>('Drag here to upload');
+    const [draggingClass, setDraggingClass] = useState<string>('');
     const cropperRef = useRef<HTMLImageElement>(null);
-    let cropper: Cropper;
+    let cropperObjRef = useRef<Cropper | null>(null);
 
     useEffect(() => {
+        if (cropperObjRef.current) cropperObjRef.current.destroy();
         if (!selectedImage || !cropperRef.current) return;
 
-        if (cropper) cropper.destroy();
-
-        cropper = new Cropper(cropperRef.current, {
+        cropperObjRef.current = new Cropper(cropperRef.current, {
             aspectRatio: props.aspectRatio,
             viewMode: 1,
             minCropBoxHeight: 100,
@@ -52,6 +52,7 @@ export default function UploadImage(props: UploadImageProps) {
         e.preventDefault();
         e.stopPropagation();
 
+        setDraggingClass('');
         if (!e.dataTransfer.files) {
             setMessage('Please select or drag an image');
             return;
@@ -61,10 +62,8 @@ export default function UploadImage(props: UploadImageProps) {
     }
 
     const getCroppedImage = () => {
-        if (!cropper) return;
-        const canvas = cropper.getCroppedCanvas();
-
-        if (!canvas) return;
+        if (!cropperObjRef.current) return;
+        const canvas = cropperObjRef.current.getCroppedCanvas();
 
         props.onCrop(canvas.toDataURL('image/jpg', 0.9));
     }
@@ -74,7 +73,9 @@ export default function UploadImage(props: UploadImageProps) {
             <div 
             style={selectedImage ? { display: "none" } : {}}
             onDrop={handleDrop}
-            className="upload-image-box">
+            onDragEnter={() => setDraggingClass('dragging')}
+            onDragLeave={() => setDraggingClass('')}
+            className={`upload-image-box ${draggingClass}`}>
                 <input 
                 className="upload-pfp-btn" 
                 type="file" 
@@ -93,6 +94,7 @@ export default function UploadImage(props: UploadImageProps) {
             <div style={!selectedImage ? { display: "none" } : { minWidth: "200px" }}>
                 <img style={{ height: props.height, maxWidth: "100%", display: "100%" }} ref={cropperRef} src={selectedImage as string} alt="profile-picture"/>
                 <button onClick={() => getCroppedImage()} style={{ marginTop: "10px", width: "100%" }} className="button primary">Upload</button>
+                <button onClick={() => setSelectedImage(null)} style={{ marginTop: "10px", width: "100%" }} className="button">Choose Another Image</button>
             </div>
         </div>
     );

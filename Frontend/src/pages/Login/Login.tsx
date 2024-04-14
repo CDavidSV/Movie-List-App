@@ -10,8 +10,8 @@ export default function Login() {
     const [loginError, setLoginError] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
     const { setSessionData, mml_api, loggedIn } = useContext(GlobalContext);
+    const navigate = useNavigate();
 
     document.title = "Log In | My Movie List";
 

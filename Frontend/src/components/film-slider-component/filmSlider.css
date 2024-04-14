@@ -96,6 +96,7 @@
     .slider {
         padding: 0 25px;
         scroll-padding-inline: 25px;
+        scroll-snap-type: none;
     }
 
     .slider-page-indicator {

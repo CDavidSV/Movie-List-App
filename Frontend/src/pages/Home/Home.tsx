@@ -3,6 +3,7 @@ import FilmSlider from "../../components/film-slider-component/filmSlider";
 import PersonalListsProvider from "../../contexts/PersonalListsContext";
 import HomeCarousel from "../../components/home-carousel-component/home-carousel";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { ToastContext } from "../../contexts/ToastContext";
 import "./home.css";
 
 export default function Home() {
@@ -12,6 +13,7 @@ export default function Home() {
     const [watchlist, setWatchlist] = useState<FilmCardProps[]>([]);
     const [carouselData, setCarouselData] = useState<SliderItem[]>([]);
     const { loggedIn, mml_api, mml_api_protected, getSavedItems } = useContext(GlobalContext);
+    const toast = useContext(ToastContext);
 
     const parseFilmData = (film: any): FilmCardProps[] => {
         return film.map((film: any) => {
@@ -41,6 +43,8 @@ export default function Home() {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setCarouselData(films);
             });
+        }).catch(() => {
+            toast.open("Error loading carousel data", "error");
         });
 
         mml_api.get("api/v1/media/movies/popular").then((response) => {
@@ -48,6 +52,8 @@ export default function Home() {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setPopularMovies(parseFilmData(films));
             });
+        }).catch(() => {
+            toast.open("Error loading popular movies", "error");
         });
 
         mml_api.get("api/v1/media/movies/upcoming").then((response) => {
@@ -55,6 +61,8 @@ export default function Home() {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setUpcoming(parseFilmData(films));
             });
+        }).catch(() => {
+            toast.open("Error loading upcoming movies", "error");
         });
 
         mml_api.get("api/v1/media/movies/top-rated").then((response) => {
@@ -62,6 +70,8 @@ export default function Home() {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setTopRated(parseFilmData(films));
             });
+        }).catch(() => {
+            toast.open("Error loading top rated movies", "error");
         });
 
         if (!loggedIn) return;
@@ -84,7 +94,6 @@ export default function Home() {
         });
     }), []);
 
-    // TODO: Implement image slider for movies
     return (
         <PersonalListsProvider>
             <div className="content">

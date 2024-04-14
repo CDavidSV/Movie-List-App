@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from "axios";
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import config from "../config/config";
+import { ToastContext } from "./ToastContext";
 
 interface GlobalContextProps {
     userData: SessionData | null;
@@ -42,6 +43,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
     const [userData, setUserData] = useState<SessionData | null>(null);
     const [loggedIn, setLoggedIn] = useState(false);
     const firstUpdate = useRef(true);
+    const toast = useContext(ToastContext);
 
     useEffect(() => {
         const sessionData = getSessionData();
@@ -62,8 +64,8 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
 
             firstUpdate.current = false;
             setUserData(sessionData);
-        }).catch((err) => {
-            console.error("Error fetching user data: ", err);
+        }).catch(() => {
+            toast.open("Error fetching user data.", "error");
         });
     }, [userData]);
 
@@ -195,12 +197,12 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         if (!userData) return;
 
         mml_api_protected.get("/api/v1/me").then((res) => {
-            const sessionData = { ...userData, username: res.data.responseData.username, profilePictureUrl: res.data.responseData.profile_picture_url, profileBannerUrl: res.data.responseData.profile_banner_utl, email: res.data.responseData.email };
+            const sessionData = { ...userData, username: res.data.responseData.username, profilePictureUrl: res.data.responseData.profile_picture_url, profileBannerUrl: res.data.responseData.profile_banner_url, email: res.data.responseData.email };
             localStorage.setItem('sessionData', JSON.stringify(sessionData));
 
             setUserData(sessionData);
-        }).catch((err) => {
-            console.error("Error fetching user data: ", err);
+        }).catch(() => {
+            toast.open("Error fetching user data.", "error");
         });
     };
 
@@ -228,16 +230,21 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
             });
             callback(films);
         }).catch(() => {
+            toast.open("Error fetching personal lists.", "error");
             callback(films);
         });
     };
 
     const setFavorite = async (id: string, type: string) => {
-        await mml_api_protected.post(`api/v1/favorites/add?media_id=${id}&type=${type}`);
+        await mml_api_protected.post(`api/v1/favorites/add?media_id=${id}&type=${type}`).catch(() => {
+            toast.open("Error adding to favorites.", "error");
+        });
     };
     
     const removeFavorite = async (id: string, type: string) => {
-        await mml_api_protected.delete(`api/v1/favorites/remove?media_id=${id}&type=${type}`);
+        await mml_api_protected.delete(`api/v1/favorites/remove?media_id=${id}&type=${type}`).catch(() => {
+            toast.open("Error removing from favorites.", "error");
+        });
     };
     
     const setWatchlist = async (id: string, type: string, status: number = 1, progress: number = 0) => {
@@ -246,11 +253,15 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
             status: status,
             progress: progress,
             type: type
+        }).catch(() => {
+            toast.open("Error adding to watchlist.", "error");
         });
     };
     
     const removeFromWatchlist = async (id: string, type: string) => {
-        await mml_api_protected.delete(`api/v1/watchlist/remove?media_id=${id}&type=${type}`);
+        await mml_api_protected.delete(`api/v1/watchlist/remove?media_id=${id}&type=${type}`).catch(() => {
+            toast.open("Error removing from watchlist.", "error");
+        });
     }
     
     const saveToHistory = (id: string, type: string, loggedIn: boolean) => {

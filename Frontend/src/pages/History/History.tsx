@@ -4,6 +4,7 @@ import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import NotFound from "../../components/not-found-component/not-found";
 import Modal from "../../components/modal-component/modal";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { ToastContext } from "../../contexts/ToastContext";
 
 export default function History() {
     const [history, setHistory] = useState<any[]>([]);
@@ -11,6 +12,7 @@ export default function History() {
     const [cursor, setCursor] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const { mml_api_protected } = useContext(GlobalContext);
+    const toast = useContext(ToastContext);
 
     useEffect(() => {
         document.title = "History | My Movie List";
@@ -29,6 +31,9 @@ export default function History() {
             setHistory([...history, ...response.data.responseData.history]);
             setCursor(response.data.responseData.cursor);
             setLoading(false);
+        }).catch(() => {
+            toast.open("Error loading history", "error");
+            setLoading(false);
         });
     }, loading, cursor === null);
 
@@ -36,6 +41,9 @@ export default function History() {
         mml_api_protected.delete('/api/v1/history/clear').then(() => {
             setHistory([]);
             setCursor(null);
+            toast.open("History cleared", "success");
+        }).catch(() => {
+            toast.open("Error clearing history", "error");
         });
         setModalOpen(false);
     }

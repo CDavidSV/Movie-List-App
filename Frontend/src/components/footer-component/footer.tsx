@@ -1,6 +1,9 @@
 import { useContext } from "react";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import LogoWithName from '../../assets/logos/mml_logo_with_name.svg';
+import TMDBLogo from '../../assets/logos/blue_short-tmdb.svg'
 import "./footer.css";
+import { NavLink } from "react-router-dom";
 
 function FooterLink({ icon, text, link }: { icon?: string, text: string, link: string }) {
     return (
@@ -17,6 +20,14 @@ export default function Footer() {
     return (
         <footer className="page-footer">
             <div className="main-footer">
+                <div className="footer-section">
+                <NavLink to="/">
+                    <img src={LogoWithName} className="footer-logo"/>
+                </NavLink>
+                <a href="https://www.themoviedb.org/" target="_blank">
+                    <img src={TMDBLogo} className="footer-logo"/>
+                </a>
+                </div>
                 <div className="footer-section">
                     <h4>My Movie List</h4>
                     <FooterLink text="Home" link="/"/>

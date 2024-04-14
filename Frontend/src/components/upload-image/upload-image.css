@@ -24,6 +24,11 @@
     color: var(--primary-color);
 }
 
+.upload-image-box.dragging {
+    border: 2px dashed var(--primary-color);
+    color: var(--primary-color);
+}
+
 .upload-container h3 {
     margin: 10px 0;
 }

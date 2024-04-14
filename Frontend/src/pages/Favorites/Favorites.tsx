@@ -6,9 +6,11 @@ import Modal from "../../components/modal-component/modal";
 import "./favorites.css";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { ToastContext } from "../../contexts/ToastContext";
 
 function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: any, removeItem: Function, provided: DraggableProvided, snapshot: DraggableStateSnapshot}) {
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const toast = useContext(ToastContext);
     const { removeFavorite } = useContext(GlobalContext);
     
     const removeFromFavorites = (e: React.MouseEvent) => {
@@ -17,6 +19,7 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
         setDeleteModalOpen(false);
         removeFavorite(filmData.media_id, filmData.type).then(() => {
             removeItem();
+            toast.open("Item removed from favorites", "success");
         });
     }
 
@@ -61,6 +64,7 @@ export default function Favorites() {
     const [lastId, setLastId] = useState<number | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const { mml_api_protected } = useContext(GlobalContext);
+    const toast = useContext(ToastContext);
 
     useInfiniteScroll(() => getNextPage(), loading, !lastId);
 
@@ -72,6 +76,8 @@ export default function Favorites() {
             setLoading(false);
 
             if (res.data.responseData.lastId) setLastId(res.data.responseData.lastId);
+        }).catch(() => {
+            toast.open("Error loading favorites", "error");
         });
     }, []);
 
@@ -88,6 +94,8 @@ export default function Favorites() {
             } else {
                 setLastId(null);
             }
+        }).catch(() => {
+            toast.open("Error loading favorites", "error");
         });
     }
 
@@ -109,9 +117,9 @@ export default function Favorites() {
             ref_id: favorites[finalIndex].id,
             target_id: favorites[startIndex].id,
             position: finalIndex > startIndex ? "after" : "before"
-        }).catch((err) => {
+        }).catch(() => {
+            toast.open("Error reordering favorites", "error");
             setFavorites(original);
-            console.error("Unable to reorder: ", err);
         });
 
         // Move the reordered items

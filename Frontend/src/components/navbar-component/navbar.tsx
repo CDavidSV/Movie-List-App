@@ -211,7 +211,7 @@ export default function Navbar() {
             <header>
                 <div className="header-section">
                     <HanburgerMenu handleMenuStateChange={handleMenuStateChange}/>
-                    <NavLink to="/" className="logo-container"> 
+                    <NavLink to="/" className="logo-container">
                         <LogoWithName className="logo-desktop"/>
                         <Logo className="logo-mobile"/>
                     </NavLink>

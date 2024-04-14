@@ -107,3 +107,9 @@ interface SliderItem {
     inWatchlist?: boolean;
     inFavorites?: boolean;
 }
+
+interface ToastProps {
+    message: string;
+    onClose: () => void;
+    type: "success" | "error" | "warning" | "info";
+}

@@ -6,6 +6,7 @@ import Modal from '../../components/modal-component/modal';
 import UploadImage from '../../components/upload-image/upload-image';
 import { GlobalContext } from '../../contexts/GlobalContext';
 import "./myprofile.css";
+import { ToastContext } from '../../contexts/ToastContext';
 
 function ChangeUsername ({ username }: { username: string }) {
     const [oldUsername, setOldUsername] = useState<string>(username);
@@ -259,7 +260,8 @@ export default function MyProfile() {
     const navigate = useNavigate();
     const { userData, updateUserData, mml_api_protected } = useContext(GlobalContext);
     const [selectedTab, setSelectedTab] = useState<number>(0);
-    const [modalsState, setModalsState] = useState<{ pfpModal: boolean, bannerModal: boolean }>({ pfpModal: false, bannerModal: false })
+    const [modalsState, setModalsState] = useState<{ pfpModal: boolean, bannerModal: boolean }>({ pfpModal: false, bannerModal: false });
+    const toast = useContext(ToastContext);
 
     useEffect(() => {
         document.title = "Profile | My Movie List";
@@ -278,9 +280,13 @@ export default function MyProfile() {
         const blob = await fetch(newPfp).then((res) => res.blob());
         formData.append('image', blob);
 
+        setModalsState({ ...modalsState, pfpModal: false });
+        toast.open("Uploading profile picture...");
         mml_api_protected.post('/api/v1/user/change-profile-picture', formData, { headers: { "Content-Type": "multipart/form-data" } }).then(() => {
-            setModalsState({ ...modalsState, pfpModal: false });
             updateUserData();
+            toast.open("Profile picture updated successfully.", "success");
+        }).catch(() => {
+            toast.open("Failed to update profile picture. Please try again.", "error");
         });
     }
 
@@ -289,15 +295,19 @@ export default function MyProfile() {
         const blob = await fetch(newBanner).then((res) => res.blob());
         formData.append('image', blob);
 
+        setModalsState({ ...modalsState, bannerModal: false });
+        toast.open("Uploading profile banner...");
         mml_api_protected.post('/api/v1/user/change-profile-banner', formData, { headers: { "Content-Type": "multipart/form-data" } }).then(() => {
-            setModalsState({ ...modalsState, bannerModal: false });
             updateUserData();
+        }).then(() => {
+            toast.open("Profile banner updated successfully.", "success");
+        }).catch(() => {
+            toast.open("Failed to update profile banner. Please try again.", "error");
         });
     }
 
     const tabs = [<GeneralTab/>, <ChangePasswordTab />];
     
-    // TODO: Implement a way to change the user's banner
     return (
         <div className="content">
             <div className="profile-wallpaper">

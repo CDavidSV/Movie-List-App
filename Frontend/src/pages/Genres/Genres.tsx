@@ -4,6 +4,7 @@ import PageNotFound from "../PageNotFound/PageNotFound";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { ToastContext } from "../../contexts/ToastContext";
 
 export default function Genres() {
     const { genreName } = useParams<{ genreName: string }>();
@@ -11,6 +12,7 @@ export default function Genres() {
     const [loading, setLoading] = useState<boolean>(true);
     const [page, setPage] = useState<number>(1);
     const { getSavedItems, mml_api } = useContext(GlobalContext);
+    const toast = useContext(ToastContext);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -27,6 +29,9 @@ export default function Genres() {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type})), (films: any) => {
                 setMedia(films);
             });
+        }).catch(() => {
+            toast.open("Error loading genre", "error");
+            navigate("/genres");
         });
     }, [navigate]);
 
@@ -41,6 +46,9 @@ export default function Genres() {
                 setPage(nextPage);
                 setLoading(false);
             });
+        }).catch(() => {
+            toast.open("Error loading genre", "error");
+            setLoading(false);
         });
     }
 

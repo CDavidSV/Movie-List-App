@@ -8,6 +8,7 @@ import Modal from "../../components/modal-component/modal";
 import axios, { CancelTokenSource } from "axios";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { ToastContext } from "../../contexts/ToastContext";
 
 function WatchlistItem(props: WatchlistItemProps) {
     const [status, setStatus] = useState<string>("plan-to-watch");
@@ -109,6 +110,7 @@ export default function Watchlist() {
     const [watchlist, setWatchlist] = useState<any[]>([]);
     const [source, setSource] = useState<CancelTokenSource | null>(null);
     const [cursor, setCursor] = useState<number | null>(null);
+    const toast = useContext(ToastContext);
     const { removeFromWatchlist, mml_api_protected } = useContext(GlobalContext);
 
     useInfiniteScroll(() => getNextPage(), loading, !cursor);
@@ -134,6 +136,9 @@ export default function Watchlist() {
             setWatchlist(response.data.responseData.watchlist);
 
             if (response.data.responseData.cursor) setCursor(response.data.responseData.cursor);
+        }).catch(() => {
+            toast.open("Error loading watchlist", "error");
+            setLoading(false);
         });
 
     }, [selectedTab]);
@@ -150,6 +155,9 @@ export default function Watchlist() {
             } else {
                 setCursor(null)
             }
+        }).catch(() => {
+            toast.open("Error loading watchlist", "error");
+            setLoading(false);
         });
     }
 
@@ -163,6 +171,7 @@ export default function Watchlist() {
         removeFromWatchlist(id, type).then(() => {
             watchlist.splice(index, 1);
             setWatchlist([...watchlist]);
+            toast.open("Item removed from watchlist", "success");
         });
     }
 

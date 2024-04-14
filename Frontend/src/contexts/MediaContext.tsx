@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 import { GlobalContext } from './GlobalContext';
+import { ToastContext } from './ToastContext';
 interface MediaContextProps {
     getMediaData: (mediaId: string, type: string) => Promise<any>;
 }
@@ -11,6 +12,7 @@ export const MediaContext = createContext<MediaContextProps>({
 export default function MediaProvider({ children }: { children: React.ReactNode }) {
     const [mediaData, setMediaData] = useState(new Map<string, any>());
     const { mml_api } = useContext(GlobalContext);
+    const toast = useContext(ToastContext);
 
     const getMediaData = async (mediaId: string, type: string): Promise<any> => {
         const uniqueId = `${mediaId}.${type}`;
@@ -23,8 +25,8 @@ export default function MediaProvider({ children }: { children: React.ReactNode 
                 newMediaData.set(uniqueId, res.data.responseData);
                 setMediaData(newMediaData);
                 return res.data.responseData;
-            }).catch((err) => {
-                console.error("Error fetching media data: ", err);
+            }).catch(() => {
+                toast.open("Error fetching media data", "error");
                 return null;
             });
         }

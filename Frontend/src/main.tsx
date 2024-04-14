@@ -7,6 +7,7 @@ import Footer from './components/footer-component/footer';
 import GlobalProvider from './contexts/GlobalContext';
 import MediaProvider from './contexts/MediaContext';
 import "./index.css";
+import { ToastProvider } from './contexts/ToastContext';
 
 const Home = lazy(() => import('./pages/Home/Home'));
 const Movies = lazy(() => import('./pages/Movies/Movies'));
@@ -73,12 +74,14 @@ function App() {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <GlobalProvider>
-      <MediaProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </MediaProvider>
-    </GlobalProvider>
+    <ToastProvider>
+      <GlobalProvider>
+        <MediaProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </MediaProvider>
+      </GlobalProvider>
+    </ToastProvider>
   </React.StrictMode>,
 )

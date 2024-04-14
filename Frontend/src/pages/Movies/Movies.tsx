@@ -2,11 +2,13 @@ import { useContext, useEffect, useState } from "react";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { ToastContext } from "../../contexts/ToastContext";
 
 export default function Movies() {
     const [movies, setMovies] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
+    const toast = useContext(ToastContext);
     const { getSavedItems, mml_api } = useContext(GlobalContext);
 
     const getMovies = (page: number) => {
@@ -19,6 +21,8 @@ export default function Movies() {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                 setMovies([...movies, ...films]);
             });
+        }).catch(() => {
+            toast.open("Error loading movies", "error");
         });
     }
 
