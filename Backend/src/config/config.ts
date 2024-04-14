@@ -25,8 +25,8 @@ const config: Config = {
     expiration1Hour: 3600000,
     cookieSecure: process.env.NODE_ENV === 'development' ? false : true,
     cookieSameSite: 'lax',
-    domain: undefined, // For now because I have no custom domain :(
-    refreshTokenDomain: undefined, // For now because I have no custom domain :(
+    domain: process.env.NODE_ENV === 'development' ? 'localhost' : process.env.SITE_DOMAIN,
+    refreshTokenDomain: process.env.NODE_ENV === 'development' ? 'localhost' : process.env.API_DOMAIN,
     allowedDevDomains: ['http://localhost:5173', 'http://localhost'],
     allowedProdDomains: ['https://white-stone-02077ca1e.5.azurestaticapps.net'],
     tmdbImageSmall: 'https://image.tmdb.org/t/p/w185',
