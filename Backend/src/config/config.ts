@@ -22,7 +22,7 @@ const config: Config = {
     environment: process.env.NODE_ENV,
     port: 8080,
     expiration30Days: 2592000000,
-    expiration1Hour: 3600000,
+    expiration1Hour: 5000,
     cookieSecure: process.env.NODE_ENV === 'development' ? false : true,
     cookieSameSite: 'lax',
     domain: process.env.NODE_ENV === 'development' ? 'localhost' : process.env.SITE_DOMAIN,
