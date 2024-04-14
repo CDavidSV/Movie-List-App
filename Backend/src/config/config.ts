@@ -24,7 +24,7 @@ const config: Config = {
     expiration30Days: 2592000000,
     expiration1Hour: 3600000,
     cookieSecure: process.env.NODE_ENV === 'development' ? false : true,
-    cookieSameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
+    cookieSameSite: 'lax',
     domain: undefined, // For now because I have no custom domain :(
     refreshTokenDomain: undefined, // For now because I have no custom domain :(
     allowedDevDomains: ['http://localhost:5173', 'http://localhost'],
