@@ -483,7 +483,7 @@ export default function Media() {
 
             saveToHistory(mediaData.id.toString(), type as string, loggedIn);
         });
-    }, [navigate]);
+    }, [navigate, id, type]);
 
     return (
         <div className="content">
