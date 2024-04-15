@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'Frontend/**'
+      - '.github/workflows/azure-static-web-apps-white-stone-02077ca1e.yml'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:

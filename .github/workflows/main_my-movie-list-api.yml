@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'Backend/**'
+      - '.github/workflows/main_my-movie-list-api.yml'
   workflow_dispatch:
 
 jobs:

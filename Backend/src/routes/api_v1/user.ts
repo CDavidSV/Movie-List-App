@@ -265,7 +265,7 @@ const deleteAccount = async (req: Request, res: Response) => {
 
         // Update cookies.
         res.clearCookie("a_t", { domain: config.domain });
-        res.clearCookie("r_t", { domain: config.refreshTokenDomain });
+        res.clearCookie("r_t", { domain: config.domain });
         res.clearCookie("s_id", { domain: config.domain });
         
         return sendResponse(res, { status: 200, message: "Account deleted successfully" });

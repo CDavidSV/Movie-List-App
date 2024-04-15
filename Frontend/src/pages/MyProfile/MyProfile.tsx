@@ -312,7 +312,7 @@ export default function MyProfile() {
         <div className="content">
             <div className="profile-wallpaper">
                 {userData && userData.profileBannerUrl && <img src={`${userData.profileBannerUrl}`} alt="profile_banner" />}
-                <div onClick={() => setModalsState({ ...modalsState, bannerModal: true })} className="upload_banner"><span style={{}} className="material-icons">image</span></div>
+                <div onClick={() => setModalsState({ ...modalsState, bannerModal: true })} className="upload_banner"><span className="material-icons">image</span></div>
                 <Modal open={modalsState.bannerModal} onClose={() => setModalsState({ ...modalsState, bannerModal: false })}>
                     <UploadImage onCrop={onBannerChange} aspectRatio={16 / 9} height="35vh" maxImageSizeInMb={16}/>
                 </Modal>
@@ -321,7 +321,7 @@ export default function MyProfile() {
                 <div className="profile-general-data">
                     <div className="profile-picture">
                         <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile_picture" />
-                        <div onClick={() => setModalsState({ ...modalsState, pfpModal: true })} className="upload_pfp"><span style={{}} className="material-icons">photo_camera</span></div>
+                        <div onClick={() => setModalsState({ ...modalsState, pfpModal: true })} className="upload_pfp"><span className="material-icons">photo_camera</span></div>
                         <Modal open={modalsState.pfpModal} onClose={() => setModalsState({ ...modalsState, pfpModal: false })}>
                             <UploadImage onCrop={onPfpChange} aspectRatio={1} height="50vh" maxImageSizeInMb={8}/>
                         </Modal>

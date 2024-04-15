@@ -62,7 +62,7 @@ const registerUser = async (req: express.Request, res: express.Response) => {
                 httpOnly: true,
                 sameSite: config.cookieSameSite,
                 secure: config.cookieSecure,
-                domain: config.refreshTokenDomain,
+                domain: config.domain,
                 maxAge: session.tokenExpirations.refreshTokenExpiration
             }
         );
@@ -125,7 +125,7 @@ const loginUser = async (req: express.Request, res: express.Response) => {
                 httpOnly: true,
                 sameSite: config.cookieSameSite,
                 secure: config.cookieSecure,
-                domain: config.refreshTokenDomain,
+                domain: config.domain,
                 maxAge: session.tokenExpirations.refreshTokenExpiration
             }
         );
@@ -203,7 +203,7 @@ const revokeSession = async (req: express.Request, res: express.Response) => {
 
     // Update cookies.
     res.clearCookie("a_t", { domain: config.domain });
-    res.clearCookie("r_t", { domain: config.refreshTokenDomain });
+    res.clearCookie("r_t", { domain: config.domain });
     res.clearCookie("s_id", { domain: config.domain });
 
     sendResponse(res, { status: 200, message: "Session invalidated" });
