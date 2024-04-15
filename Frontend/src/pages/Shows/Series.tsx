@@ -3,6 +3,7 @@ import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
+import { ScrollRestoration } from "react-router-dom";
 
 export default function Series() {
     const [movies, setMovies] = useState<any[]>([]);
@@ -36,6 +37,7 @@ export default function Series() {
 
     return (
         <div className="content">
+            <ScrollRestoration />
             <div className="page-title-container">
                 <span style={{fontSize: "2rem"}} className="material-icons icon">live_tv</span>
                 <h1>Series</h1>

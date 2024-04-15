@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
-import { Route, BrowserRouter, Routes, useLocation, matchPath } from 'react-router-dom'
+import { matchPath, createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
@@ -24,51 +24,95 @@ const PageNotFound = lazy(() => import('./pages/PageNotFound/PageNotFound'));
 const Favorites = lazy(() => import('./pages/Favorites/Favorites'));
 const Media = lazy(() => import('./pages/Media/Media'));
 
-function App() {
-  const location = useLocation();
-  const showNavIn: string[] = [
-    "/", 
-    "/movies", 
-    "/series", 
-    "/my-lists", 
-    "/genres/:genreName", 
-    "/search", 
-    "/watchlist", 
-    "/history", 
-    "/profile", 
-    "/favorites",
-    "/media/:type/:id"
-  ];
+function PageWrapper({ children }: { children: React.ReactNode }) {
+ return (
+  <div className="main-page-container">
+    <div className="main-content-wrap">
+      <Navbar />
+      {children}
+    </div>
+    <Footer />
+  </div>
+ );
+}
 
-  const shouldShowNavbar = showNavIn.some((path: string) => {
-    return matchPath(path, location.pathname);
-  });
+function App() {
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <PageWrapper><Home /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/movies',
+      element: <PageWrapper><Movies /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/series',
+      element: <PageWrapper><Series /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/my-lists',
+      element: <PageWrapper><MyLists /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/genres',
+      element: <PageWrapper><Genres /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/search',
+      element: <PageWrapper><Search /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/watchlist',
+      element: <PageWrapper><Watchlist /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/history',
+      element: <PageWrapper><History /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/profile',
+      element: <PageWrapper><MyProfile /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/login',
+      element: <PageWrapper><Login /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/signup',
+      element: <PageWrapper><SignUp /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/favorites',
+      element: <PageWrapper><Favorites /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '/media/:type/:id',
+      element: <PageWrapper><Media /></PageWrapper>,
+      errorElement: <PageNotFound />
+    },
+    {
+      path: '*',
+      element: <PageNotFound />
+    }
+  ]);
 
   return (
-    <div className="main-page-container">
-      <div className="main-content-wrap">
-        {shouldShowNavbar ? <Navbar/> : <Header/>}
-        <Suspense>
-          <Routes>
-            <Route path="/" Component={Home}/>
-            <Route path="/movies" Component={Movies}/>
-            <Route path="/series" Component={Series}/>
-            <Route path="/my-lists" Component={MyLists}/>
-            <Route path="/genres/:genreName" Component={Genres}/>
-            <Route path="/media/:type/:id" Component={Media}/>
-            <Route path="/search" Component={Search}/>
-            <Route path="/watchlist" Component={Watchlist}/>
-            <Route path="/favorites" Component={Favorites}/>
-            <Route path="/history" Component={History}/>
-            <Route path="/profile" Component={MyProfile}/>
-            <Route path="/login" Component={Login}/>
-            <Route path="/signup" Component={SignUp}/>
-            <Route path="*" Component={PageNotFound}/>
-          </Routes>
-        </Suspense>
-      </div>
-      <Footer />
-    </div>
+    <Suspense>
+      <RouterProvider router={router} />
+    </Suspense>
   );
 }
 
@@ -77,9 +121,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ToastProvider>
       <GlobalProvider>
         <MediaProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <App />
         </MediaProvider>
       </GlobalProvider>
     </ToastProvider>

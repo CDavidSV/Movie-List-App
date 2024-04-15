@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, ScrollRestoration } from 'react-router-dom';
 import InputField from '../../components/inputField-component/inputField';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useState } from 'react';
@@ -39,6 +39,7 @@ export default function Login() {
 
     return (
         <div>
+            <ScrollRestoration />
             <div className="login-container">
                 <form className="login-form" onSubmit={attemptLogin}>
                     <h1 style={{textAlign: "center"}}>Log In</h1>

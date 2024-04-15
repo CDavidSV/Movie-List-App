@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { ScrollRestoration, useNavigate, useParams } from "react-router-dom";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
@@ -57,6 +57,7 @@ export default function Genres() {
 
     return (
         <div className="content">
+            <ScrollRestoration />
             <div className="page-title-container">
                 <span style={{fontSize: "2rem"}} className="material-icons icon">movie</span>
                 <h1>{genreName}</h1>

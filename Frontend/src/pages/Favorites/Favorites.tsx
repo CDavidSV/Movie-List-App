@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, ScrollRestoration } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DraggableStateSnapshot } from "react-beautiful-dnd";
 import WatchlistButton from "../../components/watchlist-button-component/watchlist-button";
 import Modal from "../../components/modal-component/modal";
@@ -131,6 +131,7 @@ export default function Favorites() {
 
     return (  
         <div className="content">
+            <ScrollRestoration />
             <div className="content-wrapper">                
                 <div className="favorites-container">
                     <h1>Favorites</h1>

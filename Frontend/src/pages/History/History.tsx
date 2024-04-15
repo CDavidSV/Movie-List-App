@@ -5,6 +5,7 @@ import NotFound from "../../components/not-found-component/not-found";
 import Modal from "../../components/modal-component/modal";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
+import { ScrollRestoration } from "react-router-dom";
 
 export default function History() {
     const [history, setHistory] = useState<any[]>([]);
@@ -50,6 +51,7 @@ export default function History() {
  
     return (
         <div className="content">
+            <ScrollRestoration />
             <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
                 <div>
                     <h3 style={{textAlign: "center"}}>Are you sure you want to clear your history?</h3>

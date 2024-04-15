@@ -5,6 +5,7 @@ import HomeCarousel from "../../components/home-carousel-component/home-carousel
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
 import "./home.css";
+import { ScrollRestoration } from "react-router-dom";
 
 export default function Home() {
     const [popularMovies, setPopularMovies] = useState<FilmCardProps[]>([]);
@@ -37,7 +38,6 @@ export default function Home() {
 
     useEffect((() => {
         document.title = "My Movie List";
-        window.scrollTo(0, 0);
 
         mml_api.get("api/v1/media/movies/home-carousel").then((response) => {
             setCarouselData(response.data.responseData);
@@ -97,6 +97,7 @@ export default function Home() {
 
     return (
         <PersonalListsProvider>
+            <ScrollRestoration />
             <div className="content">
                 <div className="sliders-container">
                     { carouselData.length > 0 ? <HomeCarousel items={carouselData}/> : <div className="skeleton-carousel"></div> }

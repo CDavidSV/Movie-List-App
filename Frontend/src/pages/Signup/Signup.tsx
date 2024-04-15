@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, ScrollRestoration, useNavigate } from 'react-router-dom';
 import InputField from '../../components/inputField-component/inputField';
 import { useContext, useState } from 'react';
 import { GlobalContext } from '../../contexts/GlobalContext';
@@ -64,6 +64,7 @@ export default function SignUp() {
 
     return (
         <div>
+            <ScrollRestoration />
             <div className="login-container">
                 <form className="signup-form" onSubmit={attemptSignUp}>
                     <h1 style={{textAlign: "center"}}>Sign Up</h1>
