@@ -58,7 +58,7 @@ export default function FavoriteButton(props: { size: string, isFavorite: boolea
                 <p>You must be logged in to add a favorite.</p>
                 <div className="modal-buttons">
                     <button className="button primary" onClick={() => navigate("/login")}>Login</button>
-                    <button className="button primary" onClick={() => navigate("signup")}>Create Account</button>
+                    <button className="button primary" onClick={() => navigate("/signup")}>Create Account</button>
                 </div>
             </Modal>
             <span style={{ userSelect: "none" }} className={`material-icons icon-btn blue ${props.size}`} onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>

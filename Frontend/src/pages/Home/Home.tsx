@@ -37,6 +37,7 @@ export default function Home() {
 
     useEffect((() => {
         document.title = "My Movie List";
+        window.scrollTo(0, 0);
 
         mml_api.get("api/v1/media/movies/home-carousel").then((response) => {
             setCarouselData(response.data.responseData);
