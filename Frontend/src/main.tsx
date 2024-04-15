@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
-import { matchPath, createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { matchPath, createBrowserRouter, RouterProvider, useLocation } from 'react-router-dom'
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
@@ -25,15 +25,34 @@ const Favorites = lazy(() => import('./pages/Favorites/Favorites'));
 const Media = lazy(() => import('./pages/Media/Media'));
 
 function PageWrapper({ children }: { children: React.ReactNode }) {
- return (
-  <div className="main-page-container">
-    <div className="main-content-wrap">
-      <Navbar />
-      {children}
+  const location = useLocation();
+  const showNavIn: string[] = [
+    "/", 
+    "/movies", 
+    "/series", 
+    "/my-lists", 
+    "/genres/:genreName", 
+    "/search", 
+    "/watchlist", 
+    "/history", 
+    "/profile", 
+    "/favorites",
+    "/media/:type/:id"
+  ];
+
+  const shouldShowNavbar = showNavIn.some((path: string) => {
+    return matchPath(path, location.pathname);
+  });
+
+  return (
+    <div className="main-page-container">
+      <div className="main-content-wrap">
+        {shouldShowNavbar ? <Navbar/> : <Header/>}
+        {children}
+      </div>
+      <Footer />
     </div>
-    <Footer />
-  </div>
- );
+  );
 }
 
 function App() {
