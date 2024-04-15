@@ -78,7 +78,7 @@ function App() {
       errorElement: <PageNotFound />
     },
     {
-      path: '/genres',
+      path: '/genres/:genreName',
       element: <PageWrapper><Genres /></PageWrapper>,
       errorElement: <PageNotFound />
     },
