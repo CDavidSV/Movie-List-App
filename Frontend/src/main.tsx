@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
-import { matchPath, createBrowserRouter, RouterProvider, useLocation } from 'react-router-dom'
+import { matchPath, createBrowserRouter, RouterProvider, useLocation, Outlet } from 'react-router-dom'
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
@@ -24,7 +24,7 @@ const PageNotFound = lazy(() => import('./pages/PageNotFound/PageNotFound'));
 const Favorites = lazy(() => import('./pages/Favorites/Favorites'));
 const Media = lazy(() => import('./pages/Media/Media'));
 
-function PageWrapper({ children }: { children: React.ReactNode }) {
+function PageWrapper() {
   const location = useLocation();
   const showNavIn: string[] = [
     "/", 
@@ -48,7 +48,9 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
     <div className="main-page-container">
       <div className="main-content-wrap">
         {shouldShowNavbar ? <Navbar/> : <Header/>}
-        {children}
+        <Suspense>
+          <Outlet />
+        </Suspense>
       </div>
       <Footer />
     </div>
@@ -58,68 +60,61 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
 function App() {
   const router = createBrowserRouter([
     {
-      path: '/',
-      element: <PageWrapper><Home /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/movies',
-      element: <PageWrapper><Movies /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/series',
-      element: <PageWrapper><Series /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/my-lists',
-      element: <PageWrapper><MyLists /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/genres/:genreName',
-      element: <PageWrapper><Genres /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/search',
-      element: <PageWrapper><Search /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/watchlist',
-      element: <PageWrapper><Watchlist /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/history',
-      element: <PageWrapper><History /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/profile',
-      element: <PageWrapper><MyProfile /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/login',
-      element: <PageWrapper><Login /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/signup',
-      element: <PageWrapper><SignUp /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/favorites',
-      element: <PageWrapper><Favorites /></PageWrapper>,
-      errorElement: <PageNotFound />
-    },
-    {
-      path: '/media/:type/:id',
-      element: <PageWrapper><Media /></PageWrapper>,
+      element: <PageWrapper />,
+      children: [
+        {
+          path: '/',
+          element: <Home />,
+        },
+        {
+          path: '/movies',
+          element: <Movies />,
+        },
+        {
+          path: '/series',
+          element: <Series />,
+        },
+        {
+          path: '/my-lists',
+          element: <MyLists />,
+        },
+        {
+          path: '/genres/:genreName',
+          element: <Genres />,
+        },
+        {
+          path: '/search',
+          element: <Search />,
+        },
+        {
+          path: '/watchlist',
+          element: <Watchlist />,
+        },
+        {
+          path: '/history',
+          element: <History />,
+        },
+        {
+          path: '/profile',
+          element: <MyProfile />,
+        },
+        {
+          path: '/login',
+          element: <Login />,
+        },
+        {
+          path: '/signup',
+          element: <SignUp />,
+        },
+        {
+          path: '/favorites',
+          element: <Favorites />,
+        },
+        {
+          path: '/media/:type/:id',
+          element: <Media />,
+        },
+      ],
       errorElement: <PageNotFound />
     },
     {
@@ -129,9 +124,7 @@ function App() {
   ]);
 
   return (
-    <Suspense>
-      <RouterProvider router={router} />
-    </Suspense>
+    <RouterProvider router={router} />
   );
 }
 
