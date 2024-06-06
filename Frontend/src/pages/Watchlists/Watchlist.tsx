@@ -15,6 +15,7 @@ function WatchlistItem(props: WatchlistItemProps) {
     const [itemProgress, setItemProgress] = useState<{ progress: number, totalProgress: number }>({ progress: props.progress, totalProgress: props.total_progress });
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     const { setWatchlist } = useContext(GlobalContext);
+    const [editProgressModal, setEditProgressModal] = useState<boolean>(false);
 
     useEffect(() => {
         switch (props.status) {
@@ -62,6 +63,18 @@ function WatchlistItem(props: WatchlistItemProps) {
                     </div>
                 </div>
             </Modal>
+            <Modal open={editProgressModal} onClose={() => setEditProgressModal(false)}>
+                <h3 style={{textAlign: "center", margin: 0}}>Edit your watchlist progress</h3>
+                <p style={{ margin: 0, opacity: 0.5 }}>Edit your progress in "{props.title}"</p>
+                <div className="flex-container" style={{ justifyContent: "center" }}>
+                    <WatchlistProgress
+                        mediaId={props.id}
+                        type={props.type}
+                        progressState={itemProgress}
+                        updateProgress={updateProgress}
+                    />
+                </div>
+            </Modal>
             <Link to={`/media/${props.type}/${props.id}`}>
                 <picture className="">
                     <source media="(max-width: 768px)" srcSet={props.poster} />
@@ -78,11 +91,10 @@ function WatchlistItem(props: WatchlistItemProps) {
                     type={props.type}
                     progressState={itemProgress}
                     updateProgress={updateProgress}
-                    />
-                
+                />
             </div>
             <div className="actions mobile">
-                <span className="watchlist-btn trash-icon material-icons">edit</span>
+                <span className="watchlist-btn trash-icon material-icons" onClick={() => setEditProgressModal(true)}>edit</span>
             </div>
             <span className="watchlist-btn trash-icon material-icons" onClick={() => setDeleteModalOpen(true)}>delete_outline</span>
         </div>
