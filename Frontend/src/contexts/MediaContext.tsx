@@ -3,16 +3,28 @@ import { GlobalContext } from './GlobalContext';
 import { ToastContext } from './ToastContext';
 interface MediaContextProps {
     getMediaData: (mediaId: string, type: string) => Promise<any>;
+    homeData?: HomeData;
+    setHomeData: React.Dispatch<React.SetStateAction<HomeData>>;
 }
 
 export const MediaContext = createContext<MediaContextProps>({
     getMediaData: async () => {},
+    homeData: undefined,
+    setHomeData: () => {}
 });
 
 export default function MediaProvider({ children }: { children: React.ReactNode }) {
-    const [mediaData, setMediaData] = useState(new Map<string, any>());
     const { mml_api } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
+    
+    const [mediaData, setMediaData] = useState(new Map<string, any>());
+    const [homeData, setHomeData] = useState<HomeData>({
+        popularMovies: [],
+        upcoming: [],
+        topRated: [],
+        watchlist: [],
+        carouselData: []
+    });
 
     const getMediaData = async (mediaId: string, type: string): Promise<any> => {
         const uniqueId = `${mediaId}.${type}`;
@@ -34,7 +46,9 @@ export default function MediaProvider({ children }: { children: React.ReactNode 
 
     return (
         <MediaContext.Provider value={{
-            getMediaData
+            getMediaData,
+            homeData,
+            setHomeData
         }}>
             {children}
         </MediaContext.Provider>

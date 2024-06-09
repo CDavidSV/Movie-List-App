@@ -113,3 +113,11 @@ interface ToastProps {
     onClose: () => void;
     type: "success" | "error" | "warning" | "info";
 }
+
+interface HomeData {
+    carouselData: SliderItem[];
+    popularMovies: FilmCardProps[];
+    upcoming: FilmCardProps[];
+    topRated: FilmCardProps[];
+    watchlist: FilmCardProps[];
+}
