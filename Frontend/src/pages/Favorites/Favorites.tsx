@@ -114,8 +114,8 @@ export default function Favorites() {
         
         // Call the api to reorder the items
         mml_api_protected.post("api/v1/favorites/reorder", {
-            ref_id: favorites[finalIndex].id,
-            target_id: favorites[startIndex].id,
+            ref_id: favorites[finalIndex].favorite_id,
+            target_id: favorites[startIndex].favorite_id,
             position: finalIndex > startIndex ? "after" : "before"
         }).catch(() => {
             toast.open("Error reordering favorites", "error");
@@ -149,7 +149,7 @@ export default function Favorites() {
                             {(provided, snapshot) => (
                                 <div {...provided.droppableProps} ref={provided.innerRef}>
                                     {favorites.map((film, index) => (
-                                        <Draggable key={`${index}.${film.id}.${film.type}`} draggableId={`${index}.${film.id}.${film.type}`} index={index}>
+                                        <Draggable key={`${index}.${film.favorite_id}.${film.type}`} draggableId={`${index}.${film.favorite_id}.${film.type}`} index={index}>
                                             {(providedDraggable, snapshotDraggable) => (
                                                 <div {...providedDraggable.draggableProps} ref={providedDraggable.innerRef} className={snapshot.isDraggingOver && !snapshotDraggable.isDragging ? "drag-over" : ""}>
                                                     <FilmListCard

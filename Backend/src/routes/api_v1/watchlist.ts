@@ -88,7 +88,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
     ]).then((result) => {
         const watchlist = result.map((item) => {
             if (item.media.length < 1) return {
-                id: item._id,
+                watchlist_id: item._id,
                 media_id: item.media_id,
                 dateAdded: item.date_added,
                 title: "Untitled",
@@ -102,7 +102,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 totalProgress: 0
             };
             return {
-                id: item._id,
+                watchlist_id: item._id,
                 media_id: item.media_id,
                 dateAdded: item.date_added,
                 title: item.media[0].title,

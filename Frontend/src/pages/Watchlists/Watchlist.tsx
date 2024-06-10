@@ -206,7 +206,7 @@ export default function Watchlist() {
                     <div>
                         {watchlist.map((media: any, index) => (
                             <WatchlistItem
-                                key={`${media.id}.${media.type}`}
+                                key={`${media.watchlist_id}.${media.type}`}
                                 index={index}
                                 title={media.title}
                                 progress={media.progress} 

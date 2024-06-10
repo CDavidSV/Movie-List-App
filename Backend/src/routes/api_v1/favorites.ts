@@ -73,7 +73,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
     ]).then((response) => {
         const favorites = response.map((favorite) => {
             if (favorite.media.length < 1) return {
-                id: favorite._id,
+                favorite_id: favorite._id,
                 media_id: favorite.media_id,
                 type: favorite.type,
                 dateAdded: favorite.date_added,
@@ -84,7 +84,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 watchlisted: favorite.watchlisted >= 1 ? true : false
             };
             return {
-                id: favorite._id,
+                favorite_id: favorite._id,
                 media_id: favorite.media_id,
                 type: favorite.type,
                 dateAded: favorite.date_added,
@@ -96,7 +96,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
             }
         });
 
-        const last_id = favorites.length > 0 ? favorites[favorites.length - 1].id : null;
+        const last_id = favorites.length > 0 ? favorites[favorites.length - 1].favorite_id : null;
         sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { lastId: last_id, favorites } });
     }).catch((err) => {
         console.error(err);
