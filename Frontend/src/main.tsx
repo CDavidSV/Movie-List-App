@@ -129,7 +129,7 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <>
+  <React.StrictMode>
     <ToastProvider>
       <GlobalProvider>
         <MediaProvider>
@@ -137,5 +137,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </MediaProvider>
       </GlobalProvider>
     </ToastProvider>
-  </>,
+  </React.StrictMode>,
 )
