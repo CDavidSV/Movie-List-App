@@ -65,7 +65,7 @@ export default function UploadImage(props: UploadImageProps) {
         if (!cropperObjRef.current) return;
         const canvas = cropperObjRef.current.getCroppedCanvas();
 
-        props.onCrop(canvas.toDataURL('image/jpg', 0.9));
+        props.onCrop(canvas.toDataURL('image/jpeg', 0.8));
     }
 
     return (
