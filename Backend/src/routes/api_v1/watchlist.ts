@@ -5,7 +5,6 @@ import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 import Series from "../../Models/Series";
 import Movie from "../../Models/Movie";
-import userSchema from "../../scheemas/userSchema";
 import Joi from "joi";
 
 const watchlistStatus = new Map([
@@ -139,8 +138,7 @@ const updateWatchlist = async (req: express.Request, res: express.Response) => {
 
     // Validate id and get the latest favorite saved
     try {
-        const [mediaData, userExists] = await Promise.all([findMediaById(value.media_id as string, value.type), userSchema.exists({ _id: req.user!.id })]);
-        if (!userExists) return sendResponse(res, { status: 404, message: "User not found" });
+        const mediaData = findMediaById(value.media_id as string, value.type);
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
         
         // Check progress

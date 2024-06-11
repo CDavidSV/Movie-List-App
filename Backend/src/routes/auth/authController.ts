@@ -102,6 +102,9 @@ const loginUser = async (req: express.Request, res: express.Response) => {
         const user = await UserSchema.findOne({ email: username });
         if (!user) return sendResponse(res, { status: 400, message: "Invalid email or password" });
 
+        // Check if user account is scheduled for deletion.
+        if (user.deletion_timestamp) return sendResponse(res, { status: 403, message: "Can't log in while account has been scheduled for deletion" });
+
         const passwordHash = user.password_hash;
         const passwordSalt = user.password_salt;
 
@@ -231,7 +234,7 @@ const changePassword = async (req: express.Request, res: express.Response) => {
 
         if (typeof deleteAllSessions === "boolean" && deleteAllSessions) {
             // Invalidate all sessions.
-            userSessionsSchema.deleteMany({ user_id: req.user?.id, session_id: { $ne: req.user?.sessionId } }).catch((err) => console.error("Error deleting sessions: ", err));
+            userSessionsSchema.deleteMany({ user_id: req.user?.id, session_id: { $ne: req.user?.sessionId } }).catch((err: any) => console.error("Error deleting sessions: ", err));
         }
         sendResponse(res, { status: 200, message: "Password changed successfully" });
     } catch (err) {

@@ -13,10 +13,11 @@ const UserSchema = new Schema({
     mature_content: { type: Boolean, default: false },
     public_watchlist: { type: Boolean, default: true },
     public_favorites: { type: Boolean, default: true },
-    deletionTimestamp: { type: Date },
+    deletion_timestamp: { type: Date },
     favorite_genres: { type: [String] }
 });
 
 UserSchema.index({ username: 1 });
 UserSchema.index({ email: 1 });
+
 export default model("User", UserSchema);

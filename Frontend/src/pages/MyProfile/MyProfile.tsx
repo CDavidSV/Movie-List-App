@@ -110,7 +110,11 @@ function AccDelPassConf({ onCancel }: { onCancel: () => void }) {
     return (
         <div className="modal-content">
         <h3>Please enter your password</h3>
-        <p>Once you click the confirm button your account will be deleted <strong>forever.</strong></p>
+        <p>
+            Once you enter your password and click the confirm button, your account will be queued for deletion and will <strong>not be recoverable</strong>.
+            The period for deletion can take up to 24 hours. During this period you will not be able to access 
+            your account or create a new one with the same email address until it is completely removed from our servers.
+        </p>
         {message.length > 0 && <p className="error-text">{message}</p>}
         <form onSubmit={attemptAccountDeletion}>
             <InputField

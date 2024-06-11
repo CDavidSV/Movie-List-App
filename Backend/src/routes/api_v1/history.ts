@@ -4,7 +4,6 @@ import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 import Joi from "joi";
-import userSchema from "../../scheemas/userSchema";
 
 const getHistory = async (req: Request, res: Response) => {
     const cursor = new Date(Number(req.query.cursor));
@@ -146,9 +145,7 @@ const addHistory = async (req: Request, res: Response) => {
 
     // Add history
     try {
-        const [media, userExists] = await Promise.all([findMediaById(media_id as string, type as string), userSchema.exists({ _id: req.user!.id })]);
-
-        if (!userExists) return sendResponse(res, { status: 404, message: "User not found" });
+        const media = await findMediaById(media_id as string, type as string);
         if (!media) sendResponse(res, { status: 404, message: "Media not found" });
 
         const currDate = new Date();

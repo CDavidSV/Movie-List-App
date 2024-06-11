@@ -5,7 +5,6 @@ import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../u
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 import Joi from "joi";
-import userSchema from "../../scheemas/userSchema";
 
 const getFavorites = async (req: express.Request, res: express.Response) => {
     const last_id = req.query.last_id;
@@ -113,13 +112,11 @@ const addFavorite = async (req: express.Request, res: express.Response) => {
 
     try {
         // Validate id and get the latest favorite saved
-        const [mediaData, lastFavorite, userExists] = await Promise.all([
+        const [mediaData, lastFavorite] = await Promise.all([
             findMediaById(media_id as string, type as string),
             favoritesSchema.findOne({ user_id: req.user!.id }, { rank: 1 }).sort({ rank: -1 }),
-            userSchema.exists({ _id: req.user!.id })
         ]);
 
-        if (!userExists) return sendResponse(res, { status: 404, message: "User not found" });
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
 
         // Calculate the new rank for the new favorite.

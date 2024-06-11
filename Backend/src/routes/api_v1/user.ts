@@ -6,14 +6,13 @@ import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import Series from "../../Models/Series";
 import userSchema from "../../scheemas/userSchema";
 import { SHA256 } from "crypto-js";
-import historySchema from "../../scheemas/historySchema";
-import userSessionsSchema from "../../scheemas/userSessionsSchema";
 import Joi from "joi";
 import { v4 as uuid } from 'uuid';
 import sharp from "sharp";
 import config from "../../config/config";
 import containerClient from "../../config/azure-blob-storage";
 import { Readable } from "stream";
+import { invalidateAllUserSessions } from "../../util/sessionHandler";
 
 const getuserInfo = async (req: Request, res: Response) => {
     const userId = req.params.id;
@@ -244,7 +243,7 @@ const deleteAccount = async (req: Request, res: Response) => {
     const password = req.body.password;
     if (!password) return sendResponse(res, { status: 400, message: "No password provided" });
 
-    // Validate password and attempt to delete the user's account. :(
+    // Validate password and schedule user's account for deletion. :(
     try {
         const user = await userSchema.findById(req.user!.id);
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
@@ -255,13 +254,10 @@ const deleteAccount = async (req: Request, res: Response) => {
         if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return sendResponse(res, { status: 400, message: "The password is incorrect" });
 
         // Delete the user's account and all of their data.
-        await Promise.all([
-            userSchema.deleteOne({ _id: req.user!.id }),
-            historySchema.deleteMany({ user_id: req.user!.id }),
-            watchlistSchema.deleteMany({ user_id: req.user!.id }),
-            favoritesSchema.deleteMany({ user_id: req.user!.id }),
-            userSessionsSchema.deleteMany({ user_id: req.user!.id })
-        ]);
+        await userSchema.updateOne({ _id: req.user!.id }, { deletion_timestamp: Date.now() + 1000 * 60 * 60 * 3 }); // 3 hours from now. 
+
+        // Clear all user's sessions.
+        invalidateAllUserSessions(req.user!.id);
 
         // Update cookies.
         res.clearCookie("a_t", { domain: config.domain });
