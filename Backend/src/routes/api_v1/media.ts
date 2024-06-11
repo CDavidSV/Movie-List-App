@@ -141,6 +141,7 @@ const getMoviesByGenre = async (req: express.Request, res: express.Response) => 
     } catch (err) {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching genres" });
+        return;
     }
 
     if (!genreObj) return sendResponse(res, { status: 404, message: "Genre not found" });
