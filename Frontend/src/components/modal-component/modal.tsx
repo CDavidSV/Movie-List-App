@@ -4,7 +4,7 @@ import "./modal.css";
 
 type ModalState = "open" | "closed" | "opening" | "closing";
 
-export default function Modal({ open, onClose, children, style }: { open: boolean, onClose: () => void, children: React.ReactNode, style?: React.CSSProperties }) {    
+export default function Modal({ open, onClose, children, style, background = true }: { open: boolean, onClose: () => void, children: React.ReactNode, style?: React.CSSProperties, background?: boolean }) {    
     const [modalState, setModalState] = useState<ModalState>("closed");
 
     useEffect(() => {
@@ -39,7 +39,7 @@ export default function Modal({ open, onClose, children, style }: { open: boolea
     
     return ReactDOM.createPortal(
         <>
-            <div className={`modal ${modalState}`} style={style}>
+            <div className={`modal ${modalState} ${background && "background"}`} style={style}>
                 <span className="material-icons modal-close" onClick={() => onClose()}>close</span>
                 <div>
                     {children}

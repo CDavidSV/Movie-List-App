@@ -214,7 +214,7 @@ function Images({ type, id }: { type: string, id: string }) {
     return (
         <>
             <div>
-                <Modal open={showModal} onClose={() => setShowModal(false)}>
+                <Modal background={false} open={showModal} onClose={() => setShowModal(false)}>
                     <div>
                         <img loading="lazy" src={selectedImage} alt="selected-image" style={{ objectFit: "contain", maxHeight: "800px", maxWidth: "1300px", width: "100%" }}/>
                     </div>
