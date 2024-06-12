@@ -36,7 +36,7 @@ router.post("/user/in-personal-lists", requireUser, hasMedia);
 router.post("/user/status-in-personal-lists", requireUser, getStatusInPersonalLists);
 router.post("/user/change-profile-picture", requireUser, createMulterInstance(8).single('image'), uploadProfilePicture);
 router.post("/user/change-profile-banner", requireUser, createMulterInstance(16).single('image'), uploadBannerPicture);
-router.post("/user/change-username", requireUser, changeUsername);
+router.put("/user/change-username", requireUser, changeUsername);
 router.delete("/user/delete-account", requireUser, deleteAccount);
 router.get("/user/:id", requireUser, getuserInfo);
 

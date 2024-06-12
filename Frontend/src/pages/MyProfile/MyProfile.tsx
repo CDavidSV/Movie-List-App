@@ -24,7 +24,7 @@ function ChangeUsername ({ username }: { username: string }) {
         setMessage("");
 
         setsaveDisabled(true);
-        mml_api_protected.post('/api/v1/user/change-username', { username: newUsername }).then(() => {
+        mml_api_protected.put('/api/v1/user/change-username', { username: newUsername }).then(() => {
             const oldSessionData = userData;
 
             if (oldSessionData) {
