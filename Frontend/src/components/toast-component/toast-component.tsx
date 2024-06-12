@@ -26,14 +26,12 @@ export default function Toast({ message, onClose, type }: ToastProps) {
     }, []);
 
     const onMouseEnter = () => {
-        console.log("mouse enter");
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
         }
     }
 
     const onMouseLeave = () => {
-        console.log("mouse leave");
         timeoutRef.current = setTimeout(() => {
             closeToast();
         }, 3000);

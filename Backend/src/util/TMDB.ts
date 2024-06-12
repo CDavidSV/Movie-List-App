@@ -13,7 +13,7 @@ let clearGenresTimeout: NodeJS.Timeout | null = null;
 const makeTMDBRequest = async (url: string) => {
     return await axios({
         method: 'get',
-        url: `https://api.themoviedb.org/3/${url}`,
+        url: `https://api.themoviedb.org/3${url}`,
         headers: {
             "Authorization": "Bearer " + tmdb_token,
             "Content-Type": "application/json"
