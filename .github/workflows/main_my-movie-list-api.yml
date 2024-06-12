@@ -7,9 +7,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'Backend/**'
-      - '.github/workflows/main_my-movie-list-api.yml'
   workflow_dispatch:
 
 jobs:
@@ -26,20 +23,18 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          cd Backend
           npm install
-          npm run build
+          npm run build --if-present
+          npm run test --if-present
 
       - name: Zip artifact for deployment
-        run: | 
-          cd Backend
-          zip release.zip ./* -r
+        run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: node-app
-          path: Backend/release.zip
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -62,9 +57,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_8CD11EEC6D3E487EB6EA216D14AD51D9 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8B963C52EE6F453A9716BBF4AAA12881 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8E86114F133D4B8DA4709C4D21EA9469 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_EBCF53FCD8CA401D8AB61106C038838D }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B4568301F24D43118E11482A9D2CFF95 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A37B2CC0073248F2B0747F798AA51EE0 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
