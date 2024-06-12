@@ -115,11 +115,17 @@ function App() {
           element: <Media />,
         },
       ],
-      errorElement: <PageNotFound />
+      errorElement: <>
+        <Header/>
+        <PageNotFound />
+      </>
     },
     {
       path: '*',
-      element: <PageNotFound />
+      element: <>
+        <Header/>
+        <PageNotFound />
+      </>
     }
   ]);
 

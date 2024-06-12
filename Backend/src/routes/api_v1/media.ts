@@ -133,6 +133,8 @@ const getMoviesByGenre = async (req: express.Request, res: express.Response) => 
     try {
         const genreResponse = await makeTMDBRequest(`/genre/movie/list`);
 
+        if (!genreResponse || !genreResponse.genres) return sendResponse(res, { status: 500, message: "Error fetching genres" });
+
         genreObj = genreResponse.genres.find((genre: any) => {
             if (typeof name === 'string') {
                 return genre.name.toLowerCase() === name.toLowerCase();
