@@ -8,7 +8,7 @@ interface GlobalContextProps {
     updateUsername: (username: string) => void;
     updateUserData: () => void | SessionData;
     clearSessionData: () => void;
-    setSessionData: (email: string, username: string, expiresIn: number, profilePictureUrl?: string, profileBannerUrl?: string) => void;
+    setSessionData: (email: string, username: string, expiresIn: number, matureContent: boolean, publicWatchlist: boolean, publicFavorites: boolean, profilePictureUrl?: string, profileBannerUrl?: string) => void;
     getSavedItems: (films: any[], media: { id: string, type: string }[], callback: (films: any) => void) => void;
     setFavorite: (id: string, type: string) => Promise<void>;
     removeFavorite: (id: string, type: string) => Promise<void>;
@@ -59,7 +59,16 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         if (!userData) return;
 
         mml_api_protected.get("/api/v1/me").then((res) => {
-            const sessionData = { ...userData, username: res.data.responseData.username, profilePictureUrl: res.data.responseData.profile_picture_url, profileBannerUrl: res.data.responseData.profile_banner_url, email: res.data.responseData.email };
+            const sessionData = { 
+                ...userData, 
+                username: res.data.responseData.username, 
+                profilePictureUrl: res.data.responseData.profile_picture_url, 
+                profileBannerUrl: res.data.responseData.profile_banner_url, 
+                email: res.data.responseData.email,
+                matureContent: res.data.responseData.mature_content,
+                publicWatchlist: res.data.responseData.public_watchlist,
+                publicFavorites: res.data.responseData.public_favorites
+            };
             localStorage.setItem('sessionData', JSON.stringify(sessionData));
 
             firstUpdate.current = false;
@@ -111,7 +120,7 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
                     const { responseData } = response.data
             
                     // Update the session data
-                    setSessionData(userData.email, userData.username, responseData.expiresIn, userData.profilePictureUrl, userData.profileBannerUrl);
+                    setSessionData(userData.email, userData.username, responseData.expiresIn, userData.matureContent, userData.publicWatchlist, userData.publicFavorites, userData.profilePictureUrl, userData.profileBannerUrl);
                     processQueue(null);
                     return config;
                 }
@@ -156,13 +165,15 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         mml_api.post('/auth/logout', {}, {
             withCredentials: true
         });
+
+        window.location.href = "/login";
     }
 
     const getSessionData = () => {
         return JSON.parse(localStorage.getItem('sessionData')!) as SessionData;
     };
 
-    const setSessionData = (email: string, username: string, expiresIn: number, profilePictureUrl?: string, profileBannerUrl?: string) => {
+    const setSessionData = (email: string, username: string, expiresIn: number, matureContent: boolean, publicWatchlist: boolean, publicFavorites: boolean, profilePictureUrl?: string, profileBannerUrl?: string) => {
         setLoggedIn(true);
 
         const sessionData = {
@@ -170,6 +181,9 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
             username,
             expiresIn,
             setAt: Date.now(),
+            matureContent,
+            publicWatchlist,
+            publicFavorites
         } as SessionData;
     
         if (profilePictureUrl) {
@@ -197,7 +211,16 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         if (!userData) return;
 
         mml_api_protected.get("/api/v1/me").then((res) => {
-            const sessionData = { ...userData, username: res.data.responseData.username, profilePictureUrl: res.data.responseData.profile_picture_url, profileBannerUrl: res.data.responseData.profile_banner_url, email: res.data.responseData.email };
+            const sessionData = { 
+                ...userData, 
+                username: res.data.responseData.username, 
+                profilePictureUrl: res.data.responseData.profile_picture_url, 
+                profileBannerUrl: res.data.responseData.profile_banner_url, 
+                email: res.data.responseData.email,
+                matureContent: res.data.responseData.mature_content,
+                publicWatchlist: res.data.responseData.public_watchlist,
+                publicFavorites: res.data.responseData.public_favorites
+            };
             localStorage.setItem('sessionData', JSON.stringify(sessionData));
 
             setUserData(sessionData);
@@ -208,7 +231,14 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
 
     const getSavedItems = (films: any[], media: { id: string, type: string }[], callback: (films: any) => void) => {
         // Check first if the user is logged in
-        if (!loggedIn) return callback(films);
+        if (!loggedIn) {
+            films.forEach((film) => {
+                film.inWatchlist = false;
+                film.inFavorites = false;
+            });
+            callback(films);
+            return;
+        };
     
         const requestMedia = media.map((item) => {
             return {

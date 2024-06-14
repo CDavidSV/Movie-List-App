@@ -82,7 +82,10 @@ const registerUser = async (req: express.Request, res: express.Response) => {
                 username: newUser.username, 
                 userEmail: newUser.email, 
                 userId: newUser._id.toString(),
-                expiresIn: session.tokenExpirations.accessTokenExpitation
+                expiresIn: session.tokenExpirations.accessTokenExpitation,
+                matureContent: newUser.mature_content,
+                publicWatchlist: newUser.public_watchlist,
+                publicFavorites: newUser.public_favorites
             } 
         });
     } catch (err) {
@@ -150,7 +153,10 @@ const loginUser = async (req: express.Request, res: express.Response) => {
                 userId: user._id.toString(),
                 expiresIn: session.tokenExpirations.accessTokenExpitation,
                 profilePictureUrl: user.profile_picture_url,
-                profileBannerUrl: user.profile_banner_url
+                profileBannerUrl: user.profile_banner_url,
+                matureContent: user.mature_content,
+                publicWatchlist: user.public_watchlist,
+                publicFavorites: user.public_favorites
             }
         });
     } catch {

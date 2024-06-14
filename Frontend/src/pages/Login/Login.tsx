@@ -24,7 +24,16 @@ export default function Login() {
         setLoading(true);
         mml_api.post("/auth/login", loginData, { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
         .then((response) => {
-            setSessionData(response.data.responseData.userEmail, response.data.responseData.username, response.data.responseData.expiresIn, response.data.responseData.profilePictureUrl, response.data.responseData.profileBannerUrl);
+            setSessionData(
+                response.data.responseData.userEmail, 
+                response.data.responseData.username, 
+                response.data.responseData.expiresIn,
+                response.data.responseData.matureContent,
+                response.data.responseData.publicWatchlist,
+                response.data.responseData.publicFavorites,
+                response.data.responseData.profilePictureUrl, 
+                response.data.responseData.profileBannerUrl
+            );
             // If login is successful, store user data and redirect to home page
             navigate("/");
         }).catch((err) => {

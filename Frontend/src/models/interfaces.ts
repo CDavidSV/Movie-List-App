@@ -42,6 +42,9 @@ interface SessionData {
     setAt: number;
     profilePictureUrl?: string;
     profileBannerUrl?: string;
+    matureContent: boolean;
+    publicWatchlist: boolean;
+    publicFavorites: boolean;
 }
 
 interface SearchResultItem {

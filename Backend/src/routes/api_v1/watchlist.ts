@@ -17,6 +17,13 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
     const status = req.query.status ? parseInt(req.query.status as string) : 3;
     const cursor = req.query.cursor;
 
+    let sanitizedCursor: number[] = [];
+    if (cursor && typeof cursor === 'string') {
+        cursor.split('.').forEach((item) => {
+            if (isNaN(parseInt(item))) return sendResponse(res, { status: 400, message: "Invalid cursor" });
+            sanitizedCursor.push(parseInt(item));
+        });
+    }
     if (status < 0 || status > 3) return sendResponse(res, { status: 400, message: "Invalid status integer" });
 
     let match: any = { user_id: req.user?.id, status: status };
@@ -25,7 +32,17 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
         match = { user_id: req.user?.id }
         sort = { status: 1, updated_date: -1 } 
     };
-    if (cursor) match.updated_date = { $lt: cursor };
+
+    if (sanitizedCursor.length) {
+        if (status !== 3) {
+            match.updated_date = { $lt: new Date(sanitizedCursor[1]) }
+        } else {
+            match.$and = [
+                { updated_date: { $lt: new Date(sanitizedCursor[1]) } },
+                { status: { $gte: sanitizedCursor[0] } }
+            ];
+        };
+    }
 
     watchlistSchema.aggregate([
         { $match: match },
@@ -116,8 +133,8 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
             }
         });
 
-        const last_id = result.length > 0 ? new Date(result[result.length - 1].updated_date).getTime() : null;
-        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: { cursor: last_id, watchlist } });
+        const cursor = result.length < 100 ? null : `${result[result.length - 1].status}.${new Date(result[result.length - 1].updated_date).getTime()}`;
+        sendResponse(res, { status: 200, message: "Watchlist fetched", responsePayload: { cursor, watchlist } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching watchlist" });

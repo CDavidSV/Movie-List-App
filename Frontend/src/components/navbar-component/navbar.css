@@ -267,6 +267,7 @@ header {
     align-items: center;
     gap: 20px;
     height: 100%;
+    width: 100%;
     min-height: 50px;
     padding: 5px 20px;
     transition: ease 0.2s;

@@ -5,7 +5,7 @@ import { addFavorite, getFavorites, removeFavorite, reorderFavorites } from "./f
 import { getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchlist";
 import { getHistory, addHistory, removeHistory, clearHistory } from "./history";
 import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMoviesByGenre, getTopRatedSeries, getUpcomingSeries, getCast, getCrew, getImages, getVideos, getMoviesHomeCarousel } from "./media";
-import { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getuserInfo, uploadBannerPicture } from "./user";
+import { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getuserInfo, uploadBannerPicture, updateUser } from "./user";
 import requireUser from "../../middlewares/requireUser";
 import createMulterInstance from "../../config/multer.config";
 
@@ -37,6 +37,7 @@ router.post("/user/status-in-personal-lists", requireUser, getStatusInPersonalLi
 router.post("/user/change-profile-picture", requireUser, createMulterInstance(8).single('image'), uploadProfilePicture);
 router.post("/user/change-profile-banner", requireUser, createMulterInstance(16).single('image'), uploadBannerPicture);
 router.put("/user/change-username", requireUser, changeUsername);
+router.put("/user/update", requireUser, updateUser);
 router.delete("/user/delete-account", requireUser, deleteAccount);
 router.get("/user/:id", requireUser, getuserInfo);
 

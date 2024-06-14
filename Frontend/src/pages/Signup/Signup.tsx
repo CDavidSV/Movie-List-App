@@ -40,7 +40,14 @@ export default function SignUp() {
         }, 
         { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
         .then((response) => {
-            setSessionData(response.data.responseData.userEmail, response.data.responseData.username, response.data.responseData.expiresIn);
+            setSessionData(
+                response.data.responseData.userEmail, 
+                response.data.responseData.username, 
+                response.data.responseData.expiresIn,
+                response.data.responseData.matureContent,
+                response.data.responseData.publicWatchlist,
+                response.data.responseData.publicFavorites
+            );
 
             navigate("/");
         }).catch(((err) => {

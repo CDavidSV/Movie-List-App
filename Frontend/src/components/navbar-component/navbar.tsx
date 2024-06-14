@@ -127,10 +127,10 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
                     </NavLink>
                 </div>
                 <div className="profile-dropdown-section">
-                    <NavLink className="menu-profile-item" to="/login" onClick={logOut}>
+                    <button className="menu-profile-item" onClick={logOut}>
                         <span className="material-icons">logout</span>
                         Log out
-                    </NavLink>
+                    </button>
                 </div>
             </div>}
             {!userData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>

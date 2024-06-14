@@ -53,6 +53,9 @@ const getMeUserInfo = async (req: Request, res: Response) => {
         joined_at: 1,
         profile_picture_url: 1,
         profile_banner_url: 1,
+        mature_content: 1,
+        public_favorites: 1,
+        public_watchlist: 1,
         _id: 0
     }).then(user => {
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
@@ -236,6 +239,31 @@ const changeUsername = async (req: Request, res: Response) => {
     }
 };
 
+const updateUser = async (req: Request, res: Response) => {
+    const body = req.body;
+
+    const updateUserSchema = Joi.object({
+        username: Joi.string().min(3).max(20).optional(),
+        public_favorites: Joi.boolean().optional(),
+        public_watchlist: Joi.boolean().optional(),
+        mature_content: Joi.boolean().optional()
+    });
+
+    const { error, value } = updateUserSchema.validate(body);
+    if (error) return sendResponse(res, { status: 400, message: error.details[0].message });
+
+    const updateUserObj: any = {};
+
+    for (let key in value) {
+        if (value[key]) updateUserObj[key] = value[key];
+    }
+
+    console.log(updateUserObj);
+
+
+    sendResponse(res, { status: 200, message: "User updated successfully" });
+}
+
 const deleteAccount = async (req: Request, res: Response) => {
     // Check if the request type is form encoded.
     if (!req.is("application/x-www-form-urlencoded")) return sendResponse(res, { status: 400, message: "Invalid request body" });
@@ -271,4 +299,4 @@ const deleteAccount = async (req: Request, res: Response) => {
     }
 };
 
-export { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getuserInfo, uploadBannerPicture };
+export { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getuserInfo, uploadBannerPicture, updateUser };

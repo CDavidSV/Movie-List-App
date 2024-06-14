@@ -7,6 +7,7 @@ import UploadImage from '../../components/upload-image/upload-image';
 import { GlobalContext } from '../../contexts/GlobalContext';
 import "./myprofile.css";
 import { ToastContext } from '../../contexts/ToastContext';
+import { Switch } from '@/components/ui/switch';
 
 function ChangeUsername ({ username }: { username: string }) {
     const [oldUsername, setOldUsername] = useState<string>(username);
@@ -225,9 +226,19 @@ function ChangePasswordTab() {
 }
 
 function GeneralTab() {
+    const { userData } = useContext(GlobalContext);
+    
     const [accountDeletionModal, setAccountDeletionModal] = useState<boolean>(false);
     const [accountDeletionPassModal, setAccountDeletionPassModal] = useState<boolean>(false);
-    const { userData } = useContext(GlobalContext);
+    const [matureContent, setMatureContent] = useState<boolean>(userData ? userData.matureContent : false);
+    const [publicFavorites, setPublicFavorites] = useState<boolean>(userData ? userData.publicFavorites : false);
+    const [publicWatchlist, setPublicWatchlist] = useState<boolean>(userData ? userData.publicWatchlist : false);
+
+    useEffect(() => {
+        setMatureContent(userData ? userData.matureContent : false);
+        setPublicFavorites(userData ? userData.publicFavorites : false);
+        setPublicWatchlist(userData ? userData.publicWatchlist : false);
+    }, [userData]);
 
     return (
         <div className="profile-page-tab">
@@ -247,9 +258,48 @@ function GeneralTab() {
             <Modal open={accountDeletionPassModal} onClose={() => setAccountDeletionPassModal(false)}>
                 <AccDelPassConf onCancel={() => setAccountDeletionPassModal(false)}/>
             </Modal>
-            <div>
-                <h4 style={{margin: "0 0 15px 0"}}>Change Username</h4>
-                <ChangeUsername username={userData ? userData.username : ''}/>
+            <div className="flex flex-col gap-5">
+                <div>
+                    <h4 style={{margin: "0 0 15px 0"}}>Change Username</h4>
+                    <ChangeUsername username={userData ? userData.username : ''}/>
+                </div>
+                
+                <div className="mt-6 flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5 pr-3">
+                        <h4>Keep Favorites Public</h4>
+                        <p className="text-muted-foreground">
+                            When enabled, your favorited movies and TV shows will be visible to other users.
+                        </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch checked={publicFavorites} onCheckedChange={setPublicFavorites}/>
+                    </div>
+                </div>
+
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5 pr-3">
+                        <h4>Keep Watchlist Public</h4>
+                        <p className="text-muted-foreground">
+                            When enabled, your watchlist will be visible to other users.
+                        </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch checked={publicWatchlist} onCheckedChange={setPublicWatchlist}/>
+                    </div>
+                </div>
+
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5 pr-3">
+                        <h4>Mature Content</h4>
+                        <p className="text-muted-foreground">
+                            When enabled, your favorited movies and TV shows will be visible to other users.
+                        </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Switch checked={matureContent} onCheckedChange={setMatureContent}/>
+                    </div>
+                </div>
+
                 <div style={{marginTop: "40px"}}>
                     <h4 style={{margin: "0"}}>Account Removal</h4>
                     <p style={{margin: "0 0 10px 0", opacity: "0.5", fontSize: "0.8rem"}}>This will delete your account and all data associated with it. This action cannot be undone.</p>
