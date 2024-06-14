@@ -39,6 +39,7 @@
     padding: 0;
     margin: 0;
     height: 100%;
+    aspect-ratio: 16 / 9;
 }
 
 .list-card-container img {
@@ -46,15 +47,10 @@
     object-fit: cover;
     border-radius: 10px;
     background-color: rgba(56, 56, 56, 0.1);
-    aspect-ratio: 16 / 9;
 }
 
 .list-card-main-container {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    height: 100%;
-    width: 100%;
     min-width: 0;
 }
 
@@ -120,7 +116,7 @@
 }
 
 @media screen and (max-width: 768px) {
-    .list-card-container img {
+    .list-card-img-container {
         aspect-ratio: 2 / 3;
     }
 

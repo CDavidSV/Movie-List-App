@@ -255,13 +255,17 @@ const updateUser = async (req: Request, res: Response) => {
     const updateUserObj: any = {};
 
     for (let key in value) {
-        if (value[key]) updateUserObj[key] = value[key];
+        if (value[key] !== undefined) updateUserObj[key] = value[key];
     }
 
-    console.log(updateUserObj);
-
-
-    sendResponse(res, { status: 200, message: "User updated successfully" });
+    try {
+        await userSchema.updateOne({ _id: req.user!.id }, updateUserObj);
+        
+        sendResponse(res, { status: 200, message: "User settings updated successfully" });
+    } catch (err) {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error updating user settings" });
+    }
 }
 
 const deleteAccount = async (req: Request, res: Response) => {

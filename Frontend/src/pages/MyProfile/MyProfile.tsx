@@ -226,7 +226,8 @@ function ChangePasswordTab() {
 }
 
 function GeneralTab() {
-    const { userData } = useContext(GlobalContext);
+    const { userData, mml_api_protected, updateUserSettings: updateClientUserSettings } = useContext(GlobalContext);
+    const toast = useContext(ToastContext);
     
     const [accountDeletionModal, setAccountDeletionModal] = useState<boolean>(false);
     const [accountDeletionPassModal, setAccountDeletionPassModal] = useState<boolean>(false);
@@ -234,11 +235,32 @@ function GeneralTab() {
     const [publicFavorites, setPublicFavorites] = useState<boolean>(userData ? userData.publicFavorites : false);
     const [publicWatchlist, setPublicWatchlist] = useState<boolean>(userData ? userData.publicWatchlist : false);
 
-    useEffect(() => {
-        setMatureContent(userData ? userData.matureContent : false);
-        setPublicFavorites(userData ? userData.publicFavorites : false);
-        setPublicWatchlist(userData ? userData.publicWatchlist : false);
-    }, [userData]);
+    const updateUserSettings = (settings: { matureContent?: boolean, publicFavorites?: boolean, publicWatchlist?: boolean }) => {
+        setMatureContent(settings.matureContent !== undefined ? settings.matureContent : matureContent);
+        setPublicFavorites(settings.publicFavorites !== undefined ? settings.publicFavorites : publicFavorites);
+        setPublicWatchlist(settings.publicWatchlist !== undefined ? settings.publicWatchlist : publicWatchlist);
+        
+        const prevSettings = {
+            matureContent: userData ? userData.matureContent : false,
+            publicFavorites: userData ? userData.publicFavorites : false,
+            publicWatchlist: userData ? userData.publicWatchlist : false
+        };
+        
+        mml_api_protected.put('/api/v1/user/update', {
+            mature_content: settings.matureContent !== undefined ? settings.matureContent : matureContent,
+            public_favorites: settings.publicFavorites !== undefined ? settings.publicFavorites : publicFavorites,
+            public_watchlist: settings.publicWatchlist !== undefined ? settings.publicWatchlist : publicWatchlist,
+        }).then((res) => {
+            console.log(res.data);
+            updateClientUserSettings(settings);
+        }).catch(() => {
+            setMatureContent(prevSettings.matureContent);
+            setPublicFavorites(prevSettings.publicFavorites);
+            setPublicWatchlist(prevSettings.publicWatchlist);
+
+            toast.open("Failed to update settings. Please try again.", "error");
+        });
+    }
 
     return (
         <div className="profile-page-tab">
@@ -264,7 +286,8 @@ function GeneralTab() {
                     <ChangeUsername username={userData ? userData.username : ''}/>
                 </div>
                 
-                <div className="mt-6 flex flex-row items-center justify-between rounded-lg border p-4">
+                <h4 className="m-0">Settings</h4>
+                <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5 pr-3">
                         <h4>Keep Favorites Public</h4>
                         <p className="text-muted-foreground">
@@ -272,7 +295,7 @@ function GeneralTab() {
                         </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <Switch checked={publicFavorites} onCheckedChange={setPublicFavorites}/>
+                        <Switch checked={publicFavorites} onCheckedChange={(value: boolean) => updateUserSettings({ publicFavorites: value })}/>
                     </div>
                 </div>
 
@@ -284,7 +307,7 @@ function GeneralTab() {
                         </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <Switch checked={publicWatchlist} onCheckedChange={setPublicWatchlist}/>
+                        <Switch checked={publicWatchlist} onCheckedChange={(value: boolean) => updateUserSettings({ publicWatchlist: value })}/>
                     </div>
                 </div>
 
@@ -296,7 +319,7 @@ function GeneralTab() {
                         </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <Switch checked={matureContent} onCheckedChange={setMatureContent}/>
+                        <Switch checked={matureContent} onCheckedChange={(value: boolean) => updateUserSettings({ matureContent: value })}/>
                     </div>
                 </div>
 

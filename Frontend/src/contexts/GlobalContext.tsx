@@ -3,10 +3,17 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import config from "../config/config";
 import { ToastContext } from "./ToastContext";
 
+interface UserSettings {
+    matureContent?: boolean;
+    publicWatchlist?: boolean;
+    publicFavorites?: boolean;
+}
+
 interface GlobalContextProps {
     userData: SessionData | null;
     updateUsername: (username: string) => void;
     updateUserData: () => void | SessionData;
+    updateUserSettings: (settings: UserSettings) => void;
     clearSessionData: () => void;
     setSessionData: (email: string, username: string, expiresIn: number, matureContent: boolean, publicWatchlist: boolean, publicFavorites: boolean, profilePictureUrl?: string, profileBannerUrl?: string) => void;
     getSavedItems: (films: any[], media: { id: string, type: string }[], callback: (films: any) => void) => void;
@@ -24,6 +31,7 @@ interface GlobalContextProps {
 export const GlobalContext = createContext<GlobalContextProps>({
     updateUsername: () => {},
     updateUserData: () => {},
+    updateUserSettings: () => {},
     setSessionData: () => {},
     clearSessionData: () => {},
     getSavedItems: () => {},
@@ -304,12 +312,36 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         });
     };
 
+    const updateUserSettings = (settings: UserSettings) => {
+        const sessionData = getSessionData();
+        if (!sessionData) return;
+
+        const updatedSessionData = {
+            ...sessionData,
+            matureContent: settings.matureContent !== undefined ? settings.matureContent : sessionData.matureContent,
+            publicWatchlist: settings.publicWatchlist !== undefined ? settings.publicWatchlist : sessionData.publicWatchlist,
+            publicFavorites: settings.publicFavorites !== undefined ? settings.publicFavorites : sessionData.publicFavorites
+        };
+
+        setSessionData(
+            updatedSessionData.email,
+            updatedSessionData.username,
+            updatedSessionData.expiresIn,
+            updatedSessionData.matureContent,
+            updatedSessionData.publicWatchlist,
+            updatedSessionData.publicFavorites,
+            updatedSessionData.profilePictureUrl,
+            updatedSessionData.profileBannerUrl
+        );
+    }
+
     return (
         <GlobalContext.Provider value={{
             updateUsername,
             updateUserData,
             setSessionData,
             clearSessionData,
+            updateUserSettings,
             getSavedItems,
             logOut,
             setFavorite,
