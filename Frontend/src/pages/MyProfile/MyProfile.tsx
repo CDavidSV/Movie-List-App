@@ -315,7 +315,7 @@ function GeneralTab() {
                     <div className="space-y-0.5 pr-3">
                         <h4>Mature Content</h4>
                         <p className="text-muted-foreground">
-                            When enabled, your favorited movies and TV shows will be visible to other users.
+                            When enabled, mature content will be visible to you. If you enable this setting, you confirm that you are over 18 years old.
                         </p>
                     </div>
                     <div className="flex items-center space-x-2">
