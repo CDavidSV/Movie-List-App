@@ -166,7 +166,7 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
                   onClick={() => saveSearch(item)}
                   onAuxClick={() => saveSearch(item)}
                   to={`/media/${item.type}/${item.id}`}/>
-                <img src={item.logoUrl} alt={`logo-${item.title}`} loading="lazy" />
+                <img src={item.logoUrl} alt={`logo-${item.title}`} loading="eager" />
               </div>
               <div className="title-details">
                 <p>{`${item.releaseDate} • ${item.genres.join(", ")}`}</p>
@@ -222,7 +222,7 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
       <div ref={carouselRef} onTransitionEnd={onTransitionEnd} className="carousel-container" style={{transform: `translateX(-${1 * 100}%)`}}>
         {slides.map((item, index) => (
           <div key={`${item.backdropUrl}-${index}`} className="slide">
-            <img className="slide-backdrop-img" src={item.backdropUrl} alt={`backdrop-${item.title}`} loading="lazy" />
+            <img className="slide-backdrop-img" src={item.backdropUrl} alt={`backdrop-${item.title}`} loading="eager" />
           </div>
         ))}
       </div>
