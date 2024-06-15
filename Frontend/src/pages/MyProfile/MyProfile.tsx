@@ -399,7 +399,7 @@ export default function MyProfile() {
             <div className="content-wrapper">
                 <div className="profile-general-data">
                     <div className="profile-picture">
-                        <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile_picture" />
+                        <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile_picture" loading="lazy" />
                         <div onClick={() => setModalsState({ ...modalsState, pfpModal: true })} className="upload_pfp"><Camera /></div>
                         <Modal open={modalsState.pfpModal} onClose={() => setModalsState({ ...modalsState, pfpModal: false })}>
                             <UploadImage onCrop={onPfpChange} aspectRatio={1} height="50vh" maxImageSizeInMb={8}/>

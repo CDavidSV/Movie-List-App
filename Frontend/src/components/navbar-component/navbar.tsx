@@ -86,14 +86,14 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
             >
             <div className="select-button" onClick={toggleMenu}>
                 <div className="profile-img">
-                    <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile-picture"/>
+                    <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile-picture" loading="lazy"/>
                 </div>
                 <span className={menuState ? "select-arrow select-active" : "select-arrow"}></span>
             </div>
             { userData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
                 <div className="menu-profile-section">
                     <div className="menu-user-profile-item">
-                        <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile-picture"/>
+                        <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile-picture" loading="lazy"/>
                         <div className="profile-name">
                             <p>{userData.username || "Username"}</p>
                             <p>{userData.email || "Email"}</p>

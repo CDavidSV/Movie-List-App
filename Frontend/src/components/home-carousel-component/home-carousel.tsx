@@ -222,7 +222,7 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
       <div ref={carouselRef} onTransitionEnd={onTransitionEnd} className="carousel-container" style={{transform: `translateX(-${1 * 100}%)`}}>
         {slides.map((item, index) => (
           <div key={`${item.backdropUrl}-${index}`} className="slide">
-            <img className="slide-backdrop-img" src={item.backdropUrl} alt={`backdrop-${item.title}`} />
+            <img className="slide-backdrop-img" src={item.backdropUrl} alt={`backdrop-${item.title}`} loading="lazy" />
           </div>
         ))}
       </div>

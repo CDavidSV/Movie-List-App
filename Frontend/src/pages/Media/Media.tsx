@@ -294,7 +294,7 @@ function Videos({ type, id }: { type: string, id: string }) {
                         <span className="play-btn material-icons">
                             play_circle_outline
                         </span>
-                        <img src={video.thumbnail} alt={video.name} />
+                        <img src={video.thumbnail} alt={video.name} loading="lazy" />
                     </div>
                     <div className="video-details">
                         <h4>{video.name}</h4>
@@ -505,7 +505,7 @@ export default function Media() {
                 <div className="film-backdrop-container" style={{backgroundImage: `url(${mediaData.backdropPath})`}}>
                     <div className="film-info-content">
                         <div className="film-poster-container">
-                            <img className="film-poster" src={mediaData.posterPath} alt={mediaData.title || mediaData.name}/>
+                            <img className="film-poster" src={mediaData.posterPath} alt={mediaData.title || mediaData.name} loading="lazy"/>
                         </div>
                         <div className="film-overview-info">
                             <h2 className="film-title">{mediaData.name || mediaData.title}</h2>
