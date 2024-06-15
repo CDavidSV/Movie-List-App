@@ -8,7 +8,7 @@ import axios, { CancelTokenSource } from "axios";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
-import { Plus, Bookmark, Trash2, Pencil } from "lucide-react";
+import { Bookmark, Trash2, Pencil } from "lucide-react";
 import "./watchlist.css";
 
 function WatchlistItem(props: WatchlistItemProps) {
