@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import FilmCard from '../film-card-component/filmCard';
-import './filmSlider.css';
 import FilmCardSkeleton from '../film-card-skeleton-component/film-card-skeleton';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import React from 'react';
+import './filmSlider.css';
 
 export default React.memo(function FilmSlider (props: FilmSliderProps) {
     const slider = useRef<HTMLDivElement>(null);
@@ -66,14 +67,10 @@ export default React.memo(function FilmSlider (props: FilmSliderProps) {
         <div className="slider-container">
             <div className="button-wrapper">
                 <button className={`slider-button slider-button-left${!buttonStates.left ? ' disabled' : ''}`}  onClick={() => changePage('left')}>
-                    <span className="material-icons">
-                        arrow_back_ios
-                    </span>
+                    <ChevronLeft size={36} />
                 </button>
                 <button className={`slider-button slider-button-right${!buttonStates.right ? ' disabled' : ''}`} onClick={() => changePage('right')}>
-                    <span className="material-icons">
-                        arrow_forward_ios
-                    </span>
+                    <ChevronRight size={36} />
                 </button>
             </div> 
             <div ref={slider} className="slider">

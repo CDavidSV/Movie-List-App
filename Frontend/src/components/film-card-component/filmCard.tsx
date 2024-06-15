@@ -64,12 +64,12 @@ export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchRe
                     </div>
                     <div className="card-hover-info-content-buttons">
                         <WatchlistButton 
-                            size='small'
+                            size={25}
                             isWatchlisted={inWatchlist}
                             mediaId={filmData.id.toString()}
                             type={filmData.type}/>  
                         <FavoriteButton 
-                            size='small'
+                            size={25}
                             isFavorite={inFavorites}
                             mediaId={filmData.id.toString()}
                             type={filmData.type}/>

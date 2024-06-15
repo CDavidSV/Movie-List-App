@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 import "./toast-component.css";
 
 export default function Toast({ message, onClose, type }: ToastProps) {
@@ -41,7 +42,7 @@ export default function Toast({ message, onClose, type }: ToastProps) {
         <div className={`toast ${type}${closing ? " closing" : ""}`} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <p>{message}</p>
             <button className="toast-close-btn" onClick={closeToast}>
-                <span className="material-icons">close</span>
+                <X />
             </button>
         </div>
     );

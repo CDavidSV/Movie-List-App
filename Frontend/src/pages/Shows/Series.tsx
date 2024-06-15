@@ -4,6 +4,7 @@ import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
 import { ScrollRestoration } from "react-router-dom";
+import { TvMinimalPlay } from "lucide-react";
 
 export default function Series() {
     const [movies, setMovies] = useState<any[]>([]);
@@ -39,7 +40,7 @@ export default function Series() {
         <div className="content">
             <ScrollRestoration />
             <div className="page-title-container">
-                <span style={{fontSize: "2rem"}} className="material-icons icon">live_tv</span>
+                <TvMinimalPlay size={40} />
                 <h1>Series</h1>
             </div>
             <div className="content-wrapper">

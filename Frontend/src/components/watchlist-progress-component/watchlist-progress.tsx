@@ -1,5 +1,6 @@
-import "./watchlist-progress.css";
 import { useEffect, useRef, useState } from "react";
+import { Plus } from "lucide-react";
+import "./watchlist-progress.css";
 
 export default function WatchlistProgress(props: ProgressProps) {
     const inputChangeTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -67,7 +68,9 @@ export default function WatchlistProgress(props: ProgressProps) {
                     <span style={{paddingRight: "12px"}}>/</span>
                 <span className="progress-indicator">{props.progressState.totalProgress}</span>
             </div>
-            <span className="progress-btn material-icons" onClick={(e) => handleProgressChange(e, 'add')}>add</span>
+            <span className="progress-btn" onClick={(e) => handleProgressChange(e, 'add')}>
+                <Plus size={26} />
+            </span>
         </div>
     );
 }

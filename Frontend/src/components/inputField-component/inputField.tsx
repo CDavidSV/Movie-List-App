@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import "./inputField.css";
+import { X, Eye, EyeOff } from "lucide-react"; 
 import React from "react";
+import "./inputField.css";
 
 export default function InputField(
     { type, id, required, label, onInputChange, status, defaultValue, clearButton, autofocus, autocomplete, value }: 
@@ -39,11 +40,11 @@ export default function InputField(
     return (
         <div className={`input-box ${status ? status : ""}`}>
             {type === "password" && 
-                <span onClick={togglePasswordView} className="material-icons">
-                    { showPassword ? "visibility" : "visibility_off" }
+                <span onClick={togglePasswordView}>
+                    { showPassword ? <Eye /> : <EyeOff /> }
                 </span>
             }
-            {clearButton && <span onClick={clearinput} style={{userSelect: "none"}} className="material-icons">close</span>}
+            {clearButton && <span onClick={clearinput} style={{userSelect: "none"}}><X /></span> }
             <input 
             ref={inputRef} 
             onChange={inputChangeEvent}

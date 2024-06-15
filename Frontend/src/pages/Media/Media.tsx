@@ -9,8 +9,15 @@ import FilmSlider from "../../components/film-slider-component/filmSlider";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import Modal from "../../components/modal-component/modal";
 import { MediaContext } from "../../contexts/MediaContext";
-import "./media.css";
 import { ToastContext } from "../../contexts/ToastContext";
+import "./media.css";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -68,10 +75,8 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
         });
     }
 
-    const handleStatusSelect = (e: React.ChangeEvent) => {
-        e.preventDefault();
-        let target = e.target as HTMLSelectElement;
-        let status = parseInt(target.value);
+    const handleStatusSelect = (value: string) => {
+        let status = parseInt(value);
         const prevStatus = watchlistStatus;
         setWatchlistStatus(status);
         
@@ -105,14 +110,19 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
         <div className="film-interaction-container">
             {loggedIn ? 
                 <div className={loading ? "film-interaction disabled" : "film-interaction"}>
-                    <FavoriteButton size="medium" mediaId={props.mediaId} type={props.type} isFavorite={inFavorites}/>
+                    <FavoriteButton size={36} mediaId={props.mediaId} type={props.type} isFavorite={inFavorites}/>
                     {isWatchlisted ?
                         <>
-                            <select name="watchlist-status" value={watchlistStatus} onChange={handleStatusSelect}>
-                                <option value="0">Watching</option>
-                                <option value="1">Plan to Watch</option>
-                                <option value="2">Finished</option>
-                            </select>
+                            <Select value={watchlistStatus.toString()} onValueChange={handleStatusSelect}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="watchlist-status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="0">Watching</SelectItem>
+                                    <SelectItem value="1">Plan to Watch</SelectItem>
+                                    <SelectItem value="2">Finished</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <WatchlistProgress 
                                 progressState={itemProgress}
                                 mediaId={props.mediaId}
@@ -205,10 +215,8 @@ function Images({ type, id }: { type: string, id: string }) {
         setShowModal(true);
     }
 
-    const handleSelectType = (e: React.ChangeEvent) => {
-        let target = e.target as HTMLSelectElement;
-
-        if (images) setSelectedImages(images[target.value]);
+    const handleSelectType = (value: string) => {
+        if (images) setSelectedImages(images[value]);
     }
 
     return (
@@ -219,11 +227,16 @@ function Images({ type, id }: { type: string, id: string }) {
                         <img loading="lazy" src={selectedImage} alt="selected-image" style={{ objectFit: "contain", maxHeight: "800px", maxWidth: "1300px", width: "100%" }}/>
                     </div>
                 </Modal>
-                <select name="images" id="images" defaultValue="backdrops" onChange={handleSelectType}>
-                    <option value="backdrops">Backdrops</option>
-                    <option value="posters">Posters</option>
-                    <option value="logos">Logos</option>
-                </select>
+                <Select defaultValue="backdrops" onValueChange={handleSelectType}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="image" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="backdrops">Backdrops</SelectItem>
+                        <SelectItem value="posters">Posters</SelectItem>
+                        <SelectItem value="logos">Logos</SelectItem>
+                    </SelectContent>
+                </Select>
                 <div className="imgs-container">
                     {selectedImages.map((backdrop: any) => (
                         <div key={backdrop.previewFilePath} className="image-wrapper" onClick={() => handleSelectImage(backdrop.originalFilePath)}>

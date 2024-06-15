@@ -4,6 +4,7 @@ import FavoriteButton from '../favorite-button-component/favorite-button';
 import { Link, useNavigate } from 'react-router-dom';
 import { GlobalContext } from '../../contexts/GlobalContext';
 import { saveSearchResult, shortenNumber } from '../../helpers/util.helpers';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import './home-carousel.css';
 
 const getPageNumber = (slide: number, totalSlides: number) => {
@@ -178,12 +179,12 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
                 {loggedIn ? (
                   <>
                     <WatchlistButton 
-                        size='medium'
+                        size={40}
                         isWatchlisted={item.inWatchlist || false}
                         mediaId={item.id.toString()}
                         type={item.type}/>  
                     <FavoriteButton 
-                        size='medium'
+                        size={40}
                         isFavorite={item.inFavorites || false}
                         mediaId={item.id.toString()}
                         type={item.type}/>
@@ -214,9 +215,8 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
       onClick={() => handleSlideButton('left')}
       className="carousel-button left">
         <span 
-        style={{ pointerEvents: "none" }}
-        className="material-icons">
-          arrow_back_ios
+        style={{ pointerEvents: "none" }}>
+          <ChevronLeft size={40} />
         </span>
       </div>
       <div ref={carouselRef} onTransitionEnd={onTransitionEnd} className="carousel-container" style={{transform: `translateX(-${1 * 100}%)`}}>
@@ -232,9 +232,8 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
       onClick={() => handleSlideButton('right')}
       className="carousel-button right">
         <span
-        style={{ pointerEvents: "none" }}
-        className="material-icons">
-          arrow_forward_ios
+        style={{ pointerEvents: "none" }}>
+          <ChevronRight size={40} /> 
         </span>
       </div>
     </div>

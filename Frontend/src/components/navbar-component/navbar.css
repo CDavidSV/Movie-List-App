@@ -166,7 +166,7 @@ header {
 .hamburger-menu-genres {
     display: none;
     flex-direction: column;
-    padding: 5px;
+    padding: 5px 0;
     background: var(--tertiary-background-color);
 }
 
@@ -205,7 +205,7 @@ header {
 .menu-item {
     cursor: pointer;
     display: list-item;
-    height: 40px;
+    height: 50px;
 }
 
 .menu-item a {
@@ -296,7 +296,7 @@ header {
 }
 
 .profile-name p:nth-child(2) {
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     margin: 0;
     filter: brightness(0.6);
 }

@@ -1,5 +1,6 @@
 import ReactDOM from "react-dom";
 import React, { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import "./modal.css";
 
 type ModalState = "open" | "closed" | "opening" | "closing";
@@ -40,7 +41,9 @@ export default function Modal({ open, onClose, children, style, background = tru
     return ReactDOM.createPortal(
         <>
             <div className={`modal ${modalState} ${background && "background"}`} style={style}>
-                <span className="material-icons modal-close" onClick={() => onClose()}>close</span>
+                <span className="modal-close" onClick={() => onClose()}>
+                    <X />
+                </span>
                 <div>
                     {children}
                 </div>

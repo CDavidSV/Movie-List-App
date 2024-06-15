@@ -8,6 +8,8 @@ import { GlobalContext } from '../../contexts/GlobalContext';
 import "./myprofile.css";
 import { ToastContext } from '../../contexts/ToastContext';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Camera, Image } from 'lucide-react';
 
 function ChangeUsername ({ username }: { username: string }) {
     const [oldUsername, setOldUsername] = useState<string>(username);
@@ -207,11 +209,11 @@ function ChangePasswordTab() {
                         onInputChange={(value) => setPasswordChangeInfo({ ...passwordChangeInfo, confirmNewPassword: value })}
                         autocomplete="new-password"
                     />
-                    <div>
-                        <input checked={passwordChangeInfo.deleteSessions} type="checkbox" id="delete-sessions" onChange={(e) => setPasswordChangeInfo({ ...passwordChangeInfo, deleteSessions: e.target.checked })} />
+                    <div className="items-top flex space-x-2 items-center">
+                        <Checkbox checked={passwordChangeInfo.deleteSessions} id="delete-sessions" onCheckedChange={(value: boolean) => setPasswordChangeInfo({ ...passwordChangeInfo, deleteSessions: value })} />
                         <label 
-                        style={{ marginLeft: "10px", fontSize: "0.9rem"}} 
-                        htmlFor="delete-sessions">
+                            style={{ marginLeft: "10px", fontSize: "0.9rem"}} 
+                            htmlFor="delete-sessions">
                             Sign out of all devices except this one
                         </label>
                     </div>
@@ -389,7 +391,7 @@ export default function MyProfile() {
         <div className="content">
             <div className="profile-wallpaper">
                 {userData && userData.profileBannerUrl && <img src={`${userData.profileBannerUrl}`} alt="profile_banner" />}
-                <div onClick={() => setModalsState({ ...modalsState, bannerModal: true })} className="upload_banner"><span className="material-icons">image</span></div>
+                <div onClick={() => setModalsState({ ...modalsState, bannerModal: true })} className="upload_banner"><Image /></div>
                 <Modal open={modalsState.bannerModal} onClose={() => setModalsState({ ...modalsState, bannerModal: false })}>
                     <UploadImage onCrop={onBannerChange} aspectRatio={16 / 9} height="35vh" maxImageSizeInMb={16}/>
                 </Modal>
@@ -398,7 +400,7 @@ export default function MyProfile() {
                 <div className="profile-general-data">
                     <div className="profile-picture">
                         <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile_picture" />
-                        <div onClick={() => setModalsState({ ...modalsState, pfpModal: true })} className="upload_pfp"><span className="material-icons">photo_camera</span></div>
+                        <div onClick={() => setModalsState({ ...modalsState, pfpModal: true })} className="upload_pfp"><Camera /></div>
                         <Modal open={modalsState.pfpModal} onClose={() => setModalsState({ ...modalsState, pfpModal: false })}>
                             <UploadImage onCrop={onPfpChange} aspectRatio={1} height="50vh" maxImageSizeInMb={8}/>
                         </Modal>

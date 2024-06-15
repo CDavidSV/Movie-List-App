@@ -2,8 +2,10 @@ import { useContext } from "react";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import LogoWithName from '../../assets/logos/mml_logo_with_name.svg';
 import TMDBLogo from '../../assets/logos/blue_short-tmdb.svg'
-import "./footer.css";
 import { NavLink } from "react-router-dom";
+import { SquarePlay } from "lucide-react";
+import { Heart } from "lucide-react";
+import "./footer.css";
 
 function FooterLink({ icon, text, link }: { icon?: string, text: string, link: string }) {
     return (
@@ -49,8 +51,11 @@ export default function Footer() {
             </div>
             <div className="footer-separator"></div>
             <div className="bottom-footer">
-                <p>My Movie List</p>
-                <p>Made with <span className="material-icons">favorite</span> by <a href="">Carlos David Sandoval Vargas</a></p>
+                <div className="flex items-center gap-1">
+                    <SquarePlay />
+                    <p>My Movie List</p>
+                </div>
+                <span className="flex gap-1">Made with <Heart size={20} /> by <a href="">Carlos David Sandoval Vargas</a></span>
             </div>
         </footer>
     );

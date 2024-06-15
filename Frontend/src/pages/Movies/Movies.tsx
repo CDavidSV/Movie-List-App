@@ -4,6 +4,7 @@ import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
 import { ScrollRestoration } from "react-router-dom";
+import { Clapperboard } from "lucide-react";
 
 export default function Movies() {
     const [movies, setMovies] = useState<any[]>([]);
@@ -39,7 +40,7 @@ export default function Movies() {
         <div className="content">
             <ScrollRestoration />
             <div className="page-title-container">
-                <span style={{fontSize: "2rem"}} className="material-icons icon">movie</span>
+                <Clapperboard size={40} />
                 <h1>Movies</h1>
             </div>
             <div className="content-wrapper">

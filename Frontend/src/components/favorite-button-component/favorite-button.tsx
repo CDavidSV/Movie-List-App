@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Modal from "../modal-component/modal";
 import { PersonalListsContext } from "../../contexts/PersonalListsContext";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export default function FavoriteButton(props: { size: string, isFavorite: boolean, mediaId: string, type: string }) {
+export default function FavoriteButton(props: { size: number, isFavorite: boolean, mediaId: string, type: string }) {
     const [isFavorite, setIsFavorite] = useState<boolean>(props.isFavorite);
     const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
     const navigate = useNavigate();
@@ -61,7 +63,7 @@ export default function FavoriteButton(props: { size: string, isFavorite: boolea
                     <button className="button primary" onClick={() => navigate("/signup")}>Create Account</button>
                 </div>
             </Modal>
-            <span style={{ userSelect: "none" }} className={`material-icons icon-btn blue ${props.size}`} onClick={handleFavoriteClick}>{!isFavorite ? "favorite_border" : "favorite"}</span>
+            <Heart size={props.size} className={cn(`icon-btn blue`, isFavorite && "fill-primary")} onClick={handleFavoriteClick} />
         </>
     );
 }

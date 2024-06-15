@@ -7,6 +7,7 @@ import Logo from '../../assets/logos/mml_logo.svg?react';
 import LogoWithName from '../../assets/logos/mml_logo_with_name.svg?react';
 import useRouteChange from '../../hooks/useRouteChange';
 import { GlobalContext } from '../../contexts/GlobalContext';
+import { Search, Bookmark, CircleUserRound, Heart, LogOut, History, LogIn, UserRoundPlus, Menu } from 'lucide-react';
 import './navbar.css';
 
 const genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
@@ -101,18 +102,18 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
                 </div>
                 <div className="profile-dropdown-section">   
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/profile">
-                        <span className="material-icons">account_circle</span>
+                        <CircleUserRound />
                         <div>
                             My Profile
                             <p className="menu-item-subtext">Manage your profile settings</p>
                         </div>
                     </NavLink>
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/watchlist">
-                        <span className="material-icons">bookmark_border</span>
+                        <Bookmark />
                         Watchlist
                     </NavLink>
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/favorites">
-                        <span className="material-icons">favorite_border</span>
+                        <Heart />
                         Favorites
                     </NavLink>
                     {
@@ -122,13 +123,13 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
                         My lists
                     </NavLink> */}
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/history">
-                    <span className="material-icons">history</span>
+                        <History />
                         History
                     </NavLink>
                 </div>
                 <div className="profile-dropdown-section">
                     <button className="menu-profile-item" onClick={logOut}>
-                        <span className="material-icons">logout</span>
+                        <LogOut />
                         Log out
                     </button>
                 </div>
@@ -136,14 +137,14 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
             {!userData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
             <div className="menu-profile-section">   
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/login">
-                        <span className="material-icons">login</span>
+                        <LogIn />
                         <div>
                             Log in
                             <p className="menu-item-subtext">Log in to your existing account</p>
                         </div>
                     </NavLink>
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/signup">
-                        <span className="material-icons">person_add</span>
+                        <UserRoundPlus />
                         <div>
                             Create Account
                             <p className="menu-item-subtext">Don't have an account? Create one now.</p>
@@ -166,7 +167,7 @@ function HanburgerMenu({handleMenuStateChange}: {handleMenuStateChange: (isOpen:
                 style={{ height: "100%" }}
                 >
                 <div className="header-hoverable hamburger-btn" onClick={toggleMenu}>
-                    <span className="material-icons">menu</span>
+                    <Menu/>
                 </div>
                 <div className={menuState ? "dropdown hamburger-menu select-active" : "dropdown hamburger-menu"}>
                     <div className="hamburger-links">
@@ -231,11 +232,11 @@ export default function Navbar() {
 
                 <div className="header-section">
                     <NavLink to="/search" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
-                        <span className="material-icons">search</span>     
+                        <Search />    
                     </NavLink>
                     {loggedIn && 
                         <NavLink to="/watchlist" className={({ isActive }) => isActive ? "header-hoverable lists-icon selected " : "header-hoverable lists-icon"}>
-                            <span className="material-icons">bookmark_border</span>     
+                            <Bookmark />
                         </NavLink>
                     }
                     <ProfileDropdown handleMenuStateChange={handleMenuStateChange}/>

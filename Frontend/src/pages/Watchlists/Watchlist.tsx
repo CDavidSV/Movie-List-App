@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import NotFound from "../../components/not-found-component/not-found";
-import "./watchlist.css";
 import { Link, ScrollRestoration } from "react-router-dom";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
@@ -9,6 +8,8 @@ import axios, { CancelTokenSource } from "axios";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
+import { Plus, Bookmark, Trash2, Pencil } from "lucide-react";
+import "./watchlist.css";
 
 function WatchlistItem(props: WatchlistItemProps) {
     const [status, setStatus] = useState<string>("plan-to-watch");
@@ -82,7 +83,7 @@ function WatchlistItem(props: WatchlistItemProps) {
                 </picture>
                 <div className="info">
                     <h3>{props.title}</h3>
-                    <FavoriteButton size="small" mediaId={props.id} type={props.type} isFavorite={props.favorited}/>
+                    <FavoriteButton size={24} mediaId={props.id} type={props.type} isFavorite={props.favorited}/>
                 </div>
             </Link>
             <div className="actions desktop">
@@ -94,9 +95,13 @@ function WatchlistItem(props: WatchlistItemProps) {
                 />
             </div>
             <div className="actions mobile">
-                <span className="watchlist-btn trash-icon material-icons" onClick={() => setEditProgressModal(true)}>edit</span>
+                <span className="watchlist-btn trash-icon" onClick={() => setEditProgressModal(true)}>
+                    <Pencil size={22} />
+                </span>
             </div>
-            <span className="watchlist-btn trash-icon material-icons" onClick={() => setDeleteModalOpen(true)}>delete_outline</span>
+            <span className="watchlist-btn trash-icon" onClick={() => setDeleteModalOpen(true)}>
+                <Trash2 size={22}/>
+            </span>
         </div>
     );
 }
@@ -191,7 +196,7 @@ export default function Watchlist() {
         <div className="content">
             <ScrollRestoration />
             <div className="page-title-container">
-                <span style={{fontSize: "2rem"}} className="material-icons icon">bookmark_border</span>
+                <Bookmark size={40} />
                 <h1>Watchlist</h1>
             </div>
             <div className="content-wrapper">

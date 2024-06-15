@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Modal from "../modal-component/modal";
 import { PersonalListsContext } from "../../contexts/PersonalListsContext";
 import { GlobalContext } from "../../contexts/GlobalContext";
+import { Bookmark } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export default function WatchlistButton(props: { size: string, isWatchlisted: boolean, mediaId: string, type: string }) {
+export default function WatchlistButton(props: { size: number, isWatchlisted: boolean, mediaId: string, type: string }) {
     const [isWatchlisted, setIsWatchlisted] = useState<boolean>(props.isWatchlisted);
     const [loginModalOpen, setLoginModalOpen] = useState<boolean>(false);
     const { handleWatchlistState, watchlistState } = useContext(PersonalListsContext);
@@ -64,7 +66,7 @@ export default function WatchlistButton(props: { size: string, isWatchlisted: bo
                     <button className="button primary" onClick={() => navigate("signup")}>Create Account</button>
                 </div>
             </Modal>
-            <span style={{ userSelect: "none" }} className={`material-icons icon-btn blue ${props.size}`} onClick={handleWatchlistClick}>{!isWatchlisted ? "bookmark_border" : "bookmark"}</span>
+            <Bookmark size={props.size} className={cn(`icon-btn blue`, isWatchlisted && "fill-primary")} onClick={handleWatchlistClick} />
         </>
     );
 }

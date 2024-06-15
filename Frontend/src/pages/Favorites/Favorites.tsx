@@ -48,7 +48,7 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
                     <h4>{filmData.title}</h4>
                     <p>{filmData.description}</p>
                     <div>
-                        <WatchlistButton size="" mediaId={filmData.media_id} type={filmData.type} isWatchlisted={filmData.watchlisted}/>
+                        <WatchlistButton size={24} mediaId={filmData.media_id} type={filmData.type} isWatchlisted={filmData.watchlisted}/>
                     </div>
                 </div>
             </Link>
