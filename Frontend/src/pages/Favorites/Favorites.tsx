@@ -3,10 +3,11 @@ import { Link, ScrollRestoration } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DraggableStateSnapshot } from "react-beautiful-dnd";
 import WatchlistButton from "../../components/watchlist-button-component/watchlist-button";
 import Modal from "../../components/modal-component/modal";
-import "./favorites.css";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
+import { GripVertical, Trash2 } from "lucide-react";
+import "./favorites.css";
 
 function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: any, removeItem: Function, provided: DraggableProvided, snapshot: DraggableStateSnapshot}) {
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
@@ -35,7 +36,7 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
                 </div>
             </Modal>
             <div className="list-drag" {...provided.dragHandleProps}>
-                <span className="material-icons" >drag_indicator</span>
+                <GripVertical/>
             </div>
             <Link to={`/media/${filmData.type}/${filmData.media_id}`} className="list-card-main-container">
                 <figure className="list-card-img-container">
@@ -53,7 +54,9 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
                 </div>
             </Link>
             <div className="list-card-delete">
-                <span className="material-icons remove-list-item-btn" onClick={() => setDeleteModalOpen(true)}>delete_outline</span>
+                <span className="material-icons remove-list-item-btn" onClick={() => setDeleteModalOpen(true)}>
+                    <Trash2/>
+                </span>
             </div>
         </div>
     );

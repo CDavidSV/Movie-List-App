@@ -10,6 +10,7 @@ import corsConfig from "./middlewares/corsConfig";
 import cors from "cors";
 import path from "path";
 import { formatTime, addSpacing } from "./util/helpers";
+import compression from "compression";
 
 // routes
 import routes from "./routes/router";
@@ -44,6 +45,7 @@ const logger = morgan((tokens, req, res) => {
 });
 
 // Middleware
+app.use(compression());
 app.use(cors(corsConfig));
 app.use(logger);
 app.use(bodyParser.json());
