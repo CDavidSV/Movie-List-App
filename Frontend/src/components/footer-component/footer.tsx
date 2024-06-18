@@ -4,7 +4,6 @@ import LogoWithName from '../../assets/logos/mml_logo_with_name.svg';
 import TMDBLogo from '../../assets/logos/blue_short-tmdb.svg'
 import { NavLink } from "react-router-dom";
 import { SquarePlay } from "lucide-react";
-import { Heart } from "lucide-react";
 import "./footer.css";
 
 function FooterLink({ icon, text, link }: { icon?: string, text: string, link: string }) {
@@ -24,10 +23,10 @@ export default function Footer() {
             <div className="main-footer">
                 <div className="footer-section">
                 <NavLink to="/">
-                    <img src={LogoWithName} className="footer-logo"/>
+                    <img src={LogoWithName} className="footer-logo" alt="mml-logo" loading="lazy"/>
                 </NavLink>
                 <a href="https://www.themoviedb.org/" target="_blank">
-                    <img src={TMDBLogo} className="footer-logo"/>
+                    <img src={TMDBLogo} className="footer-logo" alt="tmbd-logo" loading="lazy"/>
                 </a>
                 </div>
                 <div className="footer-section">
@@ -55,7 +54,7 @@ export default function Footer() {
                     <SquarePlay />
                     <p>My Movie List</p>
                 </div>
-                <span className="flex gap-1">Made with <Heart size={20} /> by <a href="">Carlos David Sandoval Vargas</a></span>
+                <span>Made with ❤ by <a href="">Carlos David Sandoval Vargas</a></span>
             </div>
         </footer>
     );

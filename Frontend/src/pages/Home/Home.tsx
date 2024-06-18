@@ -11,14 +11,16 @@ import "./home.css";
 
 export default function Home() {
     const { homeData, setHomeData } = useContext(MediaContext);
-    const { loggedIn, mml_api, mml_api_protected, getSavedItems } = useContext(GlobalContext);
-
-    const [popularMovies, setPopularMovies] = useState<FilmCardProps[]>([]);
-    const [upcoming, setUpcoming] = useState<FilmCardProps[]>([]);
-    const [topRated, setTopRated] = useState<FilmCardProps[]>([]);
-    const [watchlist, setWatchlist] = useState<FilmCardProps[]>([]);
-    const [carouselData, setCarouselData] = useState<SliderItem[]>([]);
+    const { loggedIn, mml_api, mml_api_protected, getSavedItems, userData } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
+
+    const [homeState, setHomeState] = useState<HomeData>({
+        carouselData: [],
+        popularMovies: [],
+        upcoming: [],
+        topRated: [],
+        watchlist: []
+    });
 
     const parseFilmData = (film: any): FilmCardProps[] => {
         return film.map((film: any) => {
@@ -42,30 +44,42 @@ export default function Home() {
     
     const fetchHandler = {
         carouselData: async () => {
-            await mml_api.get("api/v1/media/movies/home-carousel").then((response) => {
+            await mml_api.get(`api/v1/media/movies/home-carousel?mature_content=${userData?.matureContent}`).then((response) => {
                 getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
-                    setCarouselData(films);
+                    setHomeState((prev) => ({
+                        ...prev,
+                        carouselData: films
+                    }));
                 });
             });
         },
         popularMovies: async () => {
-            await mml_api.get("api/v1/media/movies/popular").then((response) => {
+            await mml_api.get(`api/v1/media/movies/popular?mature_content=${userData?.matureContent}`).then((response) => {
                 getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
-                    setPopularMovies(parseFilmData(films));
+                    setHomeState((prev) => ({
+                        ...prev,
+                        popularMovies: parseFilmData(films)
+                    }));
                 });
             });
         },
         upcoming: async () => {
-            await mml_api.get("api/v1/media/movies/upcoming").then((response) => {
+            await mml_api.get(`api/v1/media/movies/upcoming?mature_content=${userData?.matureContent}`).then((response) => {
                 getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
-                    setUpcoming(parseFilmData(films));
+                    setHomeState((prev) => ({
+                        ...prev,
+                        upcoming: parseFilmData(films)
+                    }));
                 });
             });
         },
         topRated: async () => {
-            await mml_api.get("api/v1/media/movies/top-rated").then((response) => {
+            await mml_api.get(`api/v1/media/movies/top-rated?mature_content=${userData?.matureContent}`).then((response) => {
                 getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
-                    setTopRated(parseFilmData(films));
+                    setHomeState((prev) => ({
+                        ...prev,
+                        topRated: parseFilmData(films)
+                    }));
                 });
             });
         },
@@ -73,31 +87,24 @@ export default function Home() {
             if (!loggedIn) return;
 
             await mml_api_protected.get(`api/v1/watchlist?status=3`).then((response) => {
-                setWatchlist(parseFilmData(response.data.responseData.watchlist));
+                setHomeState((prev) => ({
+                    ...prev,
+                    watchlist: parseFilmData(response.data.responseData.watchlist)
+                }));
             });
         }
     }
 
-    useEffect(() => {  
-        setHomeData((prev) => ({
-            carouselData: carouselData || prev?.carouselData || [],
-            popularMovies: popularMovies || prev?.popularMovies || [],
-            upcoming: upcoming || prev?.upcoming || [],
-            topRated: topRated || prev?.topRated || [],
-            watchlist: watchlist || prev?.watchlist || []
-        }));
-    }, [carouselData, popularMovies, upcoming, topRated, watchlist]);
+    useEffect(() => {
+        setHomeData(homeState);
+    }, [homeState]);
 
     useEffect((() => {
         document.title = "My Movie List";
 
-        setCarouselData(homeData?.carouselData || []);
-        setPopularMovies(homeData?.popularMovies || []);
-        setUpcoming(homeData?.upcoming || []);
-        setTopRated(homeData?.topRated || []);
-        setWatchlist(homeData?.watchlist || []);
-
         if (!homeData) return
+        setHomeState(homeData);
+        
         const promises: Promise<void>[] = [];
 
         Object.entries(fetchHandler).forEach(([key, fetchFunction]) => {
@@ -116,7 +123,7 @@ export default function Home() {
             <ScrollRestoration />
             <div className="content">
                 <div className="sliders-container">
-                    { carouselData.length ? <HomeCarousel items={carouselData}/> : 
+                    { homeState.carouselData.length ? <HomeCarousel items={homeState.carouselData}/> : 
                     <>
                         <div className="skeleton-carousel flex justify-center items-center">
                             <LoaderCircle className="animate-spin" size={40} />
@@ -124,10 +131,10 @@ export default function Home() {
                     </>
                     }
                     <div style={{ top: "-125px", position: "relative", zIndex: 3 }}>
-                        <FilmSlider title="Popular" filmArr={popularMovies}/>
-                        <FilmSlider title="Upcoming" filmArr={upcoming}/>
-                        {watchlist.length > 0 && <FilmSlider title="Your Watchlist" filmArr={watchlist}/>}
-                        <FilmSlider title="Top Rated" filmArr={topRated}/>
+                        <FilmSlider title="Popular" filmArr={homeState.popularMovies}/>
+                        <FilmSlider title="Upcoming" filmArr={homeState.upcoming}/>
+                        {homeState.watchlist.length && <FilmSlider title="Your Watchlist" filmArr={homeState.upcoming}/>}
+                        <FilmSlider title="Top Rated" filmArr={homeState.topRated}/>
                     </div>
                 </div>
             </div>

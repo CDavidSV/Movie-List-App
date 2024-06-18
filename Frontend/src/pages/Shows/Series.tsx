@@ -11,12 +11,12 @@ export default function Series() {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const toast = useContext(ToastContext);
-    const { getSavedItems, mml_api } = useContext(GlobalContext);
+    const { getSavedItems, mml_api, userData } = useContext(GlobalContext);
 
     const getShows = (page: number) => {
         setLoading(true);
 
-        mml_api.get(`api/v1/media/series/popular?page=${page}`).then((response) => {
+        mml_api.get(`api/v1/media/series/popular?page=${page}&mature_content=${userData?.matureContent}`).then((response) => {
             setLoading(false);
             setMovies([...movies, ...response.data.responseData]);
 

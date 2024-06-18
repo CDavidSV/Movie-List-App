@@ -1,6 +1,6 @@
 import express from 'express';
 import { sendResponse } from '../../util/apiHandler';
-import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre, getCredits, getMediaImages, getMediaVideos, getGenreName } from '../../util/TMDB';
+import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre, getCredits, getMediaImages, getMediaVideos } from '../../util/TMDB';
 import Movie from '../../Models/Movie';
 import Series from '../../Models/Series';
 import config from '../../config/config';
@@ -18,8 +18,9 @@ interface SeriesResponse extends Series {
 
 const getPopularMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
-    fetchMedia("movie", "popular", page as number).then((response) => {
+    fetchMedia("movie", "popular", page as number, matureContent).then((response) => {
         if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
         sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
@@ -31,8 +32,9 @@ const getPopularMovies = async (req: express.Request, res: express.Response) => 
 
 const getUpcomingMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
-    const response = await fetchMedia("movie", "upcoming", page as number);
+    const response = await fetchMedia("movie", "upcoming", page as number, matureContent);
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
     sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
@@ -40,8 +42,9 @@ const getUpcomingMovies = async (req: express.Request, res: express.Response) =>
 
 const getUpcomingSeries = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
-    const response = await fetchMedia("tv", "upcoming", page as number);
+    const response = await fetchMedia("tv", "upcoming", page as number, matureContent);
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
     sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
@@ -49,8 +52,9 @@ const getUpcomingSeries = async (req: express.Request, res: express.Response) =>
 
 const getTopRatedMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
-    const response = await fetchMedia("movie", "top_rated", page as number);
+    const response = await fetchMedia("movie", "top_rated", page as number, matureContent);
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
     sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
@@ -58,8 +62,9 @@ const getTopRatedMovies = async (req: express.Request, res: express.Response) =>
 
 const getTopRatedSeries = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
-    const response = await fetchMedia("tv", "top_rated", page as number);
+    const response = await fetchMedia("tv", "top_rated", page as number, matureContent);
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching series" });
 
     sendResponse(res, { status: 200, message: "Series fetched successfully", responsePayload: response });
@@ -67,8 +72,9 @@ const getTopRatedSeries = async (req: express.Request, res: express.Response) =>
 
 const getNowPlayingMovies = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
-    const response = await fetchMedia("movie", "now_playing", page as number);
+    const response = await fetchMedia("movie", "now_playing", page as number, matureContent);
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies" });
 
     sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
@@ -76,8 +82,9 @@ const getNowPlayingMovies = async (req: express.Request, res: express.Response) 
 
 const getPopularSeries = async (req: express.Request, res: express.Response) => {
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
-    const response = await fetchMedia("tv", "popular", page as number);
+    const response = await fetchMedia("tv", "popular", page as number, matureContent);
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching series" });
 
     sendResponse(res, { status: 200, message: "Series fetched successfully", responsePayload: response });
@@ -85,13 +92,14 @@ const getPopularSeries = async (req: express.Request, res: express.Response) => 
 
 const searchByTitle = async (req: express.Request, res: express.Response) => {
     const title = req.query.title;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
     if (!title) {
         sendResponse(res, { status: 400, message: "Missing query parameter" });
         return;
     }
 
-    findMediaByTitle(title as string).then((response) => {
+    findMediaByTitle(title as string, matureContent).then((response) => {
         if (!response) return sendResponse(res, { status: 500, message: "Error fetching media" });
 
         sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: response });
@@ -125,13 +133,14 @@ const getMediaById = async (req: express.Request, res: express.Response) => {
 const getMoviesByGenre = async (req: express.Request, res: express.Response) => {
     const { name } = req.query;
     const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
     if (!name) return sendResponse(res, { status: 400, message: "Missing query parameters" });
 
     // First get the genre id based on the type of media
     let genreObj;
     try {
-        const genreResponse = await makeTMDBRequest(`/genre/movie/list`);
+        const genreResponse = await makeTMDBRequest(`/genre/movie/list`, matureContent);
         if (!genreResponse || !genreResponse.genres) return sendResponse(res, { status: 500, message: "Error fetching genres" });
 
         genreObj = genreResponse.genres.find((genre: any) => {
@@ -196,11 +205,12 @@ const getCrew = async (req: express.Request, res: express.Response) => {
 
 const getImages = async (req: express.Request, res: express.Response) => {
     const { type, id } = req.params;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
     if (!type || !id) return sendResponse(res, { status: 400, message: "Missing query parameters" });
     if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid media type" });
 
-    const images = await getMediaImages(id, type);
+    const images = await getMediaImages(id, type, matureContent);
     if (!images) return sendResponse(res, { status: 500, message: "Error fetching images" });
 
     sendResponse(res, { status: 200, message: "Images fetched successfully", responsePayload: images });
@@ -220,8 +230,9 @@ const getVideos = async (req: express.Request, res: express.Response) => {
 
 const getMoviesHomeCarousel = async (req: express.Request, res: express.Response) => {
     const page = parseInt(req.query.page as string, 10) || 1;
+    const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
 
-    let response = await fetchMedia("movie", "upcoming", page);
+    let response = await fetchMedia("movie", "upcoming", page, matureContent);
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
     
     const imageRequests = [];
@@ -235,7 +246,7 @@ const getMoviesHomeCarousel = async (req: express.Request, res: express.Response
         pickedIndices.add(randomIndex);
 
         carouselItems.push(response[randomIndex]);
-        imageRequests.push(getMediaImages(response[randomIndex].id.toString(), 'movie'));
+        imageRequests.push(getMediaImages(response[randomIndex].id.toString(), 'movie', matureContent));
     }
     
     const imageResponses = await Promise.all(imageRequests);

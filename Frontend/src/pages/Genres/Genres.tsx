@@ -116,7 +116,7 @@ export default function Genres() {
     const [media, setMedia] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [page, setPage] = useState<number>(1);
-    const { getSavedItems, mml_api } = useContext(GlobalContext);
+    const { getSavedItems, mml_api, userData } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
     const navigate = useNavigate();
 
@@ -127,7 +127,7 @@ export default function Genres() {
         setMedia([]);
         setLoading(true);
         
-        mml_api.get(`api/v1/media/movies/genres?name=${genreName}`).then((response) => {
+        mml_api.get(`api/v1/media/movies/genres?name=${genreName}&mature_content=${userData?.matureContent}`).then((response) => {
             setLoading(false);
             
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type})), (films: any) => {
@@ -139,12 +139,11 @@ export default function Genres() {
         });
     }, [navigate, genreName]);
 
-
     const getNextPage = () => {
         const nextPage = page + 1;
 
         setLoading(true);
-        mml_api.get(`api/v1/media/movies/genres?name=${genreName}&page=${nextPage}`).then((response) => {
+        mml_api.get(`api/v1/media/movies/genres?name=${genreName}&page=${nextPage}&mature_content=${userData?.matureContent}`).then((response) => {
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type})), (films: any) => {
                 setMedia((prev) => [...prev, ...films]);
             });
@@ -168,7 +167,7 @@ export default function Genres() {
                     {genereMap[genreName] ? genereMap[genreName].icon : <Clapperboard size={40} /> }
                     <h1 className="m-0">{genreName}</h1>
                 </div>
-                <p className="text-center pl-7">{genereMap[genreName] ? genereMap[genreName].message: ""}</p>
+                <p className="text-center">{genereMap[genreName] ? genereMap[genreName].message: ""}</p>
             </div>
             <div className="content-wrapper">
                 <div className="movies-container">

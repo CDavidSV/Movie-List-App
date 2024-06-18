@@ -10,10 +10,11 @@ const tmdb_token = process.env.TMDB_ACCESS_TOKEN;
 const genres: { movies: Genre[], series: Genre[] } = { movies: [], series: [] };
 let clearGenresTimeout: NodeJS.Timeout | null = null;
 
-const makeTMDBRequest = async (url: string) => {
+const makeTMDBRequest = async (url: string, matureContent: boolean = false) => {
+    console.log(`https://api.themoviedb.org/3${url}&include_adult=${matureContent}`);
     return await axios({
         method: 'get',
-        url: `https://api.themoviedb.org/3${url}`,
+        url: `https://api.themoviedb.org/3${url}&include_adult=${matureContent}`,
         headers: {
             "Authorization": "Bearer " + tmdb_token,
             "Content-Type": "application/json"
@@ -31,10 +32,10 @@ const makeTMDBRequest = async (url: string) => {
  * @param type 
  * @returns 
  */
-const fetchMedia  = async (type: string, url: string, page: number) => {
+const fetchMedia  = async (type: string, url: string, page: number, matureContent: boolean = false) => {
     if (type !== "movie" && type !== "tv") throw new Error("Invalid media type");
 
-    const response = await makeTMDBRequest(`/${type}/${url}?language=en-US&page=${page}`);
+    const response = await makeTMDBRequest(`/${type}/${url}?language=en-US&page=${page}`, matureContent);
     if (!response) return null;
     
     let media: CustomMediaResponse[] = [];
@@ -75,10 +76,10 @@ const fetchMedia  = async (type: string, url: string, page: number) => {
     return media;
 };
 
-const findMediaByTitle = async (title: string) => {
+const findMediaByTitle = async (title: string, matureContent: boolean = false) => {
     const [ moviesResponse, seriesResponse ] = await Promise.all([
-        makeTMDBRequest(`/search/movie?query=${title}&include_adult=false&language=en-US&page=1`),
-        makeTMDBRequest(`/search/tv?query=${title}&include_adult=false&language=en-US&page=1`)
+        makeTMDBRequest(`/search/movie?query=${title}&language=en-US&page=1`, matureContent),
+        makeTMDBRequest(`/search/tv?query=${title}&language=en-US&page=1`, matureContent)
     ]);
     if (!moviesResponse || !seriesResponse) return null;
 
@@ -152,8 +153,8 @@ const findMediaById = async (id: string, type: string, append?: string[]): Promi
     }
 };
 
-const fetchMoviesByGenre = async (genreId: number, page: number) => {
-    const response = await makeTMDBRequest(`/discover/movie?with_genres=${genreId}&page=${page}&include_adult=false&include_video=false&language=en-US&sort_by=popularity.desc`);
+const fetchMoviesByGenre = async (genreId: number, page: number, matureContent: boolean = false) => {
+    const response = await makeTMDBRequest(`/discover/movie?with_genres=${genreId}&page=${page}&include_video=false&language=en-US&sort_by=popularity.desc`, matureContent);
     if (!response) return null;
 
     const media = response.results.map((item: any) => {
@@ -217,8 +218,8 @@ const getCredits = async (id: string, type: string) => {
     return response;
 };
 
-const getMediaImages = async (id: string, type: string) => {
-    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/images?include_image_language=en,null&include_video=false`);
+const getMediaImages = async (id: string, type: string, matureContent: boolean) => {
+    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/images?include_image_language=en&include_video=false`, matureContent);
     if (!response) return null;
 
     response.backdrops = response.backdrops.map((backdrop: any) => {

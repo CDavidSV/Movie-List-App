@@ -7,6 +7,7 @@ import { getSearchResultsHistory } from "../../helpers/util.helpers";
 import { Link } from "react-router-dom";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
+import { X } from "lucide-react";
 
 function PrevSearchResultCard(props: { name: string, url: string, remove: React.MouseEventHandler }) {
     return (
@@ -15,7 +16,7 @@ function PrevSearchResultCard(props: { name: string, url: string, remove: React.
                 <p>{props.name}</p>
             </Link>
             <div className="remove-searched-card" onClick={props.remove}>
-                <span className="material-icons">close</span>
+                <X size={20} />
             </div>
         </div>
     );
@@ -27,7 +28,7 @@ export default function Browse() {
     const [timeoutFunc, setTimeoutFunc] = useState<NodeJS.Timeout | null>(null);
     const [searchHistory, setSearchHistory] = useState<SearchResultItem[]>(getSearchResultsHistory());
     const [defaultValue, setDefaultValue] = useState<string>("");
-    const { getSavedItems, mml_api } = useContext(GlobalContext);
+    const { getSavedItems, mml_api, userData } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
     const cooldown = 400;
 
@@ -46,7 +47,7 @@ export default function Browse() {
     const search = (query: string) => {
         setLoading(true);
 
-        mml_api.get(`api/v1/media/search?title=${query}`).then((response) => {
+        mml_api.get(`api/v1/media/search?title=${query}&mature_content=${userData?.matureContent}`).then((response) => {
             setLoading(false);
             window.history.pushState({}, "", `/search?query=${query}`);
             
@@ -58,7 +59,7 @@ export default function Browse() {
     }
 
     const querySearchCooldown = (query: string) => {
-        if (query.length <= 2) {
+        if (query.length <= 1) {
             window.history.replaceState({}, "", `/search`);
             return;
         };

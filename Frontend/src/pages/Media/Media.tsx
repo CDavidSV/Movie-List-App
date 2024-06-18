@@ -10,6 +10,7 @@ import PageNotFound from "../PageNotFound/PageNotFound";
 import Modal from "../../components/modal-component/modal";
 import { MediaContext } from "../../contexts/MediaContext";
 import { ToastContext } from "../../contexts/ToastContext";
+import { Skeleton } from "@/components/ui/skeleton"
 import "./media.css";
 import {
     Select,
@@ -199,10 +200,10 @@ function Images({ type, id }: { type: string, id: string }) {
     const [selectedImage, setSelectedImage] = useState<string>("");
     const [selectedImages, setSelectedImages] = useState<any[]>([]);
     const toast = useContext(ToastContext);
-    const { mml_api } = useContext(GlobalContext);
+    const { mml_api, userData } = useContext(GlobalContext);
 
     useEffect(() => {
-        mml_api.get(`/api/v1/media/${type}/${id}/images`).then((response) => {
+        mml_api.get(`/api/v1/media/${type}/${id}/images?mature_content=${userData?.matureContent}`).then((response) => {
             setImages(response.data.responseData);
             setSelectedImages(response.data.responseData.backdrops);
         }).catch(() => {
@@ -500,7 +501,7 @@ export default function Media() {
 
     return (
         <div className="content">
-            {mediaData && 
+            {mediaData ? 
             <>
                 <div className="film-backdrop-container" style={{backgroundImage: `url(${mediaData.backdropPath})`}}>
                     <div className="film-info-content">
@@ -603,6 +604,27 @@ export default function Media() {
                     </div>
                 </div>
             </>
+            :
+            <div className="film-backdrop-container h-[100vh]">
+                <div className="film-info-content">
+                    <div className="film-poster-container w-[270px] h-[400px] lg:h-[500px] lg:w-[410px]">
+                        <Skeleton className="w-full h-full rounded-2xl"></Skeleton>
+                    </div>
+                    <div className="film-overview-info">
+                        <Skeleton className="w-[90%] h-[40px] max-w-[400px]"></Skeleton>
+                        
+                        <Skeleton className="mt-3 w-[80%] h-[16px] rounded-sm"></Skeleton>
+                        <Skeleton className="my-1 w-[40%] h-[10px] rounded-sm"></Skeleton>
+                        <Skeleton className="w-[60%] h-[10px] rounded-sm"></Skeleton>
+
+                        <Skeleton className="w-[90%] h-[40px] mt-28 mb-2 max-w-[300px] lg:mt-20"></Skeleton>
+                        <Skeleton className="my-1 w-[80%] h-[10px] rounded-sm"></Skeleton>
+                        <Skeleton className="w-[75%] h-[10px] rounded-sm"></Skeleton>
+                        <Skeleton className="my-1 w-[78%] h-[10px] rounded-sm"></Skeleton>
+                        <Skeleton className="w-[72%] h-[10px] rounded-sm"></Skeleton>
+                    </div>
+                </div>
+            </div>
             }
         </div>
     );
