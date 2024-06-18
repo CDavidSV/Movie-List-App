@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, ScrollRestoration } from "react-router-dom";
 import { calculateMovieRuntime } from "../../helpers/util.helpers";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
@@ -10,7 +10,7 @@ import PageNotFound from "../PageNotFound/PageNotFound";
 import Modal from "../../components/modal-component/modal";
 import { MediaContext } from "../../contexts/MediaContext";
 import { ToastContext } from "../../contexts/ToastContext";
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 import "./media.css";
 import {
     Select,
@@ -501,6 +501,7 @@ export default function Media() {
 
     return (
         <div className="content">
+            <ScrollRestoration />
             {mediaData ? 
             <>
                 <div className="film-backdrop-container" style={{backgroundImage: `url(${mediaData.backdropPath})`}}>
