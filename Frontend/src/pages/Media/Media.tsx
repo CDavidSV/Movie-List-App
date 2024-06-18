@@ -456,6 +456,7 @@ export default function Media() {
 
     useEffect(() => {
         // Fetch media data based on type
+        setMediaData(null);
         getMediaData(id as string, type as string).then((data) => {
             const mediaData = data;
             setMediaData(data);
