@@ -6,17 +6,18 @@ import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
 import { ScrollRestoration } from "react-router-dom";
 import { MediaContext } from "../../contexts/MediaContext";
+import { LoaderCircle } from "lucide-react";
 import "./home.css";
 
 export default function Home() {
     const { homeData, setHomeData } = useContext(MediaContext);
+    const { loggedIn, mml_api, mml_api_protected, getSavedItems } = useContext(GlobalContext);
 
     const [popularMovies, setPopularMovies] = useState<FilmCardProps[]>([]);
     const [upcoming, setUpcoming] = useState<FilmCardProps[]>([]);
     const [topRated, setTopRated] = useState<FilmCardProps[]>([]);
     const [watchlist, setWatchlist] = useState<FilmCardProps[]>([]);
     const [carouselData, setCarouselData] = useState<SliderItem[]>([]);
-    const { loggedIn, mml_api, mml_api_protected, getSavedItems } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
 
     const parseFilmData = (film: any): FilmCardProps[] => {
@@ -38,60 +39,46 @@ export default function Home() {
             } as FilmCardProps;
         });
     }
-
+    
     const fetchHandler = {
-        popularMovies: () => {
-            mml_api.get("api/v1/media/movies/popular").then((response) => {
-                setPopularMovies(parseFilmData(response.data.responseData));
-                getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
-                    setPopularMovies(parseFilmData(films));
-                });
-            }).catch(() => {
-                toast.open("Error loading popular movies", "error");
-            });
-        },
-        upcoming: () => {
-            mml_api.get("api/v1/media/movies/upcoming").then((response) => {
-                setUpcoming(parseFilmData(response.data.responseData));
-                getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
-                    setUpcoming(parseFilmData(films));
-                });
-            }).catch(() => {
-                toast.open("Error loading upcoming movies", "error");
-            });
-        },
-        topRated: () => {
-            mml_api.get("api/v1/media/movies/top-rated").then((response) => {
-                setTopRated(parseFilmData(response.data.responseData));
-                getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
-                    setTopRated(parseFilmData(films));
-                });
-            }).catch(() => {
-                toast.open("Error loading top rated movies", "error");
-            });
-        },
-        watchlist: () => {
-            if (!loggedIn) return;
-
-            mml_api_protected.get(`api/v1/watchlist?status=3`).then((response) => {
-                setWatchlist(parseFilmData(response.data.responseData.watchlist));
-            }).catch(() => {
-                toast.open("Error loading watchlist", "error");
-            });
-        },
-        carouselData: () => {
-            mml_api.get("api/v1/media/movies/home-carousel").then((response) => {
-                setCarouselData(response.data.responseData);
+        carouselData: async () => {
+            await mml_api.get("api/v1/media/movies/home-carousel").then((response) => {
                 getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
                     setCarouselData(films);
                 });
-            }).catch(() => {
-                toast.open("Error loading carousel data", "error");
+            });
+        },
+        popularMovies: async () => {
+            await mml_api.get("api/v1/media/movies/popular").then((response) => {
+                getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
+                    setPopularMovies(parseFilmData(films));
+                });
+            });
+        },
+        upcoming: async () => {
+            await mml_api.get("api/v1/media/movies/upcoming").then((response) => {
+                getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
+                    setUpcoming(parseFilmData(films));
+                });
+            });
+        },
+        topRated: async () => {
+            await mml_api.get("api/v1/media/movies/top-rated").then((response) => {
+                getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type })), (films: any) => {
+                    setTopRated(parseFilmData(films));
+                });
+            });
+        },
+        watchlist: async () => {
+            if (!loggedIn) return;
+
+            await mml_api_protected.get(`api/v1/watchlist?status=3`).then((response) => {
+                setWatchlist(parseFilmData(response.data.responseData.watchlist));
             });
         }
     }
 
-    useEffect(() => {
+    useEffect(() => {  
         setHomeData((prev) => ({
             carouselData: carouselData || prev?.carouselData || [],
             popularMovies: popularMovies || prev?.popularMovies || [],
@@ -99,39 +86,29 @@ export default function Home() {
             topRated: topRated || prev?.topRated || [],
             watchlist: watchlist || prev?.watchlist || []
         }));
-    }, [popularMovies, upcoming, topRated, watchlist, carouselData]);
+    }, [carouselData, popularMovies, upcoming, topRated, watchlist]);
 
     useEffect((() => {
         document.title = "My Movie List";
 
-        if (homeData) {
-            for (let key in homeData) {
-                if (!homeData[key as keyof HomeData].length) {
-                    fetchHandler[key as keyof typeof fetchHandler]();
-                    continue;
-                }
-                // If the data is already loaded in cache, set it
-                switch (key) {
-                    case "popularMovies":
-                        setPopularMovies(homeData.popularMovies);
-                        break;
-                    case "upcoming":
-                        setUpcoming(homeData.upcoming);
-                        break;
-                    case "topRated":
-                        setTopRated(homeData.topRated);
-                        break;
-                    case "watchlist":
-                        setWatchlist(homeData.watchlist);
-                        break;
-                    case "carouselData":
-                        setCarouselData(homeData.carouselData);
-                        break;
-                }
-            }
+        setCarouselData(homeData?.carouselData || []);
+        setPopularMovies(homeData?.popularMovies || []);
+        setUpcoming(homeData?.upcoming || []);
+        setTopRated(homeData?.topRated || []);
+        setWatchlist(homeData?.watchlist || []);
 
-            return;
-        }
+        if (!homeData) return
+        const promises: Promise<void>[] = [];
+
+        Object.entries(fetchHandler).forEach(([key, fetchFunction]) => {
+            if (!homeData[key as keyof HomeData]?.length) {
+                promises.push(fetchFunction());
+            }
+        });
+
+        Promise.all(promises).catch(() => {
+            toast.open("An error ocurred while loading your home page", "error");
+        });
     }), []);
 
     return (
@@ -139,7 +116,13 @@ export default function Home() {
             <ScrollRestoration />
             <div className="content">
                 <div className="sliders-container">
-                    { carouselData.length > 0 ? <HomeCarousel items={carouselData}/> : <div className="skeleton-carousel"></div> }
+                    { carouselData.length ? <HomeCarousel items={carouselData}/> : 
+                    <>
+                        <div className="skeleton-carousel flex justify-center items-center">
+                            <LoaderCircle className="animate-spin" size={40} />
+                        </div>
+                    </>
+                    }
                     <div style={{ top: "-125px", position: "relative", zIndex: 3 }}>
                         <FilmSlider title="Popular" filmArr={popularMovies}/>
                         <FilmSlider title="Upcoming" filmArr={upcoming}/>

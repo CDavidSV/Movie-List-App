@@ -219,26 +219,30 @@ const getVideos = async (req: express.Request, res: express.Response) => {
 };
 
 const getMoviesHomeCarousel = async (req: express.Request, res: express.Response) => {
-    const page = req.query.page && !isNaN(Number(req.query.page)) ? Number(req.query.page) : 1;
+    const page = parseInt(req.query.page as string, 10) || 1;
 
-    let response = await fetchMedia("movie", "upcoming", page as number);
+    let response = await fetchMedia("movie", "upcoming", page);
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
     
     const imageRequests = [];
-    const carouselItems: CustomMediaResponse[] | null = [];
+    const carouselItems: CustomMediaResponse[] = [];
+    const pickedIndices = new Set();
     for (let i = 0; i < 6; i++) {
-        const randomIndex = Math.floor(Math.random() * response.length);
+        let randomIndex = Math.floor(Math.random() * response.length);
+        while (pickedIndices.has(randomIndex)) {
+            randomIndex = Math.floor(Math.random() * response.length);
+        }
+        pickedIndices.add(randomIndex);
 
         carouselItems.push(response[randomIndex]);
         imageRequests.push(getMediaImages(response[randomIndex].id.toString(), 'movie'));
-        response.splice(randomIndex, 1);
     }
     
     const imageResponses = await Promise.all(imageRequests);
     if (!imageResponses) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
 
     imageResponses.forEach((imageResponse, index) => {
-        if (carouselItems) carouselItems[index].logoUrl = imageResponse && imageResponse.logos && imageResponse.logos.length > 0 ? imageResponse.logos[0].previewFilePath : "https://via.placeholder.com/350x100.png?text=No+Logo";
+        carouselItems[index].logoUrl = imageResponse && imageResponse.logos && imageResponse.logos.length > 0 ? imageResponse.logos[0].previewFilePath : "https://via.placeholder.com/350x100.png?text=No+Logo";
     });
     
     sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: carouselItems });

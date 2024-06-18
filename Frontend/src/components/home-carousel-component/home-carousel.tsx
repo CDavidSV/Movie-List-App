@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
 import WatchlistButton from '../watchlist-button-component/watchlist-button';
 import FavoriteButton from '../favorite-button-component/favorite-button';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,7 +13,7 @@ const getPageNumber = (slide: number, totalSlides: number) => {
   return slide;
 }
 
-function SliderPagination(props: { slide: number, slides: number, cooldownSec: number, widthPercentage: number, stopped: boolean, onStop: () => void, onResume: () => void, changeSlide: (slide: number) => void }) {
+const SliderPagination = memo((props: { slide: number, slides: number, cooldownSec: number, widthPercentage: number, stopped: boolean, onStop: () => void, onResume: () => void, changeSlide: (slide: number) => void }) => {
   const [hovered, setHovered] = useState<boolean>(false);
 
   const mouseOver = () => {
@@ -28,7 +28,7 @@ function SliderPagination(props: { slide: number, slides: number, cooldownSec: n
   
   return (
     <div className="slider-pagination">
-      {Array.from(Array(props.slides).keys()).map((_, index) => (
+      {Array.from({ length: props.slides }, (_, index) => (
         <div 
         onClick={() => props.changeSlide(index + 1)}
         onMouseEnter={mouseOver} 
@@ -40,7 +40,7 @@ function SliderPagination(props: { slide: number, slides: number, cooldownSec: n
       ))}
     </div>
   );
-}
+}); 
 
 export default function HomeCarousel({ items }: { items: SliderItem[] }) {
   const cooldownSec = 12;

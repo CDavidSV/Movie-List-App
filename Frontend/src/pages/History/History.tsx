@@ -6,6 +6,7 @@ import Modal from "../../components/modal-component/modal";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
 import { ScrollRestoration } from "react-router-dom";
+import { History as HistoryIcon } from "lucide-react";
 
 export default function History() {
     const [history, setHistory] = useState<any[]>([]);
@@ -62,7 +63,7 @@ export default function History() {
                 </div>
             </Modal>
             <div className="page-title-container">
-                <span style={{fontSize: "2rem"}} className="material-icons icon">history</span>
+                <HistoryIcon size={40} />
                 <h1>History</h1>
             </div>
             <div className="content-wrapper">

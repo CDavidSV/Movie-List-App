@@ -6,8 +6,8 @@ import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
 import GlobalProvider from './contexts/GlobalContext';
 import MediaProvider from './contexts/MediaContext';
-import "./index.css";
 import { ToastProvider } from './contexts/ToastContext';
+import "./index.css";
 
 const Home = lazy(() => import('./pages/Home/Home'));
 const Movies = lazy(() => import('./pages/Movies/Movies'));
@@ -21,6 +21,7 @@ const MyProfile = lazy(() => import('./pages/MyProfile/MyProfile'));
 const Login = lazy(() => import('./pages/Login/Login'));
 const SignUp = lazy(() => import('./pages/Signup/Signup'));
 const PageNotFound = lazy(() => import('./pages/PageNotFound/PageNotFound'));
+const Error = lazy(() => import('./pages/Error/Error'));
 const Favorites = lazy(() => import('./pages/Favorites/Favorites'));
 const Media = lazy(() => import('./pages/Media/Media'));
 
@@ -117,7 +118,7 @@ function App() {
       ],
       errorElement: <>
         <Header/>
-        <PageNotFound />
+        <Error />
       </>
     },
     {
