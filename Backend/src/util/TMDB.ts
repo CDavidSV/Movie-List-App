@@ -220,7 +220,7 @@ const getCredits = async (id: string, type: string) => {
 };
 
 const getMediaImages = async (id: string, type: string, matureContent: boolean) => {
-    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/images?include_image_language=en&include_video=false`, matureContent);
+    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/images?include_image_language=en,null&include_video=false`, matureContent);
     if (!response) return null;
 
     response.backdrops = response.backdrops.map((backdrop: any) => {

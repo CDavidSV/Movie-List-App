@@ -21,6 +21,7 @@ export default function Home() {
         topRated: [],
         watchlist: []
     });
+    const [loading, setLoading] = useState<boolean>(false);
 
     const parseFilmData = (film: any): FilmCardProps[] => {
         return film.map((film: any) => {
@@ -113,8 +114,12 @@ export default function Home() {
             }
         });
 
+        if (!promises.length) return;
+        setLoading(true);
         Promise.all(promises).catch(() => {
             toast.open("An error ocurred while loading your home page", "error");
+        }).finally(() => {
+            setLoading(false);
         });
     }), []);
 
@@ -123,12 +128,13 @@ export default function Home() {
             <ScrollRestoration />
             <div className="content">
                 <div className="sliders-container">
-                    { homeState.carouselData.length ? <HomeCarousel items={homeState.carouselData}/> : 
+                    { homeState.carouselData.length ? <HomeCarousel items={homeState.carouselData}/> : loading ?
                     <>
                         <div className="skeleton-carousel flex justify-center items-center">
                             <LoaderCircle className="animate-spin" size={40} />
                         </div>
                     </>
+                    : <div className="skeleton-carousel flex justify-center items-center"></div>
                     }
                     <div style={{ top: "-125px", position: "relative", zIndex: 3 }}>
                         <FilmSlider title="Popular" filmArr={homeState.popularMovies}/>

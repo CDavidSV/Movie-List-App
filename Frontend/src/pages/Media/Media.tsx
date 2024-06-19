@@ -233,7 +233,7 @@ function Images({ type, id }: { type: string, id: string }) {
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="image" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent ref={(ref) => ref?.addEventListener('touchend', (e) => e.preventDefault())}>
                         <SelectItem value="backdrops">Backdrops</SelectItem>
                         <SelectItem value="posters">Posters</SelectItem>
                         <SelectItem value="logos">Logos</SelectItem>
@@ -607,20 +607,20 @@ export default function Media() {
             :
             <div className="film-backdrop-container h-[100vh]">
                 <div className="film-info-content">
-                    <div className="film-poster-container w-[270px] h-[410px] lg:h-[550px] lg:w-[490px]">
+                    <div className="film-poster-container min-w-[270px] min-h-[410px] lg:h-[550px] lg:min-w-[340px]">
                         <Skeleton className="w-full h-full rounded-2xl"></Skeleton>
                     </div>
                     <div className="film-overview-info">
-                        <Skeleton className="w-[90%] h-[40px] max-w-[400px]"></Skeleton>
+                        <Skeleton className="w-[90%] min-h-[40px] max-w-[400px]"></Skeleton>
                         
-                        <Skeleton className="mt-3 w-[80%] h-[20px] rounded-sm"></Skeleton>
-                        <Skeleton className="my-1 w-[40%] h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="mt-3 w-[80%] min-h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="my-1 w-[40%] min-h-[20px] rounded-sm"></Skeleton>
 
-                        <Skeleton className="w-[90%] h-[40px] mt-28 mb-2 max-w-[300px] lg:mt-20"></Skeleton>
-                        <Skeleton className="my-1 w-[80%] h-[20px] rounded-sm"></Skeleton>
-                        <Skeleton className="w-[75%] h-[20px] rounded-sm"></Skeleton>
-                        <Skeleton className="my-1 w-[78%] h-[20px] rounded-sm"></Skeleton>
-                        <Skeleton className="w-[72%] h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="w-[90%] min-h-[40px] mt-28 mb-2 max-w-[300px] lg:mt-20"></Skeleton>
+                        <Skeleton className="my-1 w-[80%] min-h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="w-[75%] min-h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="my-1 w-[78%] min-h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="w-[72%] min-h-[20px] rounded-sm"></Skeleton>
                     </div>
                 </div>
             </div>
