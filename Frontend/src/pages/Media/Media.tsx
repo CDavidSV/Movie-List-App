@@ -11,7 +11,6 @@ import Modal from "../../components/modal-component/modal";
 import { MediaContext } from "../../contexts/MediaContext";
 import { ToastContext } from "../../contexts/ToastContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import "./media.css";
 import {
     Select,
     SelectContent,
@@ -19,6 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import "./media.css";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -493,9 +493,6 @@ export default function Media() {
             if (type === 'movie') facts += ` • ${calculateMovieRuntime(mediaData.runtime)}`;
             setFacts(facts);
 
-            // Scroll to top of page
-            window.scrollTo(0, 0);
-
             saveToHistory(mediaData.id.toString(), type as string, loggedIn);
         });
     }, [navigate, id, type]);
@@ -609,7 +606,7 @@ export default function Media() {
             :
             <div className="film-backdrop-container h-[100vh]">
                 <div className="film-info-content">
-                    <div className="film-poster-container w-[270px] h-[400px] lg:h-[500px] lg:w-[410px]">
+                    <div className="film-poster-container w-[270px] h-[410px] lg:h-[500px] lg:w-[410px]">
                         <Skeleton className="w-full h-full rounded-2xl"></Skeleton>
                     </div>
                     <div className="film-overview-info">

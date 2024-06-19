@@ -11,9 +11,11 @@ const genres: { movies: Genre[], series: Genre[] } = { movies: [], series: [] };
 let clearGenresTimeout: NodeJS.Timeout | null = null;
 
 const makeTMDBRequest = async (url: string, matureContent: boolean = false) => {
+    const path = url.split("?")[0];
+    const params = url.split("?")[1];
     return await axios({
         method: 'get',
-        url: `https://api.themoviedb.org/3${url}&include_adult=${matureContent}`,
+        url: `https://api.themoviedb.org/3${path}?include_adult=${matureContent}${params ? `&${params}` : ""}`,
         headers: {
             "Authorization": "Bearer " + tmdb_token,
             "Content-Type": "application/json"
