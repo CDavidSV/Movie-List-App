@@ -607,7 +607,7 @@ export default function Media() {
             :
             <div className="film-backdrop-container h-[100vh]">
                 <div className="film-info-content">
-                    <div className="film-poster-container min-w-[270px] min-h-[410px] lg:h-[550px] lg:min-w-[340px]">
+                    <div className="film-poster-container min-w-[270px] min-h-[410px] max-h-[410px] md:h-[430px] md:min-w-[280px] lg:h-[560px] lg:min-w-[370px] lg:max-h-[560px]">
                         <Skeleton className="w-full h-full rounded-2xl"></Skeleton>
                     </div>
                     <div className="film-overview-info">
