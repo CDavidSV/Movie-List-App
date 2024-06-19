@@ -500,7 +500,7 @@ export default function Media() {
     return (
         <div className="content">
             <ScrollRestoration />
-            {mediaData && false ? 
+            {mediaData ? 
             <>
                 <div className="film-backdrop-container" style={{backgroundImage: `url(${mediaData.backdropPath})`}}>
                     <div className="film-info-content">
