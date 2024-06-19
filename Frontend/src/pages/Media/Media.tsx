@@ -500,7 +500,7 @@ export default function Media() {
     return (
         <div className="content">
             <ScrollRestoration />
-            {mediaData ? 
+            {mediaData && false ? 
             <>
                 <div className="film-backdrop-container" style={{backgroundImage: `url(${mediaData.backdropPath})`}}>
                     <div className="film-info-content">
@@ -612,15 +612,14 @@ export default function Media() {
                     <div className="film-overview-info">
                         <Skeleton className="w-[90%] h-[40px] max-w-[400px]"></Skeleton>
                         
-                        <Skeleton className="mt-3 w-[80%] h-[16px] rounded-sm"></Skeleton>
-                        <Skeleton className="my-1 w-[40%] h-[10px] rounded-sm"></Skeleton>
-                        <Skeleton className="w-[60%] h-[10px] rounded-sm"></Skeleton>
+                        <Skeleton className="mt-3 w-[80%] h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="my-1 w-[40%] h-[20px] rounded-sm"></Skeleton>
 
                         <Skeleton className="w-[90%] h-[40px] mt-28 mb-2 max-w-[300px] lg:mt-20"></Skeleton>
-                        <Skeleton className="my-1 w-[80%] h-[10px] rounded-sm"></Skeleton>
-                        <Skeleton className="w-[75%] h-[10px] rounded-sm"></Skeleton>
-                        <Skeleton className="my-1 w-[78%] h-[10px] rounded-sm"></Skeleton>
-                        <Skeleton className="w-[72%] h-[10px] rounded-sm"></Skeleton>
+                        <Skeleton className="my-1 w-[80%] h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="w-[75%] h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="my-1 w-[78%] h-[20px] rounded-sm"></Skeleton>
+                        <Skeleton className="w-[72%] h-[20px] rounded-sm"></Skeleton>
                     </div>
                 </div>
             </div>
