@@ -11,6 +11,7 @@ import Modal from "../../components/modal-component/modal";
 import { MediaContext } from "../../contexts/MediaContext";
 import { ToastContext } from "../../contexts/ToastContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CirclePlay } from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -293,7 +294,7 @@ function Videos({ type, id }: { type: string, id: string }) {
                 <div key={video.key} className="video-card">
                     <div className="video-thumbnail" onClick={() => handleSelectVideo(video.key, video.name)}>
                         <span className="play-btn material-icons">
-                            play_circle_outline
+                            <CirclePlay size={45} />
                         </span>
                         <img src={video.thumbnail} alt={video.name} loading="lazy" />
                     </div>
@@ -606,7 +607,7 @@ export default function Media() {
             :
             <div className="film-backdrop-container h-[100vh]">
                 <div className="film-info-content">
-                    <div className="film-poster-container w-[270px] h-[410px] lg:h-[500px] lg:w-[410px]">
+                    <div className="film-poster-container w-[270px] h-[410px] lg:h-[550px] lg:w-[490px]">
                         <Skeleton className="w-full h-full rounded-2xl"></Skeleton>
                     </div>
                     <div className="film-overview-info">
