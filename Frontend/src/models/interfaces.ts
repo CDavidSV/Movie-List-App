@@ -14,6 +14,7 @@ interface FilmCardProps {
     inWatchlist: boolean;
     inFavorites: boolean;
     searchResult: boolean;
+    onDelete?: (filmData: FilmCardData) => void;
 }
 
 interface FilmSliderProps {

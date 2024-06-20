@@ -4,6 +4,7 @@ import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";
 import Joi from "joi";
+import mongoose from "mongoose";
 
 const getHistory = async (req: Request, res: Response) => {
     const cursor = new Date(Number(req.query.cursor));
@@ -159,9 +160,12 @@ const addHistory = async (req: Request, res: Response) => {
 };
 
 const removeHistory = async (req: Request, res: Response) => {
-    const { id } = req.body;
+    const { id } = req.query;
 
-    if (!id) return sendResponse(res, { status: 400, message: "Id is required" });
+    // Chck if it is a valid id
+    if (!id || typeof id === 'string' && !mongoose.Types.ObjectId.isValid(id)) {
+        return sendResponse(res, { status: 400, message: "Invalid id" });
+    }
 
     historySchema.findByIdAndDelete(id).then(() => {
         sendResponse(res, { status: 200, message: "History item removed" });

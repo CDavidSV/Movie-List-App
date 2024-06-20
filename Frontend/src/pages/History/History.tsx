@@ -30,7 +30,7 @@ export default function History() {
     useInfiniteScroll(() => {
         setLoading(true);
         mml_api_protected.get(`/api/v1/history?cursor=${cursor}`).then(response => {
-            setHistory([...history, ...response.data.responseData.history]);
+            setHistory((prev) => ([...prev, ...response.data.responseData.history]));
             setCursor(response.data.responseData.cursor);
             setLoading(false);
         }).catch(() => {
@@ -87,6 +87,14 @@ export default function History() {
                                 inWatchlist={movie.watchlisted} 
                                 inFavorites={movie.favorited}
                                 searchResult={false}
+                                onDelete={() => {
+                                    mml_api_protected.delete(`/api/v1/history/remove?id=${movie.id}`).then(() => {
+                                        setHistory((prev) => prev.filter((_, i) => i !== index));
+                                        toast.open("Removed from history", "success");
+                                    }).catch(() => {
+                                        toast.open("Error removing from history", "error");
+                                    });
+                                }}
                             />
                         ))
                     }

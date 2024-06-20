@@ -4,9 +4,16 @@ import { shortenNumber, saveSearchResult } from '../../helpers/util.helpers';
 import FavoriteButton from '../favorite-button-component/favorite-button';
 import WatchlistButton from '../watchlist-button-component/watchlist-button';
 import React from 'react';
+import { Trash2 } from 'lucide-react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 import './filmCard.css';
 
-export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchResult, filmData }: FilmCardProps) {
+export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchResult, filmData, onDelete }: FilmCardProps) {
     const hoverContentRef = useRef<HTMLDivElement>(null);
 
     const activateHover = () => {         
@@ -73,6 +80,20 @@ export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchRe
                             isFavorite={inFavorites}
                             mediaId={filmData.id.toString()}
                             type={filmData.type}/>
+                        {onDelete &&
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <button onClick={() => onDelete(filmData)} className="delete-button ml-auto mr-2 text-muted-foreground hover:text-red-800 transition-all ease-in-out">
+                                            <Trash2 size={25} />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p className="m-0 text-sm">Remove from History</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        }
                     </div>
                 </div>
             </div>
