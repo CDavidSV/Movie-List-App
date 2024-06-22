@@ -12,8 +12,8 @@ import { X } from "lucide-react";
 function PrevSearchResultCard(props: { name: string, url: string, remove: React.MouseEventHandler }) {
     return (
         <div className="searched-media-card">
-            <Link to={props.url}>
-                <p>{props.name}</p>
+            <Link to={props.url} className="max-w-52">
+                <p className="truncate">{props.name}</p>
             </Link>
             <div className="remove-searched-card" onClick={props.remove}>
                 <X size={20} />
@@ -96,7 +96,7 @@ export default function Browse() {
                 {searchHistory.length > 0 &&
                 <div className="search-history-list">
                     <h3>Recently Searched</h3>
-                    <div className="search-history-list-container">
+                    <div className="flex flex-row items-center flex-nowrap gap-[10px] overflow-x-auto py-2 md:flex-wrap md:py-0">
                         {searchHistory.map((item, index) => (
                             <PrevSearchResultCard key={index} name={item.name} url={item.link} remove={() => handlePrevSearchRemove(index)}/>
                         ))}

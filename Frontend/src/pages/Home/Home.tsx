@@ -139,7 +139,7 @@ export default function Home() {
                     <div style={{ top: "-125px", position: "relative", zIndex: 3 }}>
                         <FilmSlider title="Popular" filmArr={homeState.popularMovies}/>
                         <FilmSlider title="Upcoming" filmArr={homeState.upcoming}/>
-                        {homeState.watchlist.length && <FilmSlider title="Your Watchlist" filmArr={homeState.upcoming}/>}
+                        {homeState.watchlist.length > 0 && <FilmSlider title="Your Watchlist" filmArr={homeState.upcoming}/>}
                         <FilmSlider title="Top Rated" filmArr={homeState.topRated}/>
                     </div>
                 </div>
