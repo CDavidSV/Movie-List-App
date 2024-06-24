@@ -1,6 +1,14 @@
 import { model, Schema } from "mongoose"
 
-const FavoritesSchema = new Schema({
+interface IFavorites {
+    user_id: string;
+    type: string;
+    media_id: string;
+    rank: string;
+    date_added: Date;
+}
+
+const FavoritesSchema = new Schema<IFavorites>({
     user_id: { type: String, required: true },
     type: { type: String, required: true },
     media_id: { type: String, required: true },
@@ -10,4 +18,4 @@ const FavoritesSchema = new Schema({
 
 FavoritesSchema.index({ user_id: 1, media_id: 1, type: 1 }, { unique: true });
 FavoritesSchema.index({ rank: "text" });
-export default model("Favorites", FavoritesSchema);
+export default model<IFavorites>("Favorites", FavoritesSchema);

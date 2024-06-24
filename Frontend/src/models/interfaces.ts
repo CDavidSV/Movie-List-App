@@ -79,7 +79,7 @@ interface WatchlistItemProps {
     title: string,
     progress: number,
     total_progress: number,
-    backgrop: string,
+    backdrop: string,
     poster: string,
     favorited: boolean,
     status: string,
@@ -87,6 +87,28 @@ interface WatchlistItemProps {
     id: string,
     type: string
     removeItemFromWatchlist: (id: string, type: string, index: number) => void
+}
+
+interface UserWatchlistItemProps {
+    title: string,
+    progress: number,
+    totalProgress: number,
+    backdrop: string,
+    poster: string,
+    status: string,
+    mediaId: number,
+    type: string
+}
+
+interface UserFavoriteItemProps {
+    mediaId: string;
+    title: string;
+    type: string;
+    dateAdded: string;
+    description: string;
+    poster: string;
+    backdrop: string;
+    index: number;
 }
 
 interface UploadImageProps {
@@ -124,4 +146,34 @@ interface HomeData {
     upcoming: FilmCardProps[];
     topRated: FilmCardProps[];
     watchlist: FilmCardProps[];
+}
+
+interface UserPageData {
+    id: string;
+    username: string;
+    profilePictureUrl: string;
+    profileBannerUrl: string;
+    publicWatchlist: boolean;
+    publicFavorites: boolean;
+}
+
+interface Tab {
+    id: string;
+    title: string;
+    tab: React.ReactNode;
+}
+
+interface TabHandlerProps {
+    tabs: Tab[];
+    defaultTab?: string;
+    tab?: string;
+    className?: React.HTMLAttributes<HTMLDivElement>["className"];
+    onTabChange?: (tab: Tab) => void;
+}
+
+interface UserSearchResult {
+    id: string;
+    username: string;
+    profilePictureUrl?: string;
+    joinedAt?: Date;
 }

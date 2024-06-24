@@ -1,6 +1,19 @@
 import { model, Schema } from "mongoose"
 
-const MediaSchema = new Schema({
+interface IMedia {
+    media_id: string;
+    title: string;
+    type: string;
+    description: string;
+    release_date: string;
+    runtime?: number;
+    episode_count?: number;
+    season_count?: number;
+    poster_url?: string;
+    backdrop_url?: string;
+}
+
+const MediaSchema = new Schema<IMedia>({
     media_id: { type: String, required: true },
     title: { type: String, required: true },
     type: { type: String, required: true },
@@ -14,4 +27,4 @@ const MediaSchema = new Schema({
 });
 
 MediaSchema.index({ media_id: 1, type: 1 });
-export default model("Media", MediaSchema);
+export default model<IMedia>("Media", MediaSchema);

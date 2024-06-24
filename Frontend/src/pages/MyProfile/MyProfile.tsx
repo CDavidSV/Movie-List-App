@@ -5,11 +5,11 @@ import InputField from '../../components/inputField-component/inputField';
 import Modal from '../../components/modal-component/modal';
 import UploadImage from '../../components/upload-image/upload-image';
 import { GlobalContext } from '../../contexts/GlobalContext';
-import "./myprofile.css";
 import { ToastContext } from '../../contexts/ToastContext';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Camera, Image } from 'lucide-react';
+import { Camera, Image, Share2, LogOut } from 'lucide-react';
+import "./myprofile.css";
 
 function ChangeUsername ({ username }: { username: string }) {
     const [oldUsername, setOldUsername] = useState<string>(username);
@@ -75,6 +75,7 @@ function ChangeUsername ({ username }: { username: string }) {
                     onInputChange={onInputChange}
                     defaultValue={username}
                     status={error ? "invalid" : ""}
+                    className="w-full"
                 />
                 <button className="button" disabled={saveDisabled}>Save</button>
             </form>
@@ -337,9 +338,10 @@ function GeneralTab() {
 
 export default function MyProfile() {
     const navigate = useNavigate();
-    const { userData, updateUserData, mml_api_protected } = useContext(GlobalContext);
+    const { userData, updateUserData, mml_api_protected, logOut } = useContext(GlobalContext);
     const [selectedTab, setSelectedTab] = useState<number>(0);
     const [modalsState, setModalsState] = useState<{ pfpModal: boolean, bannerModal: boolean }>({ pfpModal: false, bannerModal: false });
+    const [logoutConfirmModal, setLogoutConfirmModal] = useState<boolean>(false);
     const toast = useContext(ToastContext);
 
     useEffect(() => {
@@ -389,9 +391,20 @@ export default function MyProfile() {
     
     return (
         <div className="content">
-            <div className="profile-wallpaper">
+            <Modal onClose={() => setLogoutConfirmModal(false)} open={logoutConfirmModal}>
+                <h3 style={{textAlign: "center"}}>Are you sure you want to log out?</h3>
+                <div className="modal-buttons">
+                    <button className="button" onClick={() => setLogoutConfirmModal(false)}>No</button>
+                    <button className="button primary" onClick={logOut}>Yes</button>
+                </div>
+            </Modal>
+            <div className="profile-wallpaper select-none">
                 {userData && userData.profileBannerUrl && <img src={`${userData.profileBannerUrl}`} alt="profile_banner" />}
-                <div onClick={() => setModalsState({ ...modalsState, bannerModal: true })} className="upload_banner"><Image /></div>
+                <div onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/user/${userData && userData.username}`);
+                    toast.open("Profile link copied to clipboard.", "info");
+                }} className="profile-button bottom-2 md:bottom-5 right-20"><Share2 /></div>
+                <div onClick={() => setModalsState({ ...modalsState, bannerModal: true })} className="profile-button bottom-2 md:bottom-5 right-5"><Image /></div>
                 <Modal open={modalsState.bannerModal} onClose={() => setModalsState({ ...modalsState, bannerModal: false })}>
                     <UploadImage onCrop={onBannerChange} aspectRatio={16 / 9} height="35vh" maxImageSizeInMb={16}/>
                 </Modal>
@@ -415,6 +428,7 @@ export default function MyProfile() {
                         <ul className="profile-tabs-list">
                             <li id="0" onClick={changeTab} className={selectedTab === 0 ? "selected" : ""}>General</li>
                             <li id="1" onClick={changeTab} className={selectedTab === 1 ? "selected" : ""}>Change Password</li>
+                            <li onClick={() => setLogoutConfirmModal(true)} className="mt-3 flex"><LogOut className="mr-3" size={21}/> Log Out</li>
                         </ul>
                     </div>
                     <div className="profile-tab-content">

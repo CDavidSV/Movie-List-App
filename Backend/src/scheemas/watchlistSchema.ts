@@ -1,6 +1,17 @@
 import { model, Schema } from "mongoose"
 
-const WatchlistSchema = new Schema({
+interface IWatchlist {
+    user_id: string;
+    media_id: string;
+    type: string;
+    status: number;
+    progress: number;
+    rating: number;
+    added_date: Date;
+    updated_date: Date;
+}
+
+const WatchlistSchema = new Schema<IWatchlist>({
     user_id: { type: String, required: true },
     media_id: { type: String, required: true },
     type: { type: String, required: true },
@@ -13,4 +24,4 @@ const WatchlistSchema = new Schema({
 
 WatchlistSchema.index({ user_id: 1, media_id: 1, type: 1 }, { unique: true });
 WatchlistSchema.index({ updated_date: 1 });
-export default model("Watchlist", WatchlistSchema);
+export default model<IWatchlist>("Watchlist", WatchlistSchema);

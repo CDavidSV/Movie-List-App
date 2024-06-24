@@ -52,26 +52,24 @@
     cursor: pointer;
 }
 
-.upload_banner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background: rgb(48, 48, 48);
-    padding: 8px;
-    border-radius: 100%;
-    aspect-ratio: 1;
-    cursor: pointer;
-}
-
 .profile-picture img {
     aspect-ratio: 1;
     height: 100%;
     width: 100%;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.profile-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    background: rgb(48, 48, 48);
+    padding: 8px;
+    border-radius: 100%;
+    aspect-ratio: 1;
+    cursor: pointer;
 }
 
 .user-info {
@@ -178,19 +176,6 @@
     .profile-picture {
         max-width: 100px;
         min-width: 100px;
-    }
-
-    .upload_pfp span {
-        font-size: 0.8rem;
-    }
-
-    .upload_banner {
-        bottom: 10px;
-        right: 10px;
-    }
-
-    .upload_banner span {
-        font-size: 0.8rem;
     }
 
     .user-info {

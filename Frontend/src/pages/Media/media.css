@@ -154,25 +154,6 @@
     align-items: stretch;
 }
 
-.media-page-tabs {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-direction: row;
-    gap: 10px;
-}
-
-.media-tab {
-    width: 100%;
-    cursor: pointer;
-}
-
-.media-tab.selected {
-    font-weight: 500;
-    color: var(--primary-color);
-}
-
 .cast-tab-container {
     display: flex;
     flex-direction: row;

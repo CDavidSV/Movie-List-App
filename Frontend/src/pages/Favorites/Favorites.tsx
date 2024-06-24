@@ -64,12 +64,12 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
 
 export default function Favorites() {
     const [favorites, setFavorites] = useState<any[]>([]);
-    const [lastId, setLastId] = useState<number | null>(null);
+    const [lastRank, setlastRank] = useState<number | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const { mml_api_protected } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
 
-    useInfiniteScroll(() => getNextPage(), loading, !lastId);
+    useInfiniteScroll(() => getNextPage(), loading, !lastRank);
 
     useEffect(() => {
         document.title = "Favorites | My Movie List";
@@ -78,24 +78,24 @@ export default function Favorites() {
             setFavorites(res.data.responseData.favorites);
             setLoading(false);
 
-            if (res.data.responseData.lastId) setLastId(res.data.responseData.lastId);
+            if (res.data.responseData.lastRank) setlastRank(res.data.responseData.lastRank);
         }).catch(() => {
             toast.open("Error loading favorites", "error");
         });
     }, []);
 
     const getNextPage = () => {
-        if (!lastId) return;
+        if (!lastRank) return;
         setLoading(true);
 
-        mml_api_protected.get(`api/v1/favorites?last_id=${lastId}`).then((res) => {
+        mml_api_protected.get(`api/v1/favorites?last_rank=${lastRank}`).then((res) => {
             setFavorites([...favorites, ...res.data.responseData.favorites]);
             setLoading(false);
 
-            if (res.data.responseData.lastId) {
-                setLastId(res.data.responseData.lastId);
+            if (res.data.responseData.lastRank) {
+                setlastRank(res.data.responseData.lastRank);
             } else {
-                setLastId(null);
+                setlastRank(null);
             }
         }).catch(() => {
             toast.open("Error loading favorites", "error");

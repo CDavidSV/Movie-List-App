@@ -6,12 +6,7 @@ import config from "../../config/config";
 import Series from "../../Models/Series";
 import Movie from "../../Models/Movie";
 import Joi from "joi";
-
-const watchlistStatus = new Map([
-    [0, "Watching"],
-    [1, "Plan to Watch"],
-    [2, "Finished"]
-]);
+import { watchlistStatus } from "../../util/helpers";
 
 const getWatchlist = async (req: express.Request, res: express.Response) => {
     const status = req.query.status ? parseInt(req.query.status as string) : 3;

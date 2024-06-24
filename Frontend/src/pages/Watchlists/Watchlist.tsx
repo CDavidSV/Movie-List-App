@@ -77,9 +77,9 @@ function WatchlistItem(props: WatchlistItemProps) {
                 </div>
             </Modal>
             <Link to={`/media/${props.type}/${props.id}`}>
-                <picture className="">
-                    <source media="(max-width: 768px)" srcSet={props.poster} />
-                    <img src={props.backgrop} alt={props.title} loading="lazy" />
+                <picture>
+                    <source media="(max-width: 767px)" srcSet={props.poster} />
+                    <img src={props.backdrop} alt={props.title} loading="lazy" />
                 </picture>
                 <div className="info">
                     <h3>{props.title}</h3>
@@ -153,7 +153,10 @@ export default function Watchlist() {
             setWatchlist(response.data.responseData.watchlist);
 
             if (response.data.responseData.cursor) setCursor(response.data.responseData.cursor);
-        }).catch(() => {
+        }).catch((err) => {
+            if (err.code === "ERR_CANCELED") return;
+
+            console.error(err);
             toast.open("Error loading watchlist", "error");
             setLoading(false);
         });
@@ -216,7 +219,7 @@ export default function Watchlist() {
                                 title={media.title}
                                 progress={media.progress} 
                                 total_progress={media.totalProgress} 
-                                backgrop={media.backdropUrl}
+                                backdrop={media.backdropUrl}
                                 poster={media.posterUrl}
                                 favorited={media.favorited}
                                 status={media.status}

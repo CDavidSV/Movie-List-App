@@ -7,7 +7,7 @@ import Logo from '../../assets/logos/mml_logo.svg?react';
 import LogoWithName from '../../assets/logos/mml_logo_with_name.svg?react';
 import useRouteChange from '../../hooks/useRouteChange';
 import { GlobalContext } from '../../contexts/GlobalContext';
-import { Search, Bookmark, CircleUserRound, Heart, LogOut, History, LogIn, UserRoundPlus, Menu } from 'lucide-react';
+import { Search, Bookmark, CircleUserRound, Heart, LogOut, History, LogIn, UserRoundPlus, Menu, Users2 } from 'lucide-react';
 import './navbar.css';
 
 const genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "History", "Horror", "Music", "Mystery", "Romance", "Science Fiction", "Thriller", "War", "Western"];
@@ -125,6 +125,10 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/history">
                         <History />
                         History
+                    </NavLink>
+                    <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/search-users">
+                        <Users2 />
+                        Search Users
                     </NavLink>
                 </div>
                 <div className="profile-dropdown-section">

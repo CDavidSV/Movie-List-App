@@ -1,6 +1,16 @@
 import { model, Schema } from "mongoose"
 
-const UserSchema = new Schema({
+interface IUserSession {
+    session_id: string;
+    user_id: string;
+    created_at: Date;
+    expires_at: Date;
+    last_accessed: Date;
+    refresh_token: string;
+
+}
+
+const UserSchema = new Schema<IUserSession>({
     session_id: { type: String, required: true, unique: true },
     user_id: { type: String, required: true },
     created_at: { type: Date, required: true, default: Date.now },
@@ -10,4 +20,4 @@ const UserSchema = new Schema({
 });
 
 UserSchema.index({ expires_at: 1 }, { expireAfterSeconds: 0 });
-export default model("UserSession", UserSchema);
+export default model<IUserSession>("UserSession", UserSchema);

@@ -7,10 +7,10 @@ import config from "../../config/config";
 import Joi from "joi";
 
 const getFavorites = async (req: express.Request, res: express.Response) => {
-    const last_id = req.query.last_id;
+    const last_rank = req.query.last_rank;
 
     let mongoQuery: any = { user_id: req.user?.id };
-    if (last_id) mongoQuery._id = { $lt: last_id };
+    if (last_rank) mongoQuery._rank = { $lt: last_rank };
 
     favoritesSchema.aggregate([
         { $match: mongoQuery },
@@ -95,8 +95,8 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
             }
         });
 
-        const last_id = favorites.length > 0 ? favorites[favorites.length - 1].favorite_id : null;
-        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { lastId: last_id, favorites } });
+        const last_id = response.length >= 100 ? response[response.length - 1].rank : null;
+        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { lastRank: last_id, favorites } });
     }).catch((err) => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching favorites" });

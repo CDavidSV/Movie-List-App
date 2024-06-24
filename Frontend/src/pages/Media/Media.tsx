@@ -20,6 +20,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import "./media.css";
+import TabHandler from "@/components/tab-handler/tab-handler";
 
 function SidebarSection(props: { title: string, children: React.ReactNode }) {
     return (
@@ -381,39 +382,6 @@ function Crew({ type, id }: { type: string, id: string }) {
     );
 }
 
-function TabHandler({ tabs }: { tabs: { id: string, title: string, tab: React.ReactNode }[] } ) {
-    const [selectedTab, setSelectedTab] = useState<string>(tabs[0].id);
-    const [renderedTabs, setRenderedTabs] = useState({ [tabs[0].id]: true });
-
-    const changeTab = (tabId: string) => {
-        // Change the selected tab
-        setSelectedTab(tabId);
-        setRenderedTabs({ ...renderedTabs, [tabId]: true });
-    }
-
-    return (
-        <>
-            <div className="media-page-tabs">
-                {tabs.map((tab) => (
-                    <div 
-                    key={tab.id} 
-                    className={`media-tab${selectedTab === tab.id ? " selected" : "" }`}
-                    onClick={() => changeTab(tab.id)}>
-                        <p>{tab.title}</p>
-                    </div>
-                ))}
-            </div>
-            {tabs.map((tab) => (
-                <div
-                key={tab.id} 
-                style={{display: selectedTab === tab.id ? "block" : "none", marginTop: "20px" }}>
-                    {renderedTabs[tab.id] && tab.tab}
-                </div>
-            ))}
-        </>
-    );
-}
-
 export default function Media() {
     let { type, id } = useParams<{ type: string, id: string }>();
     const [mediaData, setMediaData] = useState<any>(null);
@@ -427,7 +395,7 @@ export default function Media() {
     if (!type || !id || (type !== 'movie' && type !== 'series')) return <PageNotFound />;
 
     // Setup tabs
-    const tabs = [
+    const tabs: Tab[] = [
         {
             id: "1",
             title: "Overview",

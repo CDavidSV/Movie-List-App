@@ -1,10 +1,10 @@
-import React, { Suspense, lazy } from 'react'
+import React, { Suspense, lazy, useContext } from 'react'
 import ReactDOM from 'react-dom/client'
-import { matchPath, createBrowserRouter, RouterProvider, useLocation, Outlet } from 'react-router-dom'
+import { matchPath, createBrowserRouter, RouterProvider, useLocation, Outlet, Navigate } from 'react-router-dom'
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
-import GlobalProvider from './contexts/GlobalContext';
+import GlobalProvider, { GlobalContext } from './contexts/GlobalContext';
 import MediaProvider from './contexts/MediaContext';
 import { ToastProvider } from './contexts/ToastContext';
 import "./index.css";
@@ -24,6 +24,17 @@ const PageNotFound = lazy(() => import('./pages/PageNotFound/PageNotFound'));
 const Error = lazy(() => import('./pages/Error/Error'));
 const Favorites = lazy(() => import('./pages/Favorites/Favorites'));
 const Media = lazy(() => import('./pages/Media/Media'));
+const UserPage = lazy(() => import('./pages/UserPage/UserPage'));
+const SearchUsers = lazy(() => import('./pages/SearchUsers/SearchUsers'));
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { loggedIn } = useContext(GlobalContext);
+
+  if (!loggedIn) {
+    return <Navigate to="/login" />;
+  }
+  return <>{children}</>;
+}
 
 function PageWrapper() {
   const location = useLocation();
@@ -38,7 +49,9 @@ function PageWrapper() {
     "/history", 
     "/profile", 
     "/favorites",
-    "/media/:type/:id"
+    "/media/:type/:id",
+    "/user/:username",
+    "/search-users"
   ];
 
   const shouldShowNavbar = showNavIn.some((path: string) => {
@@ -115,6 +128,14 @@ function App() {
           path: '/media/:type/:id',
           element: <Media />,
         },
+        {
+          path: '/user/:username',
+          element:<ProtectedRoute><UserPage /></ProtectedRoute>,
+        },
+        {
+          path: '/search-users',
+          element: <ProtectedRoute><SearchUsers /></ProtectedRoute>,
+        }
       ],
       errorElement: <>
         <Header/>

@@ -13,20 +13,22 @@ import config from "../../config/config";
 import containerClient from "../../config/azure-blob-storage";
 import { Readable } from "stream";
 import { invalidateAllUserSessions } from "../../util/sessionHandler";
+import mongoose from "mongoose";
+import { watchlistStatus } from "../../util/helpers";
 
-const getuserInfo = async (req: Request, res: Response) => {
-    const userId = req.params.id;
+const getUserInfo = async (req: Request, res: Response) => {
+    const username = req.params.username;
 
-    if (!userId) return sendResponse(res, { status: 400, message: "Invalid user id" });
+    if (!username) return sendResponse(res, { status: 400, message: "Username is required" });
 
-    userSchema.findOne({ _id: userId }, {
+    userSchema.findOne({ username: username }, {
         id: { $toString: "$_id" },
         username: 1,
-        email: 1,
-        verified: 1,
         joined_at: 1,
         profile_picture_url: 1,
         profile_banner_url: 1,
+        public_favorites: 1,
+        public_watchlist: 1,
         _id: 0
     }).then(user => {
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
@@ -41,6 +43,188 @@ const getuserInfo = async (req: Request, res: Response) => {
     }).catch(err => {
         console.error(err);
         sendResponse(res, { status: 500, message: "Error fetching user info" });
+    });
+};
+
+const getUserWatchlist = async (req: Request, res: Response) => {
+    const userId = req.params.id;
+    const cursor = req.query.cursor;
+
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return sendResponse(res, { status: 400, message: "Invalid user id" });
+
+    let sanitizedCursor: number[] = [];
+    if (cursor && typeof cursor === 'string') {
+        cursor.split('.').forEach((item) => {
+            if (isNaN(parseInt(item))) return sendResponse(res, { status: 400, message: "Invalid cursor" });
+            sanitizedCursor.push(parseInt(item));
+        });
+    }
+
+    const match: any = { user_id: userId };
+    if (sanitizedCursor.length) {
+        match.$and = [
+            { updated_date: { $lt: new Date(sanitizedCursor[1]) } },
+            { status: { $gte: sanitizedCursor[0] } }
+        ];
+    }
+
+    Promise.all([
+        userSchema.findById(userId, { public_watchlist: 1, _id: 0 }),
+        watchlistSchema.aggregate([
+            { $match: match },
+            { $sort: { status: 1, updated_date: -1 } },
+            { $limit: 100 },
+            {
+                $lookup: {
+                    from: "media",
+                    let: { media_id: "$media_id", type: "$type" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$media_id', '$$media_id'] },
+                                        { $eq: ['$type', '$$type'] }
+                                    ]
+                                }
+                            }
+                        },
+                        { $limit: 1 },
+                        { $project: { _id: 0, title: 1, description: 1, poster_url: 1, backdrop_url: 1, episode_count: 1 } }
+                    ],
+                    as: "media"
+                }
+            },
+            {
+                $project: {
+                    media_id: 1,
+                    media: 1,
+                    type: 1,
+                    status: 1,
+                    progress: 1,
+                    updated_date: 1,
+                    added_date: 1,
+                    _id: 0
+                }
+            }
+        ])
+    ]).then(([user, watchlist]) => {
+        if (!user) return sendResponse(res, { status: 404, message: "User not found" });
+
+        if (!user.public_watchlist) sendResponse(res, { status: 403, message: "User's watchlist is private" });
+        const responseWatchlist = watchlist.map((item) => {
+            if (item.media.length < 1) return {
+                mediaId: item.media_id,
+                dateAdded: item.date_added,
+                title: "Untitled",
+                description: "No description available",
+                posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                type: item.type,
+                status: watchlistStatus.get(item.status),
+                progress: item.progress,
+                totalProgress: 0
+            };
+            return {
+                mediaId: item.media_id,
+                dateAdded: item.date_added,
+                title: item.media[0].title,
+                description: item.media[0].description,
+                posterUrl: item.media[0].poster_url ? `${config.tmdbImageLarge}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: item.media[0].backdrop_url ? `${config.tmdbImageXLarge}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                type: item.type,
+                status: watchlistStatus.get(item.status),
+                progress: item.progress,
+                totalProgress: item.type === 'movie' ? 1 : item.media[0].episode_count
+            }
+        });
+
+        const cursor = watchlist.length < 100 ? null : `${watchlist[watchlist.length - 1].status}.${new Date(watchlist[watchlist.length - 1].updated_date).getTime()}`;
+
+        sendResponse(res, { status: 200, message: "Watchlist fetched successfully", responsePayload: { cursor, responseWatchlist } });
+    }).catch(err => {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching watchlist" });
+    });
+};
+
+const getUserFavorites = async (req: Request, res: Response) => {
+    const userId = req.params.id;
+    const last_rank = req.query.last_rank;
+
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return sendResponse(res, { status: 400, message: "Invalid user id" });
+
+    Promise.all([
+        userSchema.findById(userId, { public_favorites: 1, _id: 0 }),
+        favoritesSchema.aggregate([
+            {
+                $match: !last_rank || typeof last_rank !== 'string' ?  { user_id: userId } : { user_id: userId, _id: { $lt: last_rank } }
+            },
+            { $sort: { rank: 1 } },
+            { $limit: 100 },
+            {
+                $lookup: {
+                    from: "media",
+                    let: { media_id: "$media_id", type: "$type" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ['$media_id', '$$media_id'] },
+                                        { $eq: ['$type', '$$type'] }
+                                    ]
+                                }
+                            }
+                        },
+                        { $limit: 1 },
+                        {
+                            $project: { _id: 0, title: 1, description: 1, poster_url: 1, backdrop_url: 1 }
+                        },
+                    ],
+                    as: "media"
+                }
+            },
+            {
+                $project: {
+                    media: 1,
+                    media_id: 1,
+                    type: 1,
+                    date_added: 1
+                }
+            }
+        ])
+    ]).then(([user, favorites]) => {
+        if (!user) return sendResponse(res, { status: 404, message: "User not found" });
+
+        if (!user.public_favorites) sendResponse(res, { status: 403, message: "User's favorites are private" });
+
+        const responseFavorites = favorites.map((favorite) => {
+            if (favorite.media.length < 1) return {
+                mediaId: favorite.media_id,
+                type: favorite.type,
+                dateAdded: favorite.date_added,
+                title: "Untitled",
+                description: "No description available",
+                posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop"
+            };
+            return {
+                mediaId: favorite.media_id,
+                type: favorite.type,
+                dateAdded: favorite.date_added,
+                title: favorite.media[0].title,
+                description: favorite.media[0].description,
+                posterUrl: favorite.media[0].poster_url ? `${config.tmdbImageLarge}${favorite.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
+                backdropUrl: favorite.media[0].backdrop_url ? `${config.tmdbImageLarge}${favorite.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop"
+            }
+        });
+
+        const lastRank = favorites.length >= 100 ? favorites[favorites.length - 1].rank : null;
+        sendResponse(res, { status: 200, message: "Favorites fetched", responsePayload: { lastRank, responseFavorites } });
+    }).catch(err => {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error fetching favorites" });
     });
 };
 
@@ -303,4 +487,49 @@ const deleteAccount = async (req: Request, res: Response) => {
     }
 };
 
-export { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getuserInfo, uploadBannerPicture, updateUser };
+const searchUserByName = async (req: Request, res: Response) => {
+    const { username } = req.query;
+
+    if (typeof username !== 'string' || username.length > 20) return sendResponse(res, { status: 400, message: "Invalid username" });
+    userSchema.aggregate([
+        {
+            $search: {
+                index: "username",
+                text: {
+                    query: `/${username}/`,
+                    path: "username",
+                    fuzzy: {}
+                }   
+            }
+        },
+        {
+            $project: { 
+                username: 1, 
+                profile_picture_url: 1,
+                joined_at: 1,
+                id: { $toString: '$_id' }, 
+                _id: 0 
+            }
+        }
+    ]).then((response) => {
+        sendResponse(res, { status: 200, message: "Users fetched successfully", responsePayload: response });
+    }).catch((err) => {
+        console.error(err);
+        sendResponse(res, { status: 500, message: "Error searching for users" });
+    });
+}
+
+export { 
+    hasMedia, 
+    getStatusInPersonalLists, 
+    getMeUserInfo, 
+    uploadProfilePicture, 
+    changeUsername, 
+    deleteAccount, 
+    getUserInfo, 
+    uploadBannerPicture, 
+    updateUser,
+    getUserWatchlist,
+    getUserFavorites,
+    searchUserByName
+};

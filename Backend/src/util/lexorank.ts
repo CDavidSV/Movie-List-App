@@ -1,5 +1,3 @@
-const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
-
 const calculateAverage = (prev: number, next: number): number => {
     return Math.ceil((prev + next) / 2);
 };
@@ -15,8 +13,8 @@ const calculateLexoRank = (prev: string = '0', next: string = 'z'): string => {
     // If we have a subrank we calculate the average between the previous and next subrank
     let hasSubrank = false;
     if (prevArray[1].length > 0 || nextArray[1].length > 0) {
-        prev = prevArray[1];
-        next = nextArray[1];
+        prev = prevArray[1] === "" ? "0" : prevArray[1];
+        next = nextArray[1] === "" ? "z" : nextArray[1];
         hasSubrank = true;
     } else {
         prev = prevArray[0];
@@ -62,6 +60,6 @@ const getPreviousLexoRank = (next?: string) => {
     const nextRank = parseInt(next.slice(0, 6), 36);
 
     return (nextRank - 8).toString(36) + ':';
-}
+};
 
 export { getNextLexoRank, getPreviousLexoRank, calculateLexoRank };

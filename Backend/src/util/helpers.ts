@@ -21,3 +21,9 @@ export const addSpacing = (text: string, leftSpaces: number, rightSpaces: number
 
     return final;
 };
+
+export const watchlistStatus = new Map([
+    [0, "Watching"],
+    [1, "Plan to Watch"],
+    [2, "Finished"]
+]);

@@ -1,6 +1,13 @@
 import { Schema, model } from "mongoose";
 
-const historySchema = new Schema({
+interface IHistory {
+    user_id: string;
+    type: string;
+    media_id: string;
+    date_updated: Date;
+}
+
+const historySchema = new Schema<IHistory>({
     user_id: { type: String, required: true },
     type: { type: String, required: true },
     media_id: { type: String, required: true },
@@ -8,4 +15,4 @@ const historySchema = new Schema({
 });
 
 historySchema.index({ user_id: 1, date_updated: 1 });
-export default model("History", historySchema);
+export default model<IHistory>("History", historySchema);

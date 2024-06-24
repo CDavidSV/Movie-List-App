@@ -42,6 +42,7 @@ export default function Footer() {
                             {/* <FooterLink text="My Lists" link="/my-lists"/> */}
                             <FooterLink text="Favorites" link="/favorites"/>
                             <FooterLink text="History" link="/history"/>
+                            <FooterLink text="Users" link="/search-users"/>
                         </>:<>
                             <FooterLink text="Login" link="/login"/>
                             <FooterLink text="Sign Up" link="/signup"/>

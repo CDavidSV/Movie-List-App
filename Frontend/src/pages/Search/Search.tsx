@@ -90,6 +90,7 @@ export default function Browse() {
                     onInputChange={(value: string) => querySearchCooldown(value)}
                     clearButton={true}
                     defaultValue={defaultValue}
+                    className="w-full"
                 />
             </div>
             <div style={{paddingTop: "130px"}} className="content-wrapper">

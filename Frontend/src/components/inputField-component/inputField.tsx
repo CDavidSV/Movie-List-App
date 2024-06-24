@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { X, Eye, EyeOff } from "lucide-react"; 
 import React from "react";
 import "./inputField.css";
+import { cn } from "@/lib/utils";
 
 export default function InputField(
-    { type, id, required, label, onInputChange, status, defaultValue, clearButton, autofocus, autocomplete, value }: 
-    { type: string, id: string, required: boolean, label: string, onInputChange: (value: string) => void , status?: string, defaultValue?: string, clearButton?: boolean, autofocus?: boolean, autocomplete?: string, value?: string }) {
+    { type, id, required, label, onInputChange, status, defaultValue, clearButton, autofocus, autocomplete, value, className }: 
+    { type: string, id: string, required: boolean, label: string, onInputChange?: (value: string) => void , status?: string, defaultValue?: string, clearButton?: boolean, autofocus?: boolean, autocomplete?: string, value?: string, className?: React.HTMLAttributes<HTMLDivElement>["className"] }) {
     const [showPassword, setShowPassword] = useState(false)
     const inputRef = React.createRef<HTMLInputElement>();
     
@@ -22,7 +23,7 @@ export default function InputField(
             event.target.classList.remove("has-content");
         }
 
-        onInputChange(event.target.value);
+        if (onInputChange) onInputChange(event.target.value);
     }
 
     const clearinput = () => {
@@ -38,7 +39,7 @@ export default function InputField(
     }, []);
 
     return (
-        <div className={`input-box ${status ? status : ""}`}>
+        <div className={cn(`input-box ${status ? status : ""}`, className)}>
             {type === "password" && 
                 <span onClick={togglePasswordView}>
                     { showPassword ? <Eye /> : <EyeOff /> }
