@@ -5,7 +5,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import defaultPfp from '../../assets/images/profile-default.png';
 import { getRelativeTime } from "@/lib/utils";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, ScrollRestoration, useSearchParams } from "react-router-dom";
 import { LoaderCircle } from "lucide-react";
 
 function UserCard({ username, profilePictureUrl, joinedAt }: UserSearchResult) {
@@ -78,6 +78,7 @@ export default function SearchUsers() {
 
     return (
         <div className="content">
+            <ScrollRestoration />
             <div className="content-wrapper">
                 <h1>Search for other users</h1>
                 <p className="text-muted-foreground m-0 h">

@@ -1,7 +1,7 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { GlobalContext } from "@/contexts/GlobalContext";
 import { useContext, useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, ScrollRestoration, useParams, useSearchParams } from "react-router-dom";
 import defaultPfp from '../../assets/images/profile-default.png';
 import TabHandler from "@/components/tab-handler/tab-handler";
 import { ToastContext } from "@/contexts/ToastContext";
@@ -49,7 +49,7 @@ function FavoriteItem({ index, mediaId, title, type, poster, backdrop }: UserFav
     return (
         <div className="mb-3">
             <Link className="flex items-center gap-5 justify-start" to={`/media/${type}/${mediaId}`}>
-                <h1 className="text-5xl text-center w-[82px] max-w-[82px]">{index}</h1>
+                <h1 className="text-5xl text-center w-[82px] max-w-[82px] flex-shrink-0">{index}</h1>
                 <picture className="ml-1">
                     <source media="(max-width: 767px)" srcSet={poster} />
                     <img className="w-20 max-w-20 rounded-lg md:w-52 md:max-w-52" src={backdrop} alt={title} loading="lazy" />
@@ -120,8 +120,6 @@ function UserWatchlist({ userId }: { userId: string }) {
     useEffect(() => {
         setLoading(true);
         mml_api_protected.get(`/api/v1/user/${userId}/watchlist`).then((response) => {
-            console.log(response.data);
-
             setWatchlist(response.data.responseData.responseWatchlist.map((w: any) => ({
                 title: w.title,
                 progress: w.progress,
@@ -223,6 +221,14 @@ export default function UserPage() {
 
     return (
         <div className="content">
+            <ScrollRestoration getKey={(location) => {
+                const excludedPath = "/user";
+                return location.pathname.startsWith(excludedPath)
+                ?
+                    location.pathname
+                :
+                    location.key;
+            }}/>
             <div className="h-72 md:h-96 w-full bg-no-repeat bg-cover bg-center bg-secondary" style={{ backgroundImage: `url('${userInfo?.profileBannerUrl}')` }}>
             </div>
             <div className="content-wrapper">

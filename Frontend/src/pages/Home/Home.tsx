@@ -125,7 +125,7 @@ export default function Home() {
 
     return (
         <PersonalListsProvider>
-            <ScrollRestoration />
+            <ScrollRestoration getKey={(location) => location.pathname}/>
             <div className="content">
                 <div className="sliders-container">
                     { homeState.carouselData.length ? <HomeCarousel items={homeState.carouselData}/> : loading ?
