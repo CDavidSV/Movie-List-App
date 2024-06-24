@@ -125,7 +125,7 @@ export default function Home() {
 
     return (
         <PersonalListsProvider>
-            <ScrollRestoration getKey={(location) => location.pathname}/>
+            <ScrollRestoration />
             <div className="content">
                 <div className="sliders-container">
                     { homeState.carouselData.length ? <HomeCarousel items={homeState.carouselData}/> : loading ?
@@ -139,7 +139,7 @@ export default function Home() {
                     <div style={{ top: "-125px", position: "relative", zIndex: 3 }}>
                         <FilmSlider title="Popular" filmArr={homeState.popularMovies}/>
                         <FilmSlider title="Upcoming" filmArr={homeState.upcoming}/>
-                        {homeState.watchlist.length > 0 && <FilmSlider title="Your Watchlist" filmArr={homeState.upcoming}/>}
+                        {homeState.watchlist.length > 0 && <FilmSlider title="Your Watchlist" filmArr={homeState.watchlist}/>}
                         <FilmSlider title="Top Rated" filmArr={homeState.topRated}/>
                     </div>
                 </div>
