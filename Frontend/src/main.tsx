@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useContext, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import { matchPath, createBrowserRouter, RouterProvider, useLocation, Outlet, Navigate, useNavigate } from 'react-router-dom'
+import { matchPath, createBrowserRouter, RouterProvider, useLocation, Outlet, useNavigate } from 'react-router-dom'
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
