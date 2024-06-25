@@ -1,6 +1,6 @@
-import React, { Suspense, lazy, useContext } from 'react'
+import React, { Suspense, lazy, useContext, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import { matchPath, createBrowserRouter, RouterProvider, useLocation, Outlet, Navigate } from 'react-router-dom'
+import { matchPath, createBrowserRouter, RouterProvider, useLocation, Outlet, Navigate, useNavigate } from 'react-router-dom'
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
@@ -28,11 +28,15 @@ const UserPage = lazy(() => import('./pages/UserPage/UserPage'));
 const SearchUsers = lazy(() => import('./pages/SearchUsers/SearchUsers'));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { loggedIn } = useContext(GlobalContext);
+  const { userData } = useContext(GlobalContext);
+  const navigate = useNavigate();
 
-  if (!loggedIn) {
-    return <Navigate to="/login" />;
-  }
+  useEffect(() => {
+    if (!userData) {
+      return navigate('/login');
+    }
+  }, [userData]);
+
   return <>{children}</>;
 }
 
