@@ -61,8 +61,6 @@ services:
     build: ./Frontend
     ports:
       - "80:80"
-    environment:
-      VITE_API_URL_PROD: http://localhost:8080 # Change this to your backend URL if you are hosting it on a different server
 ```
 
 You need to connect to your database and provide the API key and access token for the [TMDP API](https://developer.themoviedb.org/docs/getting-started)
@@ -74,6 +72,9 @@ You need to connect to your database and provide the API key and access token fo
 - **TMDB_ACCESS_TOKEN**: API access token for TMDB API.
 - **ACCESS_TOKEN_KEY**: Cryptographically secure random string for generating access tokens (For user sessions).
 - **REFRESH_TOKEN_KEY**: Cryptographically secure random string for generating refresh tokens.
+
+For the frontend, you only need one env variable corresponding to the backend API base URL:
+- **VITE_API_URL**: This has to bee inside a .env.development or .env.production file depending on the environment (e.g. VITE_API_URL="http://localhost:8080")
 
 ## Run
 
