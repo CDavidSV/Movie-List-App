@@ -15,6 +15,7 @@ interface Config {
     tmdbImageXXLarge?: string,
     tmdbImageOriginal?: string,
     bucketName?: string
+    cdnBaseURL?: string
 }
 
 // Local config options.
@@ -35,6 +36,7 @@ const config: Config = {
     tmdbImageXLarge: 'https://image.tmdb.org/t/p/w780',
     tmdbImageXXLarge: 'https://image.tmdb.org/t/p/w1280',
     tmdbImageOriginal: 'https://image.tmdb.org/t/p/original',
+    cdnBaseURL: process.env.CDN_BASE_URL as string
 }
 
 export default config;

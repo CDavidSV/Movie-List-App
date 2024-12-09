@@ -346,6 +346,7 @@ const uploadProfilePicture = async (req: Request, res: Response) => {
     if (!req.file) return sendResponse(res, { status: 400, message: "Invalid request. No image provided" });
     const buffer = req.file.buffer;
 
+    let imgUrl: string;
     try {
         // The image needs to have an aspect ratio of 1:1
         const imgMetadata = await sharp(buffer).metadata();
@@ -364,22 +365,24 @@ const uploadProfilePicture = async (req: Request, res: Response) => {
 
         const command = new PutObjectCommand(uploadParams);
 
+        imgUrl = `https://${config.cdnBaseURL}${filename}`;
         await Promise.all([
             s3.send(command),
-            userSchema.updateOne({ _id: req.user!.id }, { profile_picture_url: filename }).exec()
+            userSchema.updateOne({ _id: req.user!.id }, { profile_picture_url: imgUrl }).exec()
         ]);
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error uploading profile picture" });
     }
 
-    sendResponse(res, { status: 200, message: "Profile picture uploaded successfully", responsePayload: { imageUrl: req.file.path } });
+    sendResponse(res, { status: 200, message: "Profile picture uploaded successfully", responsePayload: { imageUrl: imgUrl } });
 };
 
 const uploadBannerPicture = async (req: Request, res: Response) => {
     if (!req.file) return sendResponse(res, { status: 400, message: "Invalid request. No image provided" });
     const buffer = req.file.buffer;
 
+    let imgUrl: string;
     try {
         // The image needs to have an aspect ratio of 16:9
         const imgMetadata = await sharp(buffer).metadata();
@@ -396,16 +399,17 @@ const uploadBannerPicture = async (req: Request, res: Response) => {
 
         const command = new PutObjectCommand(uploadParams);
 
+        imgUrl = `https://${config.cdnBaseURL}${filename}`;
         await Promise.all([
             s3.send(command),
-            userSchema.updateOne({ _id: req.user!.id }, { profile_banner_url: filename }).exec()
+            userSchema.updateOne({ _id: req.user!.id }, { profile_banner_url: imgUrl }).exec()
         ]);
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error uploading banner image" });
     }
 
-    sendResponse(res, { status: 200, message: "Banner uploaded successfully", responsePayload: { imageUrl: req.file.path } });
+    sendResponse(res, { status: 200, message: "Banner uploaded successfully", responsePayload: { imageUrl: imgUrl } });
 };
 
 
