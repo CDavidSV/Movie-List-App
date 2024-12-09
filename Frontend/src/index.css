@@ -178,6 +178,7 @@ input::-webkit-inner-spin-button {
 }
 
 input[type=number] {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 
@@ -537,7 +538,7 @@ button:disabled, button:disabled:hover {
     .login-form {
         background: transparent;
     }
-    
+
     .signup-form {
         background: transparent;
     }
