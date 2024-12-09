@@ -1,4 +1,4 @@
-import { Link, ScrollRestoration, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import InputField from '../../components/inputField-component/inputField';
 import { useContext, useState } from 'react';
 import { GlobalContext } from '../../contexts/GlobalContext';
@@ -32,17 +32,17 @@ export default function SignUp() {
         setSignUpErrors({ usernameError: 'valid', emailError: 'valid', passwordError: 'valid' });
         setErrorMessage("");
         setLoading(true);
-        mml_api.post("/auth/register", 
+        mml_api.post("/auth/register",
         {
             email: signUpData!.email,
             username: signUpData!.username,
             password: signUpData!.password
-        }, 
+        },
         { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
         .then((response) => {
             setSessionData(
-                response.data.responseData.userEmail, 
-                response.data.responseData.username, 
+                response.data.responseData.userEmail,
+                response.data.responseData.username,
                 response.data.responseData.expiresIn,
                 response.data.responseData.matureContent,
                 response.data.responseData.publicWatchlist,
@@ -71,44 +71,43 @@ export default function SignUp() {
 
     return (
         <div>
-            <ScrollRestoration />
             <div className="login-container">
                 <form className="signup-form" onSubmit={attemptSignUp}>
                     <h1 style={{textAlign: "center"}}>Sign Up</h1>
                     {errorMessage && <p className="error-text">{errorMessage}</p>}
-                    <InputField 
-                        type="email" 
-                        id="email" 
-                        label="Email" 
-                        required={true} 
+                    <InputField
+                        type="email"
+                        id="email"
+                        label="Email"
+                        required={true}
                         onInputChange={(value: string) => setSignUpData({...signUpData!, email: value})}
                         status={signUpErrors.emailError}
                         autocomplete="off"/>
-                    <InputField 
-                        type="username" 
-                        id="username" 
-                        label="Username" 
-                        required={true} 
+                    <InputField
+                        type="username"
+                        id="username"
+                        label="Username"
+                        required={true}
                         onInputChange={(value: string) => setSignUpData({...signUpData!, username: value})}
                         status={signUpErrors.usernameError}
                         autocomplete="off"/>
-                    <InputField 
-                        type="password" 
-                        id="password" 
-                        label="Password" 
-                        required={true} 
+                    <InputField
+                        type="password"
+                        id="password"
+                        label="Password"
+                        required={true}
                         onInputChange={(value: string) => setSignUpData({...signUpData!, password: value})}
                         status={signUpErrors.passwordError}
                         autocomplete="new-password"/>
-                    <InputField 
-                        type="password" 
-                        id="password-confirm" 
-                        label="Confirm Password" 
-                        required={true} 
+                    <InputField
+                        type="password"
+                        id="password-confirm"
+                        label="Confirm Password"
+                        required={true}
                         onInputChange={(value: string) => setSignUpData({...signUpData!, passwordConfirm: value})}
                         status={signUpErrors.passwordError}
                         autocomplete="new-password"/>
-                    
+
                     <button className="button primary" disabled={loading}>
                         {!loading && "Sign Up"}
                         {loading && <span className="spinning-loader"></span>}

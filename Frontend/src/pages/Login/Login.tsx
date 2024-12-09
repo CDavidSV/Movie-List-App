@@ -1,6 +1,5 @@
-import { Link, ScrollRestoration } from 'react-router-dom';
 import InputField from '../../components/inputField-component/inputField';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useContext, useState } from 'react';
 import { GlobalContext } from '../../contexts/GlobalContext';
 import { Navigate } from 'react-router-dom';
@@ -25,13 +24,13 @@ export default function Login() {
         mml_api.post("/auth/login", loginData, { headers: { "Content-Type" : "application/x-www-form-urlencoded" } })
         .then((response) => {
             setSessionData(
-                response.data.responseData.userEmail, 
-                response.data.responseData.username, 
+                response.data.responseData.userEmail,
+                response.data.responseData.username,
                 response.data.responseData.expiresIn,
                 response.data.responseData.matureContent,
                 response.data.responseData.publicWatchlist,
                 response.data.responseData.publicFavorites,
-                response.data.responseData.profilePictureUrl, 
+                response.data.responseData.profilePictureUrl,
                 response.data.responseData.profileBannerUrl
             );
             // If login is successful, store user data and redirect to home page
@@ -48,26 +47,25 @@ export default function Login() {
 
     return (
         <div>
-            <ScrollRestoration />
             <div className="login-container">
                 <form className="login-form" onSubmit={attemptLogin}>
                     <h1 style={{textAlign: "center"}}>Log In</h1>
                     {loginError && <p className="error-text">{errorMessage}</p>}
-                    <InputField 
-                        type="email" 
-                        id="email" 
-                        label="Email" 
-                        required={true} 
-                        onInputChange={(value: string) => setLoginData({ ...loginData!, username: value })} 
+                    <InputField
+                        type="email"
+                        id="email"
+                        label="Email"
+                        required={true}
+                        onInputChange={(value: string) => setLoginData({ ...loginData!, username: value })}
                         status={loginError}
                         autocomplete="email"/>
                     <div>
-                        <InputField 
-                            type="password" 
-                            id="password" 
-                            label="Password" 
-                            required={true} 
-                            onInputChange={(value: string) => setLoginData({ ...loginData!, password: value })} 
+                        <InputField
+                            type="password"
+                            id="password"
+                            label="Password"
+                            required={true}
+                            onInputChange={(value: string) => setLoginData({ ...loginData!, password: value })}
                             status={loginError}
                             autocomplete="current-password"/>
                         <Link to="/reset-password"><p className="forgot-password">Forgot Password</p></Link>

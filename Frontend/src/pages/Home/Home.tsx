@@ -4,7 +4,6 @@ import PersonalListsProvider from "../../contexts/PersonalListsContext";
 import HomeCarousel from "../../components/home-carousel-component/home-carousel";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
-import { ScrollRestoration } from "react-router-dom";
 import { MediaContext } from "../../contexts/MediaContext";
 import { LoaderCircle } from "lucide-react";
 import "./home.css";
@@ -42,7 +41,7 @@ export default function Home() {
             } as FilmCardProps;
         });
     }
-    
+
     const fetchHandler = {
         carouselData: async () => {
             await mml_api.get(`api/v1/media/movies/home-carousel?mature_content=${userData?.matureContent}`).then((response) => {
@@ -105,7 +104,7 @@ export default function Home() {
 
         if (!homeData) return
         setHomeState(homeData);
-        
+
         const promises: Promise<void>[] = [];
 
         Object.entries(fetchHandler).forEach(([key, fetchFunction]) => {
@@ -125,7 +124,6 @@ export default function Home() {
 
     return (
         <PersonalListsProvider>
-            <ScrollRestoration />
             <div className="content">
                 <div className="sliders-container">
                     { homeState.carouselData.length ? <HomeCarousel items={homeState.carouselData}/> : loading ?

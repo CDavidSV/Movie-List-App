@@ -1,7 +1,7 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { GlobalContext } from "@/contexts/GlobalContext";
 import { useContext, useEffect, useState } from "react";
-import { Link, ScrollRestoration, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import defaultPfp from '../../assets/images/profile-default.png';
 import TabHandler from "@/components/tab-handler/tab-handler";
 import { ToastContext } from "@/contexts/ToastContext";
@@ -18,10 +18,10 @@ function WatchlistItem({ title, progress, totalProgress, backdrop, poster, statu
             case "Plan to Watch":
                 return "border-[#858585] bg-[#858585]";
             default:
-                return "border-[#2d8db7] bg-[#2d8db7]";    
+                return "border-[#2d8db7] bg-[#2d8db7]";
         }
     }
-    
+
     return (
         <div className="mb-3">
             <Link className="flex items-center gap-5" to={`/media/${type}/${mediaId}`}>
@@ -95,7 +95,7 @@ function UserFavorites({ userId, username }: { userId: string, username: string 
             {loading && <div className="flex w-full justify-center h-32">
                 <LoaderCircle className="animate-spin text-muted-foreground" size={40} />
             </div>}
-            {favorites.length > 0 && 
+            {favorites.length > 0 &&
                 <>
                     <h2>{username}'s Top 100</h2>
                     {favorites.map((item, index) => (
@@ -162,7 +162,7 @@ export default function UserPage() {
     const [ userInfo, setUserInfo ] = useState<UserPageData>();
     const [ tab, setTab ] = useState<string>(searchParams.get("tab") || "");
     const [ loading, setLoading ] = useState(true);
-    
+
     useEffect(() => {
         document.title = `${username} | My Movie List`;
 
@@ -197,7 +197,7 @@ export default function UserPage() {
             id: 'watchlist',
             title: 'Watchlist',
             tab: <>
-                { userInfo && userInfo.publicWatchlist ? <UserWatchlist userId={userInfo?.id || ""} /> : 
+                { userInfo && userInfo.publicWatchlist ? <UserWatchlist userId={userInfo?.id || ""} /> :
                     <div className="flex flex-col items-center justify-center gap-3 h-56 border-[1px] border-dashed border-white">
                         <Lock size={64} />
                         <h4>This user's watchlist is private</h4>
@@ -209,26 +209,18 @@ export default function UserPage() {
             id: 'favorites',
             title: 'Favorites',
             tab: <>
-            { userInfo && userInfo.publicFavorites ? <UserFavorites username={username || ""} userId={userInfo?.id || ""} /> : 
+            { userInfo && userInfo.publicFavorites ? <UserFavorites username={username || ""} userId={userInfo?.id || ""} /> :
                 <div className="flex flex-col items-center justify-center gap-3 h-56 border-[1px] border-dashed border-white">
                     <Lock size={64} />
                     <h4>This user's favorites is private</h4>
                 </div>
             }
-        </> 
+        </>
         }
     ];
 
     return (
         <div className="content">
-            <ScrollRestoration getKey={(location) => {
-                const excludedPath = "/user";
-                return location.pathname.startsWith(excludedPath)
-                ?
-                    location.pathname
-                :
-                    location.key;
-            }}/>
             <div className="h-72 md:h-96 w-full bg-no-repeat bg-cover bg-center bg-secondary" style={{ backgroundImage: `url('${userInfo?.profileBannerUrl}')` }}>
             </div>
             <div className="content-wrapper">

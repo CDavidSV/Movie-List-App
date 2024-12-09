@@ -29,7 +29,7 @@ export default function UploadImage(props: UploadImageProps) {
 
     const validateImage = (file: File) => {
         const fileSize = file.size / 1000 / 1000;
-        
+
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (validTypes.indexOf(file.type) === -1) {
             setMessage('Invalid file type. Only JPEG, PNG, and JPG are allowed');
@@ -65,21 +65,21 @@ export default function UploadImage(props: UploadImageProps) {
         if (!cropperObjRef.current) return;
         const canvas = cropperObjRef.current.getCroppedCanvas();
 
-        props.onCrop(canvas.toDataURL('image/jpeg', 0.8));
+        props.onCrop(canvas.toDataURL('image/jpeg', 0.7));
     }
 
     return (
         <div className="upload-container">
-            <div 
+            <div
             style={selectedImage ? { display: "none" } : {}}
             onDrop={handleDrop}
             onDragEnter={() => setDraggingClass('dragging')}
             onDragLeave={() => setDraggingClass('')}
             className={`upload-image-box ${draggingClass}`}>
-                <input 
-                className="upload-pfp-btn" 
-                type="file" 
-                name="pfp" 
+                <input
+                className="upload-pfp-btn"
+                type="file"
+                name="pfp"
                 onChange={(e) => {
                     if (!e.target.files) {
                         setMessage('Please select or drag an image');

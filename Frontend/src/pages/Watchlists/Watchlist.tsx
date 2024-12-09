@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import NotFound from "../../components/not-found-component/not-found";
-import { Link, ScrollRestoration } from "react-router-dom";
+import { Link } from "react-router-dom";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
 import Modal from "../../components/modal-component/modal";
@@ -197,7 +197,6 @@ export default function Watchlist() {
 
     return (
         <div className="content">
-            <ScrollRestoration />
             <div className="page-title-container">
                 <Bookmark size={40} />
                 <h1>Watchlist</h1>
@@ -217,8 +216,8 @@ export default function Watchlist() {
                                 key={`${media.watchlist_id}.${media.type}`}
                                 index={index}
                                 title={media.title}
-                                progress={media.progress} 
-                                total_progress={media.totalProgress} 
+                                progress={media.progress}
+                                total_progress={media.totalProgress}
                                 backdrop={media.backdropUrl}
                                 poster={media.posterUrl}
                                 favorited={media.favorited}

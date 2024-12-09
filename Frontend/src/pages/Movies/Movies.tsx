@@ -3,7 +3,6 @@ import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
-import { ScrollRestoration } from "react-router-dom";
 import { Clapperboard } from "lucide-react";
 
 export default function Movies() {
@@ -38,7 +37,6 @@ export default function Movies() {
 
     return (
         <div className="content">
-            <ScrollRestoration />
             <div className="page-title-container">
                 <Clapperboard size={40} />
                 <h1>Movies</h1>
@@ -46,11 +44,11 @@ export default function Movies() {
             <div className="content-wrapper">
                 <div className="movies-container">
                     {movies.map((movie: any, index) => (
-                        <FilmCard 
-                            key={`${index}.${movie.id}`} 
-                            filmData={movie} 
-                            inWatchlist={movie.inWatchlist} 
-                            inFavorites={movie.inFavorites} 
+                        <FilmCard
+                            key={`${index}.${movie.id}`}
+                            filmData={movie}
+                            inWatchlist={movie.inWatchlist}
+                            inFavorites={movie.inFavorites}
                             searchResult={false}/>
                     ))}
                 </div>

@@ -14,6 +14,7 @@ interface Config {
     tmdbImageXLarge?: string,
     tmdbImageXXLarge?: string,
     tmdbImageOriginal?: string,
+    bucketName?: string
 }
 
 // Local config options.
@@ -26,7 +27,8 @@ const config: Config = {
     cookieSameSite: 'lax',
     domain: process.env.NODE_ENV === 'development' ? 'localhost' : process.env.DOMAIN,
     allowedDevDomains: ['http://localhost:5173', 'http://localhost'],
-    allowedProdDomains: ['https://www.mymovielist.cdavidsv.dev'],
+    allowedProdDomains: ['https://www.mymovielist.cdavidsv.dev', 'https://mymovielist.cdavidsv.dev'],
+    bucketName: process.env.BUCKET_NAME as string,
     tmdbImageSmall: 'https://image.tmdb.org/t/p/w185',
     tmdbImageMedium: 'https://image.tmdb.org/t/p/w300',
     tmdbImageLarge: 'https://image.tmdb.org/t/p/w500',

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link, ScrollRestoration } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DraggableStateSnapshot } from "react-beautiful-dnd";
 import WatchlistButton from "../../components/watchlist-button-component/watchlist-button";
 import Modal from "../../components/modal-component/modal";
@@ -13,7 +13,7 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     const toast = useContext(ToastContext);
     const { removeFavorite } = useContext(GlobalContext);
-    
+
     const removeFromFavorites = (e: React.MouseEvent) => {
         e.preventDefault();
 
@@ -114,7 +114,7 @@ export default function Favorites() {
 
         if (startIndex === finalIndex) return;
         const original = [...favorites];
-        
+
         // Call the api to reorder the items
         mml_api_protected.post("api/v1/favorites/reorder", {
             ref_id: favorites[finalIndex].favorite_id,
@@ -132,13 +132,12 @@ export default function Favorites() {
         setFavorites([...favorites]);
     }
 
-    return (  
+    return (
         <div className="content">
-            <ScrollRestoration />
-            <div className="content-wrapper">                
+            <div className="content-wrapper">
                 <div className="favorites-container">
                     <h1>Favorites</h1>
-                    {!loading && favorites.length < 1 ? 
+                    {!loading && favorites.length < 1 ?
                     <div className="no-favorites">
                         <p style={{textAlign: "center", filter: "brightness(0.6)"}}>You have no favorites</p>
                         <Link to="/">
@@ -156,8 +155,8 @@ export default function Favorites() {
                                             {(providedDraggable, snapshotDraggable) => (
                                                 <div {...providedDraggable.draggableProps} ref={providedDraggable.innerRef} className={snapshot.isDraggingOver && !snapshotDraggable.isDragging ? "drag-over" : ""}>
                                                     <FilmListCard
-                                                        filmData={film} 
-                                                        removeItem={() => removeItemFromFavorites(index)} 
+                                                        filmData={film}
+                                                        removeItem={() => removeItemFromFavorites(index)}
                                                         provided={providedDraggable}
                                                         snapshot={snapshotDraggable}/>
                                                 </div>
@@ -165,7 +164,7 @@ export default function Favorites() {
                                         </Draggable>
                                         // <span className="list-separator"></span>
                                     ))}
-                                    {provided.placeholder}  
+                                    {provided.placeholder}
                                 </div>
                             )}
                         </Droppable>

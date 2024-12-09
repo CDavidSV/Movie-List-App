@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams, ScrollRestoration } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { calculateMovieRuntime } from "../../helpers/util.helpers";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
@@ -46,12 +46,12 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
 
         mml_api_protected.post(`/api/v1/user/status-in-personal-lists?media_id=${props.mediaId}&type=${props.type}`).then((response) => {
             const responseData = response.data.responseData;
-            
+
             if (responseData.watchlist) {
                 const status = responseData.watchlist.status;
                 const progress = responseData.watchlist.progress;
                 const totalProgress = responseData.watchlist.totalProgress;
-    
+
                 setWatchlistStatus(status);
                 setIsWatchlisted(true);
                 setItemProgress({ progress: progress, totalProgress: totalProgress });
@@ -61,7 +61,7 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
                 setInFavorites(true);
             }
             setLoading(false);
-        }).catch(() => {    
+        }).catch(() => {
             setLoading(false);
             toast.open("Error loading watchlist status", "error");
         });
@@ -82,7 +82,7 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
         let status = parseInt(value);
         const prevStatus = watchlistStatus;
         setWatchlistStatus(status);
-        
+
         let newProgress = itemProgress.progress;
         if (status === 2) {
             newProgress = props.type === 'movie' ? 1 : props.totalProgress;
@@ -111,7 +111,7 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
 
     return (
         <div className="film-interaction-container">
-            {loggedIn ? 
+            {loggedIn ?
                 <div className={loading ? "film-interaction disabled" : "film-interaction"}>
                     <FavoriteButton size={36} mediaId={props.mediaId} type={props.type} isFavorite={inFavorites}/>
                     {isWatchlisted ?
@@ -126,12 +126,12 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
                                     <SelectItem value="2">Finished</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <WatchlistProgress 
+                            <WatchlistProgress
                                 progressState={itemProgress}
                                 mediaId={props.mediaId}
                                 type={props.type}
                                 updateProgress={updateProgress}/>
-                        </>    
+                        </>
                         :
                         <button className="button primary" onClick={handleAddToWatchlist}>Add to Watchlist</button>
                     }
@@ -146,12 +146,12 @@ function InteractiveMediaOptions(props: { mediaId: string, type: string, totalPr
 function Overview({ mediaData, recommendations }: { mediaData: any, recommendations: FilmCardProps[] }) {
     return (
         <>
-            {mediaData.castMembers.length > 0 && 
+            {mediaData.castMembers.length > 0 &&
                 <>
                     <h3>Cast</h3>
                     <div className="credits-container">
-                        {mediaData.castMembers.map((person: any) => 
-                            <PersonCard 
+                        {mediaData.castMembers.map((person: any) =>
+                            <PersonCard
                                 key={`${person.id}.${person.character}`}
                                 id={person.id}
                                 name={person.name}
@@ -164,8 +164,8 @@ function Overview({ mediaData, recommendations }: { mediaData: any, recommendati
                 <>
                     <h3>Crew</h3>
                     <div className="credits-container">
-                        {mediaData.crewMembers.map((person: any) => 
-                            <PersonCard 
+                        {mediaData.crewMembers.map((person: any) =>
+                            <PersonCard
                                 key={`${person.id}.${person.job}`}
                                 id={person.id}
                                 name={person.name}
@@ -274,9 +274,9 @@ function Videos({ type, id }: { type: string, id: string }) {
 
     return (
         <div className="videos-container">
-            <Modal 
-            open={showModal} 
-            onClose={() => setShowModal(false)} 
+            <Modal
+            open={showModal}
+            onClose={() => setShowModal(false)}
             style={{ width: "95%", minWidth: "200px", maxWidth: "1300px" }}>
                 <div className="video-preview-modal">
                     { selectedVideo &&
@@ -390,7 +390,7 @@ export default function Media() {
     const { loggedIn, getSavedItems, saveToHistory } = useContext(GlobalContext);
     const { getMediaData } = useContext(MediaContext);
     const navigate = useNavigate();
-    
+
     // I case no id or type is provided
     if (!type || !id || (type !== 'movie' && type !== 'series')) return <PageNotFound />;
 
@@ -468,8 +468,7 @@ export default function Media() {
 
     return (
         <div className="content">
-            <ScrollRestoration />
-            {mediaData ? 
+            {mediaData ?
             <>
                 <div className="film-backdrop-container" style={{backgroundImage: `url(${mediaData.backdropPath})`}}>
                     <div className="film-info-content">
@@ -499,7 +498,7 @@ export default function Media() {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="film-content-wrapper">
                     <div className="film-content-sidebar">
                         <SidebarSection title="Original Title">
@@ -516,7 +515,7 @@ export default function Media() {
                                 <a href={mediaData.homepage} target="_blank">{mediaData.homepage}</a>
                             </SidebarSection>
                         }
-                        {type === 'movie' ? 
+                        {type === 'movie' ?
                         <>
                             <SidebarSection title="Release Date">
                                 <p>{mediaData.releaseDate}</p>
@@ -525,7 +524,7 @@ export default function Media() {
                                 <p>{calculateMovieRuntime(mediaData.runtime)}</p>
                             </SidebarSection>
                         </>
-                        : 
+                        :
                         <>
                             <SidebarSection title="First Air Date">
                                 <p>{mediaData.firstAirDate}</p>
@@ -566,7 +565,7 @@ export default function Media() {
                             <p>TMDB</p>
                         </SidebarSection>
                     </div>
-                    
+
                     <div className="film-content-main">
                         <TabHandler tabs={tabs} key={ type + id }/>
                     </div>
@@ -580,7 +579,7 @@ export default function Media() {
                     </div>
                     <div className="film-overview-info">
                         <Skeleton className="w-[90%] min-h-[40px] max-w-[400px]"></Skeleton>
-                        
+
                         <Skeleton className="mt-3 w-[80%] min-h-[20px] rounded-sm"></Skeleton>
                         <Skeleton className="my-1 w-[40%] min-h-[20px] rounded-sm"></Skeleton>
 

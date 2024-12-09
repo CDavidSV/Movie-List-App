@@ -3,7 +3,6 @@ import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
-import { ScrollRestoration } from "react-router-dom";
 import { TvMinimalPlay } from "lucide-react";
 
 export default function Series() {
@@ -38,7 +37,6 @@ export default function Series() {
 
     return (
         <div className="content">
-            <ScrollRestoration />
             <div className="page-title-container">
                 <TvMinimalPlay size={40} />
                 <h1>Series</h1>
@@ -46,11 +44,11 @@ export default function Series() {
             <div className="content-wrapper">
                 <div className="movies-container">
                     {movies.map((movie: any, index) => (
-                        <FilmCard 
-                            key={`${index}.${movie.id}`} 
-                            filmData={movie} 
-                            inWatchlist={movie.inWatchlist} 
-                            inFavorites={movie.inFavorites} 
+                        <FilmCard
+                            key={`${index}.${movie.id}`}
+                            filmData={movie}
+                            inWatchlist={movie.inWatchlist}
+                            inFavorites={movie.inFavorites}
                             searchResult={false}/>
                     ))}
                 </div>

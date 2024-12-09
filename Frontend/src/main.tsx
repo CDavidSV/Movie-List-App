@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useContext, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
-import { matchPath, createBrowserRouter, RouterProvider, useLocation, Outlet, useNavigate } from 'react-router-dom'
+import { matchPath, createBrowserRouter, RouterProvider, useLocation, Outlet, useNavigate, ScrollRestoration } from 'react-router-dom'
 import Navbar from './components/navbar-component/navbar'
 import Header from './components/header-component/header';
 import Footer from './components/footer-component/footer';
@@ -33,7 +33,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!userData) {
-      return navigate('/login');
+      navigate('/login');
     }
   }, [userData]);
 
@@ -43,15 +43,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function PageWrapper() {
   const location = useLocation();
   const showNavIn: string[] = [
-    "/", 
-    "/movies", 
-    "/series", 
-    "/my-lists", 
-    "/genres/:genreName", 
-    "/search", 
-    "/watchlist", 
-    "/history", 
-    "/profile", 
+    "/",
+    "/movies",
+    "/series",
+    "/my-lists",
+    "/genres/:genreName",
+    "/search",
+    "/watchlist",
+    "/history",
+    "/profile",
     "/favorites",
     "/media/:type/:id",
     "/user/:username",
@@ -67,6 +67,7 @@ function PageWrapper() {
       <div className="main-content-wrap">
         {shouldShowNavbar ? <Navbar/> : <Header/>}
         <Suspense>
+          <ScrollRestoration />
           <Outlet />
         </Suspense>
       </div>
@@ -156,7 +157,7 @@ function App() {
   ]);
 
   return (
-    <RouterProvider router={router} />
+      <RouterProvider router={router} />
   );
 }
 

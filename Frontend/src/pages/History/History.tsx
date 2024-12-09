@@ -5,7 +5,6 @@ import NotFound from "../../components/not-found-component/not-found";
 import Modal from "../../components/modal-component/modal";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
-import { ScrollRestoration } from "react-router-dom";
 import { History as HistoryIcon } from "lucide-react";
 
 export default function History() {
@@ -49,10 +48,9 @@ export default function History() {
         });
         setModalOpen(false);
     }
- 
+
     return (
         <div className="content">
-            <ScrollRestoration />
             <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
                 <div>
                     <h3 style={{textAlign: "center"}}>Are you sure you want to clear your history?</h3>
@@ -75,7 +73,7 @@ export default function History() {
                 <div className="movies-container">
                     {history.map((movie: any, index: number) => (
                             <FilmCard
-                                key={`${index}.${movie.id}`} 
+                                key={`${index}.${movie.id}`}
                                 filmData={{
                                     id: movie.media_id,
                                     type: movie.type,
@@ -83,8 +81,8 @@ export default function History() {
                                     title: movie.title,
                                     releaseDate: movie.releaseDate,
                                     description: movie.description
-                                }} 
-                                inWatchlist={movie.watchlisted} 
+                                }}
+                                inWatchlist={movie.watchlisted}
                                 inFavorites={movie.favorited}
                                 searchResult={false}
                                 onDelete={() => {

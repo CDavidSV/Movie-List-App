@@ -10,8 +10,9 @@ import Joi from "joi";
 import { v4 as uuid } from 'uuid';
 import sharp from "sharp";
 import config from "../../config/config";
-import containerClient from "../../config/azure-blob-storage";
 import { Readable } from "stream";
+import { s3 } from "../../util/aws";
+import { PutObjectCommand, PutObjectCommandInput } from "@aws-sdk/client-s3";
 import { invalidateAllUserSessions } from "../../util/sessionHandler";
 import mongoose from "mongoose";
 import { watchlistStatus } from "../../util/helpers";
@@ -33,10 +34,10 @@ const getUserInfo = async (req: Request, res: Response) => {
     }).then(user => {
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
 
-        sendResponse(res, 
-            { 
-                status: 200, 
-                message: "User fetched successfully", 
+        sendResponse(res,
+            {
+                status: 200,
+                message: "User fetched successfully",
                 responsePayload: user
             }
         );
@@ -244,10 +245,10 @@ const getMeUserInfo = async (req: Request, res: Response) => {
     }).then(user => {
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
 
-        sendResponse(res, 
-            { 
-                status: 200, 
-                message: "User fetched successfully", 
+        sendResponse(res,
+            {
+                status: 200,
+                message: "User fetched successfully",
                 responsePayload: user
             }
         );
@@ -260,7 +261,7 @@ const getMeUserInfo = async (req: Request, res: Response) => {
 const hasMedia = async (req: Request, res: Response) => {
     const reqMedia = req.body;
     if (!reqMedia) return sendResponse(res, { status: 400, message: "Invalid request" });
-    
+
     const requestMediaSchema = Joi.array().items(Joi.object({
         media_id: Joi.number().required(),
         type: Joi.string().required()
@@ -281,7 +282,7 @@ const hasMedia = async (req: Request, res: Response) => {
             // Check if the current media is in the user's watchlist or favorites based on the id of the media and its type
             const favoriteItem = favorites.find(item => item.media_id === media.media_id.toString() && item.type === media.type);
             const watchlistItem = watchlist.find(item => item.media_id === media.media_id.toString() && item.type === media.type);
-            
+
             const status: { favorite: boolean, watchlist: boolean } = { favorite: false, watchlist: false };
             if (watchlistItem) {
                 status.watchlist = true
@@ -344,25 +345,29 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
 const uploadProfilePicture = async (req: Request, res: Response) => {
     if (!req.file) return sendResponse(res, { status: 400, message: "Invalid request. No image provided" });
     const buffer = req.file.buffer;
-    
+
     try {
         // The image needs to have an aspect ratio of 1:1
         const imgMetadata = await sharp(buffer).metadata();
-    
+
         if (imgMetadata.width !== imgMetadata.height) return sendResponse(res, { status: 400, message: "Invalid image. The image must have an aspect ratio of 1:1" });
 
-        const filename = `${uuid()}.${req.file.mimetype.split("/")[1]}`;
+        const user = await userSchema.findById(req.user!.id, { profile_picture_url: 1 });
 
-        // Check if the user already has a profile picture and delete it if they do.
-        const user = await userSchema.findById(req.user!.id);
-        if (user && user.profile_picture_url) {
-            const oldProfilePicture = containerClient.getBlockBlobClient(user.profile_picture_url.split("/").pop()!);
-            oldProfilePicture.delete().catch(err => console.error(err));
-        }
-        
-        const blobClient = containerClient.getBlockBlobClient(filename);
-        await blobClient.uploadStream(Readable.from(buffer), undefined, undefined, { blobHTTPHeaders: { blobContentType: req.file.mimetype } });
-        await userSchema.updateOne({ _id: req.user!.id }, { profile_picture_url: blobClient.url.split("?")[0] });
+        const filename = `avatars/${req.user?.id}.${req.file.mimetype.split("/")[1]}`;
+        const uploadParams: PutObjectCommandInput = {
+            Bucket: config.bucketName,
+            Key: filename,
+            Body: buffer,
+            ContentType: req.file.mimetype
+        };
+
+        const command = new PutObjectCommand(uploadParams);
+
+        await Promise.all([
+            s3.send(command),
+            userSchema.updateOne({ _id: req.user!.id }, { profile_picture_url: filename }).exec()
+        ]);
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error uploading profile picture" });
@@ -374,25 +379,27 @@ const uploadProfilePicture = async (req: Request, res: Response) => {
 const uploadBannerPicture = async (req: Request, res: Response) => {
     if (!req.file) return sendResponse(res, { status: 400, message: "Invalid request. No image provided" });
     const buffer = req.file.buffer;
-    
+
     try {
         // The image needs to have an aspect ratio of 16:9
         const imgMetadata = await sharp(buffer).metadata();
 
         if (Math.abs(imgMetadata.width! / imgMetadata.height! - 16 / 9) > 0.2) return sendResponse(res, { status: 400, message: "Invalid image. The image must have an aspect ratio of 16:9" });
 
-        const filename = `${uuid()}.${req.file.mimetype.split("/")[1]}`;
+        const filename = `banners/${req.user?.id}.${req.file.mimetype.split("/")[1]}`;
+        const uploadParams: PutObjectCommandInput = {
+            Bucket: config.bucketName,
+            Key: filename,
+            Body: buffer,
+            ContentType: req.file.mimetype
+        };
 
-        // Check if the user already has a profile picture and delete it if they do.
-        const user = await userSchema.findById(req.user!.id);
-        if (user && user.profile_banner_url) {
-            const oldBannerPicture = containerClient.getBlockBlobClient(user.profile_banner_url.split("/").pop()!);
-            oldBannerPicture.delete().catch(err => console.error(err));
-        }
-        
-        const blobClient = containerClient.getBlockBlobClient(filename);
-        await blobClient.uploadStream(Readable.from(buffer), undefined, undefined, { blobHTTPHeaders: { blobContentType: req.file.mimetype } });
-        await userSchema.updateOne({ _id: req.user!.id }, { profile_banner_url: blobClient.url.split("?")[0] });
+        const command = new PutObjectCommand(uploadParams);
+
+        await Promise.all([
+            s3.send(command),
+            userSchema.updateOne({ _id: req.user!.id }, { profile_banner_url: filename }).exec()
+        ]);
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error uploading banner image" });
@@ -407,14 +414,14 @@ const changeUsername = async (req: Request, res: Response) => {
     if (!username) return sendResponse(res, { status: 400, message: "No username provided" });
 
     const usernameSchema = Joi.string().min(3).max(20).required();
-    
+
     const { error } = usernameSchema.validate(username);
     if (error) return sendResponse(res, { status: 400, message: error.details[0].message.replace('"value"', "Username") });
 
     try {
         const user = await userSchema.findOne({ username: username });
         if (user) return sendResponse(res, { status: 400, message: "Username already taken" });
-        
+
         await userSchema.updateOne({ _id: req.user!.id }, { username: username });
         return sendResponse(res, { status: 200, message: "Username changed successfully" });
     } catch (err) {
@@ -444,7 +451,7 @@ const updateUser = async (req: Request, res: Response) => {
 
     try {
         await userSchema.updateOne({ _id: req.user!.id }, updateUserObj);
-        
+
         sendResponse(res, { status: 200, message: "User settings updated successfully" });
     } catch (err) {
         console.error(err);
@@ -455,7 +462,7 @@ const updateUser = async (req: Request, res: Response) => {
 const deleteAccount = async (req: Request, res: Response) => {
     // Check if the request type is form encoded.
     if (!req.is("application/x-www-form-urlencoded")) return sendResponse(res, { status: 400, message: "Invalid request body" });
-    
+
     const password = req.body.password;
     if (!password) return sendResponse(res, { status: 400, message: "No password provided" });
 
@@ -470,7 +477,7 @@ const deleteAccount = async (req: Request, res: Response) => {
         if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return sendResponse(res, { status: 400, message: "The password is incorrect" });
 
         // Delete the user's account and all of their data.
-        await userSchema.updateOne({ _id: req.user!.id }, { deletion_timestamp: Date.now() + 1000 * 60 * 60 * 3 }); // 3 hours from now. 
+        await userSchema.updateOne({ _id: req.user!.id }, { deletion_timestamp: Date.now() + 1000 * 60 * 60 * 3 }); // 3 hours from now.
 
         // Clear all user's sessions.
         invalidateAllUserSessions(req.user!.id);
@@ -479,7 +486,7 @@ const deleteAccount = async (req: Request, res: Response) => {
         res.clearCookie("a_t", { domain: config.domain });
         res.clearCookie("r_t", { domain: config.domain });
         res.clearCookie("s_id", { domain: config.domain });
-        
+
         return sendResponse(res, { status: 200, message: "Account deleted successfully" });
     } catch (err) {
         console.error(err);
@@ -499,16 +506,16 @@ const searchUserByName = async (req: Request, res: Response) => {
                     query: `/${username}/`,
                     path: "username",
                     fuzzy: {}
-                }   
+                }
             }
         },
         {
-            $project: { 
-                username: 1, 
+            $project: {
+                username: 1,
                 profile_picture_url: 1,
                 joined_at: 1,
-                id: { $toString: '$_id' }, 
-                _id: 0 
+                id: { $toString: '$_id' },
+                _id: 0
             }
         }
     ]).then((response) => {
@@ -519,15 +526,15 @@ const searchUserByName = async (req: Request, res: Response) => {
     });
 }
 
-export { 
-    hasMedia, 
-    getStatusInPersonalLists, 
-    getMeUserInfo, 
-    uploadProfilePicture, 
-    changeUsername, 
-    deleteAccount, 
-    getUserInfo, 
-    uploadBannerPicture, 
+export {
+    hasMedia,
+    getStatusInPersonalLists,
+    getMeUserInfo,
+    uploadProfilePicture,
+    changeUsername,
+    deleteAccount,
+    getUserInfo,
+    uploadBannerPicture,
     updateUser,
     getUserWatchlist,
     getUserFavorites,

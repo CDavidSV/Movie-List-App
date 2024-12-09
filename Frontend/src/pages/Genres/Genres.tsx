@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from "react";
-import { ScrollRestoration, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
-import { 
+import {
     Clapperboard,
     Zap,
     Map,
@@ -126,10 +126,10 @@ export default function Genres() {
         setPage(1);
         setMedia([]);
         setLoading(true);
-        
+
         mml_api.get(`api/v1/media/movies/genres?name=${genreName}&mature_content=${userData?.matureContent}`).then((response) => {
             setLoading(false);
-            
+
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type})), (films: any) => {
                 setMedia(films);
             });
@@ -161,7 +161,6 @@ export default function Genres() {
 
     return (
         <div className="content">
-            <ScrollRestoration />
             <div className="page-title-container flex flex-col mt-6">
                 <div className="flex gap-4">
                     {genereMap[genreName] ? genereMap[genreName].icon : <Clapperboard size={40} /> }
@@ -172,11 +171,11 @@ export default function Genres() {
             <div className="content-wrapper">
                 <div className="movies-container">
                     {media.map((movie: any, index) => (
-                        <FilmCard 
-                            key={`${index}.${movie.id}`} 
-                            filmData={movie} 
-                            inWatchlist={movie.inWatchlist} 
-                            inFavorites={movie.inFavorites} 
+                        <FilmCard
+                            key={`${index}.${movie.id}`}
+                            filmData={movie}
+                            inWatchlist={movie.inWatchlist}
+                            inFavorites={movie.inFavorites}
                             searchResult={false}/>
                     ))}
                 </div>
