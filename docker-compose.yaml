@@ -18,4 +18,4 @@ services:
     ports:
       - "80:80"
     environment:
-      VITE_API_URL_PROD: http://localhost:8080 # Change this to your backend URL if you are hosting it on a different server
+      VITE_API_URL: http://localhost:8080 # Change this to your backend URL if you are hosting it on a different server

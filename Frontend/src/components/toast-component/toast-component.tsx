@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import "./toast-component.css";
 
 export default function Toast({ message, onClose, type }: ToastProps) {
-    const timeoutRef = useRef<NodeJS.Timeout>();
+    const timeoutRef = useRef<NodeJS.Timeout>(null);
     const [closing, setClosing] = useState<boolean>(false);
 
     const closeToast = () => {

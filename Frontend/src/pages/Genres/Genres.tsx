@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { JSX, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import FilmCard from "../../components/film-card-component/filmCard";
