@@ -12,7 +12,7 @@ import sharp from "sharp";
 import config from "../../config/config";
 import { Readable } from "stream";
 import { s3 } from "../../util/aws";
-import { PutObjectCommand, PutObjectCommandInput } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, DeleteObjectCommandInput, PutObjectCommand, PutObjectCommandInput } from "@aws-sdk/client-s3";
 import { invalidateAllUserSessions } from "../../util/sessionHandler";
 import mongoose from "mongoose";
 import { watchlistStatus } from "../../util/helpers";
@@ -354,22 +354,35 @@ const uploadProfilePicture = async (req: Request, res: Response) => {
         if (imgMetadata.width !== imgMetadata.height) return sendResponse(res, { status: 400, message: "Invalid image. The image must have an aspect ratio of 1:1" });
 
         const user = await userSchema.findById(req.user!.id, { profile_picture_url: 1 });
+        if (!user) return sendResponse(res, { status: 404, message: "User not found" });
 
-        const filename = `avatars/${req.user?.id}.${req.file.mimetype.split("/")[1]}`;
+        const filename = `avatars/${uuid()}.${req.file.mimetype.split("/")[1]}`;
+        imgUrl = `${config.cdnBaseURL}${filename}`;
+
         const uploadParams: PutObjectCommandInput = {
             Bucket: config.bucketName,
             Key: filename,
             Body: buffer,
             ContentType: req.file.mimetype
         };
+        const uploadCommand = new PutObjectCommand(uploadParams);
 
-        const command = new PutObjectCommand(uploadParams);
-
-        imgUrl = `https://${config.cdnBaseURL}${filename}`;
-        await Promise.all([
-            s3.send(command),
+        const requests = [
+            s3.send(uploadCommand),
             userSchema.updateOne({ _id: req.user!.id }, { profile_picture_url: imgUrl }).exec()
-        ]);
+        ];
+
+        if (user.profile_picture_url) {
+            const deleteParams: DeleteObjectCommandInput = {
+                Bucket: config.bucketName,
+                Key: user?.profile_picture_url?.split(config.cdnBaseURL!)[1]
+            }
+            const deleteCommand = new DeleteObjectCommand(deleteParams);
+
+            requests.push(s3.send(deleteCommand));
+        }
+
+        await Promise.all(requests);
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error uploading profile picture" });
@@ -389,21 +402,36 @@ const uploadBannerPicture = async (req: Request, res: Response) => {
 
         if (Math.abs(imgMetadata.width! / imgMetadata.height! - 16 / 9) > 0.2) return sendResponse(res, { status: 400, message: "Invalid image. The image must have an aspect ratio of 16:9" });
 
-        const filename = `banners/${req.user?.id}.${req.file.mimetype.split("/")[1]}`;
+        const user = await userSchema.findById(req.user!.id, { profile_banner_url: 1 });
+        if (!user) return sendResponse(res, { status: 404, message: "User not found" });
+
+        const filename = `banners/${uuid()}.${req.file.mimetype.split("/")[1]}`;
+        imgUrl = `${config.cdnBaseURL}${filename}`;
+
         const uploadParams: PutObjectCommandInput = {
             Bucket: config.bucketName,
             Key: filename,
             Body: buffer,
             ContentType: req.file.mimetype
         };
-
         const command = new PutObjectCommand(uploadParams);
 
-        imgUrl = `https://${config.cdnBaseURL}${filename}`;
-        await Promise.all([
+        const requests = [
             s3.send(command),
             userSchema.updateOne({ _id: req.user!.id }, { profile_banner_url: imgUrl }).exec()
-        ]);
+        ];
+
+        if (user.profile_banner_url) {
+            const deleteParams: DeleteObjectCommandInput = {
+                Bucket: config.bucketName,
+                Key: user?.profile_banner_url?.split(config.cdnBaseURL!)[1]
+            }
+            const deleteCommand = new DeleteObjectCommand(deleteParams);
+
+            requests.push(s3.send(deleteCommand));
+        }
+
+        await Promise.all(requests);
     } catch (err) {
         console.error(err);
         return sendResponse(res, { status: 500, message: "Error uploading banner image" });
