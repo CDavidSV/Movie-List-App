@@ -9,7 +9,7 @@ esbuild.build({
     outdir: 'dist',
     bundle: true,
     platform: 'node',
-    target: 'node20',
+    target: 'node22',
     sourcemap: true,
     minify: true,
     format: 'cjs',
