@@ -5,8 +5,8 @@
   "main": "./src/index.ts",
   "scripts": {
     "dev": "nodemon --config nodemon.json ./src/index.ts",
-    "start": "set NODE_ENV=production&&node dist/src/index.js",
-    "build": "tsc"
+    "start": "set NODE_ENV=production&&node dist/index.js",
+    "build": "node build.js"
   },
   "keywords": [],
   "author": "Carlos David Sandoval Vargas",
@@ -28,7 +28,6 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "sharp": "^0.33.4",
-    "typescript": "^5.5.2",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
@@ -42,7 +41,9 @@
     "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.11",
     "@types/uuid": "^10.0.0",
+    "esbuild": "^0.24.0",
     "nodemon": "^3.1.4",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
   }
 }
