@@ -36,42 +36,24 @@ To get a local copy up and running follow these simple steps.
 - Ensure you have [Node.js](https://nodejs.org/) installed on your machine if you are running it without Docker.
 - [Docker](https://www.docker.com/) is not required but can make setup easier.
 - [MongoDB](https://www.mongodb.com/) is required, either locally or hosted on a cloud service.
-- [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/) is required for storing images. 
+- [AWS S3](https://aws.amazon.com/s3/) is required to store images.
 
 ## Setup Docker
 
-The docker-compose.yaml file contains the following:
-```
-services:
-  backend:
-    build: ./Backend
-    ports:
-      - "8080:8080"
-    environment:
-      # MONGO_URI:
-      # SAS_TOKEN:
-      # ACCOUNT_NAME:
-      # CONTAINER_NAME:
-      # TMDB_API_KEY:
-      # TMDB_ACCESS_TOKEN:
-      # ACCESS_TOKEN_KEY:
-      # REFRESH_TOKEN_KEY:
-      - NODE_ENV=production
-  frontend:
-    build: ./Frontend
-    ports:
-      - "80:80"
-```
-
 You need to connect to your database and provide the API key and access token for the [TMDP API](https://developer.themoviedb.org/docs/getting-started)
+
+These are the environment variables required for the backend:
 - **MONGO_URI**: Url to connect to the MongoDB database. No need to worry about schemas or any additional data.
-- **SAS_TOKEN**: SAS token for Azure Blob Storage.
-- **ACCOUNT_NAME**: Azure Blob Storage account name.
-- **CONTAINER_NAME**: Azure Blob Storage container name.
+- **BUCKET_NAME**: Name of the AWS S3 bucket where images will be stored.
+- **BUCKET_REGION**: Region of the AWS S3 bucket.
+- **AWS_ACCESS_KEY_ID**: Access key for an AWS user.
+- **AWS_SECRET_ACCESS_KEY**: Secret access key for an AWS user.
 - **TMDB_API_KEY**: APIkey for TMDB API.
 - **TMDB_ACCESS_TOKEN**: API access token for TMDB API.
 - **ACCESS_TOKEN_KEY**: Cryptographically secure random string for generating access tokens (For user sessions).
 - **REFRESH_TOKEN_KEY**: Cryptographically secure random string for generating refresh tokens.
+
+All these variables have to be inside a .env file in the Backend directory. The build process will automatically copy this file to the Docker container.
 
 For the frontend, you only need one env variable corresponding to the backend API base URL:
 - **VITE_API_URL**: This has to bee inside a .env.development or .env.production file depending on the environment (e.g. VITE_API_URL="http://localhost:8080")
@@ -79,5 +61,3 @@ For the frontend, you only need one env variable corresponding to the backend AP
 ## Run
 
 To run the app simply execute the following command on the console in the project directory: `docker-compose up --build`
-
-If you don't want to use docker first create a .env file and add it to the Backend directory with the same environment variables previously described. Make sure to install the corresponding dependencies for both the Backend and Frontend. Once this is done run the npm start command on the Backend directory. For the frontend, you must first build the project and then run it on a server.
