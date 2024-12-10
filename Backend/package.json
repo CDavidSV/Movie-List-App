@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon --config nodemon.json ./src/index.ts",
     "start": "set NODE_ENV=production&&node dist/index.js",
+    "start:prod": "node dist/index.js",
     "build": "node build.js"
   },
   "keywords": [],

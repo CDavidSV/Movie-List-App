@@ -14,6 +14,7 @@ esbuild.build({
     minify: true,
     format: 'cjs',
     define: {
+        'process.env.NODE_ENV': '"production"',
         'process.env.MONGO_URI': `"${process.env.MONGO_URI}"`,
         'process.env.ACCESS_TOKEN_KEY': `"${process.env.ACCESS_TOKEN_KEY}"`,
         'process.env.REFRESH_TOKEN_KEY': `"${process.env.REFRESH_TOKEN_KEY}"`,
