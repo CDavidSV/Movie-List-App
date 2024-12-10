@@ -67,7 +67,14 @@ function PageWrapper() {
       <div className="main-content-wrap">
         {shouldShowNavbar ? <Navbar/> : <Header/>}
         <Suspense>
-          <ScrollRestoration />
+          <ScrollRestoration getKey={(location) => {
+                const excludedPaths = ["/user"];
+                return excludedPaths.some((excludedPath) => location.pathname.startsWith(excludedPath))
+                ?
+                    location.pathname
+                :
+                    location.key;
+            }}/>
           <Outlet />
         </Suspense>
       </div>
