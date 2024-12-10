@@ -1,18 +1,22 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DraggableStateSnapshot } from "react-beautiful-dnd";
 import WatchlistButton from "../../components/watchlist-button-component/watchlist-button";
 import Modal from "../../components/modal-component/modal";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
 import { ToastContext } from "../../contexts/ToastContext";
 import { GripVertical, Trash2 } from "lucide-react";
+import { closestCorners, DndContext, DragEndEvent } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import "./favorites.css";
 
-function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: any, removeItem: Function, provided: DraggableProvided, snapshot: DraggableStateSnapshot}) {
+function FilmListCard({ filmData, removeItem }: { filmData: any, removeItem: Function }) {
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     const toast = useContext(ToastContext);
     const { removeFavorite } = useContext(GlobalContext);
+
+    const { attributes, listeners, transform, transition, setNodeRef, isDragging } = useSortable({ id: filmData.favorite_id });
 
     const removeFromFavorites = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -25,7 +29,15 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
     }
 
     return (
-        <div className={snapshot.isDragging ? "list-card-container dragging" : "list-card-container"}>
+        <div
+            ref={setNodeRef}
+            {...attributes}
+            style={{
+                transition,
+                transform: CSS.Transform.toString(transform),
+            }}
+            className={isDragging ? "list-card-container dragging" : "list-card-container"}
+        >
             <Modal open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
                 <div>
                     <h3 style={{textAlign: "center"}}>Delete {filmData.title} from your favorites?</h3>
@@ -35,7 +47,7 @@ function FilmListCard({ filmData, removeItem, provided, snapshot }: { filmData: 
                     </div>
                 </div>
             </Modal>
-            <div className="list-drag" {...provided.dragHandleProps}>
+            <div className={isDragging ? "list-drag dragging" : "list-drag"} {...attributes} {...listeners} >
                 <GripVertical/>
             </div>
             <Link to={`/media/${filmData.type}/${filmData.media_id}`} className="list-card-main-container">
@@ -66,6 +78,7 @@ export default function Favorites() {
     const [favorites, setFavorites] = useState<any[]>([]);
     const [lastRank, setlastRank] = useState<number | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+
     const { mml_api_protected } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
 
@@ -107,29 +120,30 @@ export default function Favorites() {
         setFavorites([...favorites]);
     }
 
-    const handleOnDragEnd = (result: DropResult) => {
-        if (!result.destination || !result.source) return;
-        const startIndex = result.source.index;
-        const finalIndex = result.destination.index;
+    const handleOnDragEnd = (result: DragEndEvent) => {
+        const { active, over } = result;
+        if (!over || active.id === over.id) return;
 
-        if (startIndex === finalIndex) return;
-        const original = [...favorites];
+        const activeIndex = favorites.findIndex((item) => item.favorite_id === active.id);
+        const overIndex = favorites.findIndex((item) => item.favorite_id === over.id);
+
+        const updatedFavorites = [...favorites];
 
         // Call the api to reorder the items
         mml_api_protected.post("api/v1/favorites/reorder", {
-            ref_id: favorites[finalIndex].favorite_id,
-            target_id: favorites[startIndex].favorite_id,
-            position: finalIndex > startIndex ? "after" : "before"
+            ref_id: favorites[overIndex].favorite_id,
+            target_id: favorites[activeIndex].favorite_id,
+            position: overIndex > activeIndex ? "after" : "before"
         }).catch(() => {
             toast.open("Error reordering favorites", "error");
-            setFavorites(original);
+            setFavorites(updatedFavorites);
         });
 
         // Move the reordered items
-        const [temp] = favorites.splice(startIndex, 1);
-        favorites.splice(finalIndex, 0, temp);
+        const [temp] = updatedFavorites.splice(activeIndex, 1);
+        updatedFavorites.splice(overIndex, 0, temp);
 
-        setFavorites([...favorites]);
+        setFavorites(updatedFavorites);
     }
 
     return (
@@ -146,30 +160,21 @@ export default function Favorites() {
                             </button>
                         </Link>
                     </div>
-                    : <DragDropContext onDragEnd={handleOnDragEnd}>
-                        <Droppable droppableId="favorites">
-                            {(provided, snapshot) => (
-                                <div {...provided.droppableProps} ref={provided.innerRef}>
-                                    {favorites.map((film, index) => (
-                                        <Draggable key={`${index}.${film.favorite_id}.${film.type}`} draggableId={`${index}.${film.favorite_id}.${film.type}`} index={index}>
-                                            {(providedDraggable, snapshotDraggable) => (
-                                                <div {...providedDraggable.draggableProps} ref={providedDraggable.innerRef} className={snapshot.isDraggingOver && !snapshotDraggable.isDragging ? "drag-over" : ""}>
-                                                    <FilmListCard
-                                                        filmData={film}
-                                                        removeItem={() => removeItemFromFavorites(index)}
-                                                        provided={providedDraggable}
-                                                        snapshot={snapshotDraggable}/>
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                        // <span className="list-separator"></span>
-                                    ))}
-                                    {provided.placeholder}
-                                </div>
-                            )}
-                        </Droppable>
-
-                    </DragDropContext>
+                    :
+                    <DndContext collisionDetection={closestCorners} onDragEnd={handleOnDragEnd}>
+                        <SortableContext
+                            items={favorites.map((i) => i.favorite_id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {favorites.map((film, index) => (
+                                <FilmListCard
+                                    key={film.favorite_id}
+                                    filmData={film}
+                                    removeItem={() => removeItemFromFavorites(index)}
+                                />
+                            ))}
+                        </SortableContext>
+                    </DndContext>
                     }
                     <div className={loading ? "loader active" : "loader"}>
                         <div className="spinning-loader"></div>
