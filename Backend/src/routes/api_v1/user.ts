@@ -310,8 +310,8 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
 
     try {
         const [watchlistItem, favoriteItem, mediaData] = await Promise.all([
-            watchlistSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { id: { $toString: "$_id" }, status: 1, progress: 1, updated_date: 1, added_date: 1, _id: 0 }),
-            favoritesSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { id: { $toString: "$_id" }, date_added: 1, _id: 0 }),
+            watchlistSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { status: 1, progress: 1, updated_date: 1, added_date: 1, _id: 1 }),
+            favoritesSchema.findOne({ user_id: req.user!.id, media_id: media_id, type: type }, { date_added: 1, _id: 1 }),
             findMediaById(media_id as string, type as string)
         ]);
 
@@ -320,7 +320,7 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
         const status: any = { favorite: null, watchlist: null };
         if (watchlistItem) {
             status.watchlist = {
-                id: watchlistItem.id,
+                id: watchlistItem._id.toString(),
                 status: watchlistItem.status,
                 progress: watchlistItem.progress,
                 dateUpdated: watchlistItem.updated_date,
@@ -330,7 +330,7 @@ const getStatusInPersonalLists = async (req: Request, res: Response) => {
         }
         if (favoriteItem) {
             status.favorite = {
-                id: favoriteItem.id,
+                id: favoriteItem._id.toString(),
                 dateAdded: favoriteItem.date_added,
             };
         }
