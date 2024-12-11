@@ -18,9 +18,11 @@
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
+    touch-action: none;
 }
 
 .list-card-container.dragging {
+    background-color: rgb(25, 25, 25) !important;
     z-index: 100;
 }
 
