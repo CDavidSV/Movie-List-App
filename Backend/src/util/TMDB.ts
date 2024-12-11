@@ -29,16 +29,16 @@ const makeTMDBRequest = async (url: string, matureContent: boolean = false) => {
 };
 
 /**
- * 
- * @param type 
- * @returns 
+ *
+ * @param type
+ * @returns
  */
 const fetchMedia  = async (type: string, url: string, page: number, matureContent: boolean = false) => {
     if (type !== "movie" && type !== "tv") throw new Error("Invalid media type");
 
     const response = await makeTMDBRequest(`/${type}/${url}?language=en-US&page=${page}`, matureContent);
     if (!response) return null;
-    
+
     let media: CustomMediaResponse[] = [];
     if (type === "movie") {
         media = response.results.map((item: any) => {
@@ -47,7 +47,7 @@ const fetchMedia  = async (type: string, url: string, page: number, matureConten
                 title: item.title,
                 description: item.overview,
                 posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: item.backdrop_path ? `${config.tmdbImageOriginal}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                backdropUrl: item.backdrop_path ? `${config.tmdbImageXXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
                 type: "movie",
                 genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
                 releaseDate: item.release_date,
@@ -122,7 +122,7 @@ const findMediaByTitle = async (title: string, matureContent: boolean = false) =
 };
 
 /**
- * 
+ *
  * @param id id of the movie or series
  * @param type type of the media (movie | series)
  * @returns Movie | Series | null
@@ -320,7 +320,7 @@ const getGenreName = (genreId: number, type: string) => {
 };
 
 /**
- * 
+ *
  * @param type Valid types are "movie" and "series"
  * @returns boolean value indicating whether the type is valid or not
  */
@@ -328,12 +328,12 @@ const isValidMediaType = (type: string, acceptBoth: boolean = false): boolean =>
     return type === "movie" || type === "series" || (acceptBoth && type === 'both');
 }
 
-export { 
-    findMediaById, 
-    isValidMediaType, 
-    fetchMedia, 
-    findMediaByTitle, 
-    makeTMDBRequest, 
+export {
+    findMediaById,
+    isValidMediaType,
+    fetchMedia,
+    findMediaByTitle,
+    makeTMDBRequest,
     fetchMoviesByGenre,
     getCredits,
     getMediaImages,

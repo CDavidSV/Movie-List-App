@@ -91,6 +91,7 @@ header {
 
 .profile-img img {
     width: 40px;
+    height: 40px;
     border-radius: 100%;
 }
 
@@ -100,7 +101,7 @@ header {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     background-color: var(--secondary-background-color);
     margin: 0;
-    
+
     display: grid;
     grid-column-gap: 1.25rem;
     grid-auto-columns: minmax(0,12.5rem);
@@ -131,7 +132,7 @@ header {
     background: rgba(0, 0, 0, 0.5);
     transition: 0.2s ease;
     transition-delay: 0.1s;
-    
+
     z-index: 99;
 }
 
@@ -320,7 +321,7 @@ header {
     }
 }
 
-@media screen and (max-width: 480px) { 
+@media screen and (max-width: 480px) {
     header {
         justify-content: space-between;
     }

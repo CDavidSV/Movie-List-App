@@ -397,12 +397,12 @@ button:disabled, button:disabled:hover {
 .logo-mobile {
     display: none;
     height: 40px;
-    width: 100%;
+    width: 40px;
 }
 
 .logo-desktop {
     height: 40px;
-    width: 100%;
+    width: 200px;
 }
 
 .error-text {

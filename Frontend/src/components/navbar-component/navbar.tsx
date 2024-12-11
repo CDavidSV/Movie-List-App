@@ -15,7 +15,7 @@ const genres = ["Action", "Adventure", "Animation", "Comedy", "Crime", "Document
 function useDropdown(onMenuStateChange: (isOpen: boolean) => void) {
     const [menuState, setMenuState] = useState(false);
     const node = useRef<HTMLDivElement>(null);
-    
+
     const toggleMenu = () => setMenuState(!menuState);
     const handleClick = (e: MouseEvent) => {
         if (node.current!.contains(e.target as Node)) {
@@ -28,11 +28,11 @@ function useDropdown(onMenuStateChange: (isOpen: boolean) => void) {
     useEffect(() => {
         onMenuStateChange(menuState);
     }, [menuState]);
-    
+
     // Hook to detect when the user clicks outside the dropdown menu
     useEffect(() => {
         document.addEventListener("mousedown", handleClick);
-    
+
         return () => {
             document.removeEventListener("mousedown", handleClick);
         };
@@ -48,8 +48,8 @@ function GenresDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpen
     const { node, menuState, toggleMenu } = useDropdown(handleMenuStateChange);
 
     return (
-        <div 
-            ref={node} 
+        <div
+            ref={node}
             style={{
                 height: "100%",
                 width: "100%",
@@ -76,31 +76,31 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
     const { logOut, userData } = useContext(GlobalContext);
 
     return (
-        <div 
-            ref={node} 
+        <div
+            ref={node}
             style={{
-                height: "100%", 
+                height: "100%",
                 display: "flex",
                 justifyContent: "flex-end"
             }}
             >
             <div className="select-button" onClick={toggleMenu}>
                 <div className="profile-img">
-                    <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile-picture" loading="lazy"/>
+                    <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile-picture"/>
                 </div>
                 <span className={menuState ? "select-arrow select-active" : "select-arrow"}></span>
             </div>
             { userData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
                 <div className="menu-profile-section">
                     <div className="menu-user-profile-item">
-                        <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile-picture" loading="lazy"/>
+                        <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile-picture"/>
                         <div className="profile-name">
                             <p>{userData.username || "Username"}</p>
                             <p>{userData.email || "Email"}</p>
                         </div>
                     </div>
                 </div>
-                <div className="profile-dropdown-section">   
+                <div className="profile-dropdown-section">
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/profile">
                         <CircleUserRound />
                         <div>
@@ -139,7 +139,7 @@ function ProfileDropdown({handleMenuStateChange}: {handleMenuStateChange: (isOpe
                 </div>
             </div>}
             {!userData && <div className={menuState ? "dropdown profile-dropdown select-active" : "dropdown profile-dropdown"}>
-            <div className="menu-profile-section">   
+            <div className="menu-profile-section">
                     <NavLink className={({ isActive }) => isActive ? "menu-profile-item selected" : "menu-profile-item"} to="/login">
                         <LogIn />
                         <div>
@@ -166,8 +166,8 @@ function HanburgerMenu({handleMenuStateChange}: {handleMenuStateChange: (isOpen:
 
     return (
         <div style={{ height: "100%", left: 0 }}>
-            <div 
-                ref={node} 
+            <div
+                ref={node}
                 style={{ height: "100%" }}
                 >
                 <div className="header-hoverable hamburger-btn" onClick={toggleMenu}>
@@ -236,9 +236,9 @@ export default function Navbar() {
 
                 <div className="header-section">
                     <NavLink to="/search" className={({ isActive }) => isActive ? "header-hoverable selected" : "header-hoverable"}>
-                        <Search />    
+                        <Search />
                     </NavLink>
-                    {loggedIn && 
+                    {loggedIn &&
                         <NavLink to="/watchlist" className={({ isActive }) => isActive ? "header-hoverable lists-icon selected " : "header-hoverable lists-icon"}>
                             <Bookmark />
                         </NavLink>

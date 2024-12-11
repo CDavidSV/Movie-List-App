@@ -227,7 +227,7 @@ function Images({ type, id }: { type: string, id: string }) {
             <div>
                 <Modal background={false} open={showModal} onClose={() => setShowModal(false)}>
                     <div>
-                        <img loading="lazy" src={selectedImage} alt="selected-image" style={{ objectFit: "contain", maxHeight: "800px", maxWidth: "1300px", width: "100%" }}/>
+                        <img src={selectedImage} alt="selected-image" style={{ objectFit: "contain", maxHeight: "800px", maxWidth: "1300px", width: "100%" }}/>
                     </div>
                 </Modal>
                 <Select defaultValue="backdrops" onValueChange={handleSelectType}>
@@ -473,7 +473,7 @@ export default function Media() {
                 <div className="film-backdrop-container" style={{backgroundImage: `url(${mediaData.backdropPath})`}}>
                     <div className="film-info-content">
                         <div className="film-poster-container">
-                            <img className="film-poster" src={mediaData.posterPath} alt={mediaData.title || mediaData.name} loading="lazy"/>
+                            <img className="film-poster" src={mediaData.posterPath} alt={mediaData.title || mediaData.name}/>
                         </div>
                         <div className="film-overview-info">
                             <h2 className="film-title">{mediaData.name || mediaData.title}</h2>

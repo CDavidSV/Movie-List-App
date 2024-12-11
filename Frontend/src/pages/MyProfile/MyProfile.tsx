@@ -116,7 +116,7 @@ function AccDelPassConf({ onCancel }: { onCancel: () => void }) {
         <h3>Please enter your password</h3>
         <p>
             Once you enter your password and click the confirm button, your account will be queued for deletion and will <strong>not be recoverable</strong>.
-            The period for deletion can take up to 24 hours. During this period you will not be able to access 
+            The period for deletion can take up to 24 hours. During this period you will not be able to access
             your account or create a new one with the same email address until it is completely removed from our servers.
         </p>
         {message.length > 0 && <p className="error-text">{message}</p>}
@@ -126,7 +126,7 @@ function AccDelPassConf({ onCancel }: { onCancel: () => void }) {
                 label="Password"
                 id="password"
                 required={true}
-                onInputChange={onPasswordChange} 
+                onInputChange={onPasswordChange}
                 autocomplete="off"/>
         <div className="modal-buttons">
             <button type="button" className="button" onClick={onCancel}>Cancel</button>
@@ -212,8 +212,8 @@ function ChangePasswordTab() {
                     />
                     <div className="items-top flex space-x-2 items-center">
                         <Checkbox checked={passwordChangeInfo.deleteSessions} id="delete-sessions" onCheckedChange={(value: boolean) => setPasswordChangeInfo({ ...passwordChangeInfo, deleteSessions: value })} />
-                        <label 
-                            style={{ marginLeft: "10px", fontSize: "0.9rem"}} 
+                        <label
+                            style={{ marginLeft: "10px", fontSize: "0.9rem"}}
                             htmlFor="delete-sessions">
                             Sign out of all devices except this one
                         </label>
@@ -231,7 +231,7 @@ function ChangePasswordTab() {
 function GeneralTab() {
     const { userData, mml_api_protected, updateUserSettings: updateClientUserSettings } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
-    
+
     const [accountDeletionModal, setAccountDeletionModal] = useState<boolean>(false);
     const [accountDeletionPassModal, setAccountDeletionPassModal] = useState<boolean>(false);
     const [matureContent, setMatureContent] = useState<boolean>(userData ? userData.matureContent : false);
@@ -242,13 +242,13 @@ function GeneralTab() {
         setMatureContent(settings.matureContent !== undefined ? settings.matureContent : matureContent);
         setPublicFavorites(settings.publicFavorites !== undefined ? settings.publicFavorites : publicFavorites);
         setPublicWatchlist(settings.publicWatchlist !== undefined ? settings.publicWatchlist : publicWatchlist);
-        
+
         const prevSettings = {
             matureContent: userData ? userData.matureContent : false,
             publicFavorites: userData ? userData.publicFavorites : false,
             publicWatchlist: userData ? userData.publicWatchlist : false
         };
-        
+
         mml_api_protected.put('/api/v1/user/update', {
             mature_content: settings.matureContent !== undefined ? settings.matureContent : matureContent,
             public_favorites: settings.publicFavorites !== undefined ? settings.publicFavorites : publicFavorites,
@@ -288,7 +288,7 @@ function GeneralTab() {
                     <h4 style={{margin: "0 0 15px 0"}}>Change Username</h4>
                     <ChangeUsername username={userData ? userData.username : ''}/>
                 </div>
-                
+
                 <h4 className="m-0">Settings</h4>
                 <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="space-y-0.5 pr-3">
@@ -388,7 +388,7 @@ export default function MyProfile() {
     }
 
     const tabs = [<GeneralTab/>, <ChangePasswordTab />];
-    
+
     return (
         <div className="content">
             <Modal onClose={() => setLogoutConfirmModal(false)} open={logoutConfirmModal}>
@@ -412,7 +412,7 @@ export default function MyProfile() {
             <div className="content-wrapper">
                 <div className="profile-general-data">
                     <div className="profile-picture">
-                        <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile_picture" loading="lazy" />
+                        <img src={userData && userData.profilePictureUrl ? `${userData.profilePictureUrl}` : defaultPfp} alt="profile_picture" />
                         <div onClick={() => setModalsState({ ...modalsState, pfpModal: true })} className="upload_pfp"><Camera /></div>
                         <Modal open={modalsState.pfpModal} onClose={() => setModalsState({ ...modalsState, pfpModal: false })}>
                             <UploadImage onCrop={onPfpChange} aspectRatio={1} height="50vh" maxImageSizeInMb={8}/>
