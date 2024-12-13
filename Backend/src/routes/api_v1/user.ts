@@ -356,7 +356,7 @@ const uploadProfilePicture = async (req: Request, res: Response) => {
         const user = await userSchema.findById(req.user!.id, { profile_picture_url: 1 });
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
 
-        const filename = `avatars/${uuid()}.${req.file.mimetype.split("/")[1]}`;
+        const filename = `mml/avatars/${uuid()}.${req.file.mimetype.split("/")[1]}`;
         imgUrl = `${config.cdnBaseURL}${filename}`;
 
         const uploadParams: PutObjectCommandInput = {
@@ -405,7 +405,7 @@ const uploadBannerPicture = async (req: Request, res: Response) => {
         const user = await userSchema.findById(req.user!.id, { profile_banner_url: 1 });
         if (!user) return sendResponse(res, { status: 404, message: "User not found" });
 
-        const filename = `banners/${uuid()}.${req.file.mimetype.split("/")[1]}`;
+        const filename = `mml/banners/${uuid()}.${req.file.mimetype.split("/")[1]}`;
         imgUrl = `${config.cdnBaseURL}${filename}`;
 
         const uploadParams: PutObjectCommandInput = {
