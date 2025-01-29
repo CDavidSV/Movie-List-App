@@ -55,7 +55,7 @@ export default function Footer() {
                     <SquarePlay />
                     <p>My Movie List</p>
                 </div>
-                <span>Made with ❤ by <a href="">Carlos David Sandoval Vargas</a></span>
+                <span>Made with ❤ by <a href="https://cdavidsv.dev/" target="_blank">Carlos David Sandoval Vargas</a></span>
             </div>
         </footer>
     );

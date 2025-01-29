@@ -7,6 +7,20 @@ import { saveSearchResult, shortenNumber } from '../../helpers/util.helpers';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import './home-carousel.css';
 
+const Logo = ({ title, logoUrl }: { title: string, logoUrl: string }) => {
+  const [logoError, setLogoError] = useState<boolean>(true);
+
+  return (
+    <>
+      {logoError ? (
+        <h1 className='text-xl sm:text-3xl md:text-6xl'>{title}</h1>
+      ) : (
+        <img src={logoUrl} alt={`logo-${title}`} loading="eager" onError={() => setLogoError(true)} />
+      )}
+    </>
+  );
+}
+
 const SliderPagination = memo((props: { slide: number, slides: number, cooldownSec: number, widthPercentage: number, stopped: boolean, onStop: () => void, onResume: () => void, changeSlide: (slide: number) => void }) => {
   const [hovered, setHovered] = useState<boolean>(false);
 
@@ -120,7 +134,7 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
                   onClick={() => saveSearch(item)}
                   onAuxClick={() => saveSearch(item)}
                   to={`/media/${item.type}/${item.id}`}/>
-                <img src={item.logoUrl} alt={`logo-${item.title}`} loading="eager" />
+                <Logo title={item.title} logoUrl={item.logoUrl} />
               </div>
               <div className="title-details">
                 <p>{`${item.releaseDate} • ${item.genres.join(", ")}`}</p>

@@ -65,6 +65,7 @@
     user-select: none;
     -webkit-user-select: none;
     transform: translateY(2px);
+    margin-bottom: 25px;
 }
 
 .footer-separator {
