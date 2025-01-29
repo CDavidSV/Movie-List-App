@@ -8,7 +8,7 @@ import { ChevronRight, ChevronLeft } from 'lucide-react';
 import './home-carousel.css';
 
 const Logo = ({ title, logoUrl }: { title: string, logoUrl: string }) => {
-  const [logoError, setLogoError] = useState<boolean>(true);
+  const [logoError, setLogoError] = useState<boolean>(false);
 
   return (
     <>
