@@ -12,7 +12,6 @@ import cors from "cors";
 import path from "path";
 import compression from "compression";
 import { formatTime, addSpacing } from "./util/helpers";
-import { S3Client } from "@aws-sdk/client-s3";
 
 // routes
 import routes from "./routes/router";
