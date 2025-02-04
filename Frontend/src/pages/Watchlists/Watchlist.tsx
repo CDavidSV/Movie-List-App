@@ -78,8 +78,8 @@ function WatchlistItem(props: WatchlistItemProps) {
             </Modal>
             <Link to={`/media/${props.type}/${props.id}`}>
                 <picture>
-                    <source media="(max-width: 767px)" srcSet={props.poster} />
-                    <img src={props.backdrop} alt={props.title} loading="lazy" />
+                    <source media="(max-width: 767px)" srcSet={props.poster || "img/No_Poster.jpeg"} />
+                    <img src={props.backdrop || "/img/No_Backdrop.jpeg"} alt={props.title} loading="lazy" />
                 </picture>
                 <div className="info">
                     <h3>{props.title}</h3>

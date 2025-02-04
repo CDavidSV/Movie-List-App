@@ -46,8 +46,8 @@ const fetchMedia  = async (type: string, url: string, page: number, matureConten
                 id: item.id,
                 title: item.title,
                 description: item.overview,
-                posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: item.backdrop_path ? `${config.tmdbImageXXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : null,
+                backdropUrl: item.backdrop_path ? `${config.tmdbImageXXLarge}${item.backdrop_path}` : null,
                 type: "movie",
                 genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
                 releaseDate: item.release_date,
@@ -65,8 +65,8 @@ const fetchMedia  = async (type: string, url: string, page: number, matureConten
             id: item.id,
             title: item.name,
             description: item.overview,
-            posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-            backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+            posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : null,
+            backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : null,
             type: "series",
             genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "series")),
             releaseDate: item.first_air_date, // release_date is first_air_date for series
@@ -91,8 +91,8 @@ const findMediaByTitle = async (title: string, matureContent: boolean = false) =
                 id: movie.id,
                 title: movie.title,
                 description: movie.overview,
-                posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : null,
+                backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : null,
                 type: "movie",
                 genres: movie.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
                 releaseDate: movie.release_date,
@@ -107,8 +107,8 @@ const findMediaByTitle = async (title: string, matureContent: boolean = false) =
                 id: movie.id,
                 title: movie.name,
                 description: movie.overview,
-                posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : null,
+                backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : null,
                 type: "series",
                 genres: movie.genre_ids.map((genreId: number) => getGenreName(genreId, "series")),
                 releaseDate: movie.first_air_date,
@@ -165,8 +165,8 @@ const fetchMoviesByGenre = async (genreId: number, page: number, matureContent: 
             title: item.title,
             type: "movie",
             description: item.overview,
-            posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-            backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+            posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : null,
+            backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : null,
             genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
             releaseDate: item.release_date,
             voteAverage: item.vote_average,
@@ -194,7 +194,7 @@ const getCredits = async (id: string, type: string) => {
             creditId: cast.credit_id,
             order: cast.order,
             character: cast.character,
-            profilePath: cast.profile_path ? `${config.tmdbImageLarge}${cast.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Profile"
+            profilePath: cast.profile_path ? `${config.tmdbImageLarge}${cast.profile_path}` : null
         }
     });
 
@@ -210,7 +210,7 @@ const getCredits = async (id: string, type: string) => {
             creditId: crew.credit_id,
             department: crew.department,
             job: crew.job,
-            profilePath: crew.profile_path ? `${config.tmdbImageLarge}${crew.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Profile"
+            profilePath: crew.profile_path ? `${config.tmdbImageLarge}${crew.profile_path}` : null
         }
     });
     response.cast = cast;
@@ -226,8 +226,8 @@ const getMediaImages = async (id: string, type: string, matureContent: boolean) 
     response.backdrops = response.backdrops.map((backdrop: any) => {
         return {
             aspectRatio: backdrop.aspect_ratio,
-            previewFilePath: backdrop.file_path ? `${config.tmdbImageLarge}${backdrop.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
-            originalFilePath: backdrop.file_path ? `${config.tmdbImageOriginal}${backdrop.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            previewFilePath: backdrop.file_path ? `${config.tmdbImageLarge}${backdrop.file_path}` : null,
+            originalFilePath: backdrop.file_path ? `${config.tmdbImageOriginal}${backdrop.file_path}` : null,
             height: backdrop.height,
             width: backdrop.width,
             iso6391: backdrop.iso_639_1,
@@ -238,8 +238,8 @@ const getMediaImages = async (id: string, type: string, matureContent: boolean) 
     response.posters = response.posters.map((poster: any) => {
         return {
             aspectRatio: poster.aspect_ratio,
-            previewFilePath: poster.file_path ? `${config.tmdbImageLarge}${poster.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
-            originalFilePath: poster.file_path ? `${config.tmdbImageOriginal}${poster.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            previewFilePath: poster.file_path ? `${config.tmdbImageLarge}${poster.file_path}` : null,
+            originalFilePath: poster.file_path ? `${config.tmdbImageOriginal}${poster.file_path}` : null,
             height: poster.height,
             width: poster.width,
             iso6391: poster.iso_639_1,
@@ -250,8 +250,8 @@ const getMediaImages = async (id: string, type: string, matureContent: boolean) 
     response.logos = response.logos.map((logo: any) => {
         return {
             aspectRatio: logo.aspect_ratio,
-            previewFilePath: logo.file_path ? `${config.tmdbImageLarge}${logo.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
-            originalFilePath: logo.file_path ? `${config.tmdbImageOriginal}${logo.file_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+            previewFilePath: logo.file_path ? `${config.tmdbImageLarge}${logo.file_path}` : null,
+            originalFilePath: logo.file_path ? `${config.tmdbImageOriginal}${logo.file_path}` : null,
             height: logo.height,
             width: logo.width,
             iso6391: logo.iso_639_1,

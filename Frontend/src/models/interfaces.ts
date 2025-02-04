@@ -1,7 +1,7 @@
 interface FilmCardData {
     id: number;
     type: string;
-    posterUrl: string;
+    posterUrl: string | null;
     title: string;
     releaseDate: string;
     voteAverage?: number;
@@ -26,7 +26,7 @@ interface PersonCardProps {
     id: number;
     name: string;
     character: string;
-    profileUrl: string;
+    profileUrl: string | null;
 }
 
 interface ProgressProps {
@@ -79,8 +79,8 @@ interface WatchlistItemProps {
     title: string,
     progress: number,
     total_progress: number,
-    backdrop: string,
-    poster: string,
+    backdrop: string | null,
+    poster: string | null,
     favorited: boolean,
     status: string,
     media_id: number,
@@ -93,8 +93,8 @@ interface UserWatchlistItemProps {
     title: string,
     progress: number,
     totalProgress: number,
-    backdrop: string,
-    poster: string,
+    backdrop: string | null,
+    poster: string | null,
     status: string,
     mediaId: number,
     type: string
@@ -106,8 +106,8 @@ interface UserFavoriteItemProps {
     type: string;
     dateAdded: string;
     description: string;
-    poster: string;
-    backdrop: string;
+    poster: string | null;
+    backdrop: string | null;
     index: number;
 }
 
@@ -119,12 +119,12 @@ interface UploadImageProps {
 }
 
 interface SliderItem {
-    backdropUrl: string;
+    backdropUrl: string | null;
     description: string;
     genres: string[];
     id: number;
-    logoUrl: string;
-    posterUrl: string;
+    logoUrl: string | null;
+    posterUrl: string | null;
     releaseDate: string;
     title: string;
     type: string;

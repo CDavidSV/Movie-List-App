@@ -16,7 +16,7 @@ const getHistory = async (req: Request, res: Response) => {
         { $match: matchStr },
         { $sort: { date_updated: -1 } },
         { $limit: 100 },
-        {   
+        {
             $lookup: {
                 from: 'media',
                 let: { media_id: '$media_id', type: '$type' },
@@ -106,8 +106,8 @@ const getHistory = async (req: Request, res: Response) => {
                 dateUpdated: item.date_updated,
                 title: "Untitled",
                 description: "No description available",
-                posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: null,
+                backdropUrl: null,
                 watchlisted: item.watchlisted >= 1 ? true : false,
                 favorited: item.favorited >= 1 ? true : false
             };
@@ -118,8 +118,8 @@ const getHistory = async (req: Request, res: Response) => {
                 dateUpdated: item.date_updated,
                 title: item.media[0].title,
                 description: item.media[0].description,
-                posterUrl: item.media[0].poster_url ? `${config.tmdbImageLarge}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: item.media[0].backdrop_url ? `${config.tmdbImageLarge}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: item.media[0].poster_url ? `${config.tmdbImageLarge}${item.media[0].poster_url}` : null,
+                backdropUrl: item.media[0].backdrop_url ? `${config.tmdbImageLarge}${item.media[0].backdrop_url}` : null,
                 watchlisted: item.watchlisted >= 1 ? true : false,
                 favorited: item.favorited >= 1 ? true : false
             }

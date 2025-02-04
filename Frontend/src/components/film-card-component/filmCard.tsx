@@ -16,7 +16,7 @@ import './filmCard.css';
 export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchResult, filmData, onDelete }: FilmCardProps) {
     const hoverContentRef = useRef<HTMLDivElement>(null);
 
-    const activateHover = () => {         
+    const activateHover = () => {
         hoverContentRef.current?.classList.add("active");
     }
 
@@ -36,22 +36,22 @@ export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchRe
 
     return (
         <div onMouseEnter={activateHover} onMouseOut={deactivateHover} className="film-card">
-            <Link 
+            <Link
             onClick={saveSearch}
             onAuxClick={saveSearch}
             to={`/media/${filmData.type}/${filmData.id}`} className="card-anchor">
                 <figure className="poster-image-figure">
-                    <img loading="lazy" src={filmData.posterUrl} alt={filmData.title}/>
+                    <img loading="lazy" src={filmData.posterUrl || "/img/No_Poster.jpeg"} alt={filmData.title}/>
                 </figure>
                 <div className="card-info">
                     <h4>{filmData.title}</h4>
                     <p>{filmData.releaseDate}</p>
                 </div>
             </Link>
-            <div ref={hoverContentRef} className="card-hover-info" style={{backgroundImage: `url(${filmData.posterUrl})`}}>
+            <div ref={hoverContentRef} className="card-hover-info" style={{backgroundImage: `url(${filmData.posterUrl || "/img/No_Poster.jpeg"})`}}>
                 <div className="card-hover-info-content">
                     <Link
-                        className="media-link" 
+                        className="media-link"
                         onClick={saveSearch}
                         onAuxClick={saveSearch}
                         to={`/media/${filmData.type}/${filmData.id}`}/>
@@ -70,12 +70,12 @@ export default React.memo(function FilmCard({ inWatchlist, inFavorites, searchRe
                         </div>
                     </div>
                     <div className="card-hover-info-content-buttons">
-                        <WatchlistButton 
+                        <WatchlistButton
                             size={25}
                             isWatchlisted={inWatchlist}
                             mediaId={filmData.id.toString()}
-                            type={filmData.type}/>  
-                        <FavoriteButton 
+                            type={filmData.type}/>
+                        <FavoriteButton
                             size={25}
                             isFavorite={inFavorites}
                             mediaId={filmData.id.toString()}

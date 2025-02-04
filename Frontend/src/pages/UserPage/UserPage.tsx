@@ -26,8 +26,8 @@ function WatchlistItem({ title, progress, totalProgress, backdrop, poster, statu
         <div className="mb-3">
             <Link className="flex items-center gap-5" to={`/media/${type}/${mediaId}`}>
                 <picture>
-                    <source media="(max-width: 767px)" srcSet={poster} />
-                    <img className="w-20 max-w-20 rounded-lg md:w-52 md:max-w-52" src={backdrop} alt={title} loading="lazy" />
+                    <source media="(max-width: 767px)" srcSet={poster || "/img/No_Poster.jpeg"} />
+                    <img className="w-20 max-w-20 rounded-lg md:w-52 md:max-w-52" src={backdrop || "/img/No_Backdrop.jpeg"} alt={title} loading="lazy" />
                 </picture>
                 <div className="overflow-hidden">
                     <h3 className="text-md lg:text-xl m-0 w-full truncate max-w-[600px]">{title}</h3>
@@ -51,8 +51,8 @@ function FavoriteItem({ index, mediaId, title, type, poster, backdrop }: UserFav
             <Link className="flex items-center gap-5 justify-start" to={`/media/${type}/${mediaId}`}>
                 <h1 className="text-5xl text-center w-[82px] max-w-[82px] flex-shrink-0">{index}</h1>
                 <picture className="ml-1">
-                    <source media="(max-width: 767px)" srcSet={poster} />
-                    <img className="w-20 max-w-20 rounded-lg md:w-52 md:max-w-52" src={backdrop} alt={title} loading="lazy" />
+                    <source media="(max-width: 767px)" srcSet={poster || "/img/No_Poster.jpeg"} />
+                    <img className="w-20 max-w-20 rounded-lg md:w-52 md:max-w-52" src={backdrop || "/img/No_Backdrop.jpeg"} alt={title} loading="lazy" />
                 </picture>
                 <div className="overflow-hidden">
                     <h3 className="text-md lg:text-xl m-0 w-full truncate max-w-[600px]">{title}</h3>

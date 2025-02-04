@@ -23,9 +23,9 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
 
     let match: any = { user_id: req.user?.id, status: status };
     let sort: any = { updated_date: -1 };
-    if (status === 3) { 
+    if (status === 3) {
         match = { user_id: req.user?.id }
-        sort = { status: 1, updated_date: -1 } 
+        sort = { status: 1, updated_date: -1 }
     };
 
     if (sanitizedCursor.length) {
@@ -43,7 +43,7 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
         { $match: match },
         { $sort: sort },
         { $limit: 100 },
-        {   
+        {
             $lookup: {
                 from: 'media',
                 let: { media_id: '$media_id', type: '$type' },
@@ -104,8 +104,8 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 dateAdded: item.date_added,
                 title: "Untitled",
                 description: "No description available",
-                posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: null,
+                backdropUrl: null,
                 type: item.type,
                 favorited: item.favorited >= 1 ? true : false,
                 status: watchlistStatus.get(item.status),
@@ -118,8 +118,8 @@ const getWatchlist = async (req: express.Request, res: express.Response) => {
                 dateAdded: item.date_added,
                 title: item.media[0].title,
                 description: item.media[0].description,
-                posterUrl: item.media[0].poster_url ? `${config.tmdbImageLarge}${item.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: item.media[0].backdrop_url ? `${config.tmdbImageXLarge}${item.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: item.media[0].poster_url ? `${config.tmdbImageLarge}${item.media[0].poster_url}` : null,
+                backdropUrl: item.media[0].backdrop_url ? `${config.tmdbImageXLarge}${item.media[0].backdrop_url}` : null,
                 type: item.type,
                 favorited: item.favorited >= 1 ? true : false,
                 status: watchlistStatus.get(item.status),
@@ -152,10 +152,10 @@ const updateWatchlist = async (req: express.Request, res: express.Response) => {
     try {
         const mediaData = findMediaById(value.media_id as string, value.type);
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
-        
+
         // Check progress
         if (value.progress < 0) value.progress = 0;
-        if (mediaData instanceof Series && value.progress > mediaData.numberOfEpisodes) { 
+        if (mediaData instanceof Series && value.progress > mediaData.numberOfEpisodes) {
             value.progress = mediaData.numberOfEpisodes;
         } else if (mediaData instanceof Movie && value.progress > 1) {
             value.progress = 1;
@@ -163,7 +163,7 @@ const updateWatchlist = async (req: express.Request, res: express.Response) => {
 
         // Save to database
         const watchlistItem = await watchlistSchema.findOneAndUpdate({ user_id: req.user!.id, media_id: value.media_id, type: value.type  }, { status: value.status, progress: value.progress, updated_date: Date.now(), type: value.type }, { upsert: true, setDefaultsOnInsert: true, new: true });
-        
+
         sendResponse(res, { status: 200, message: "Updated watchlist item", responsePayload: { id: watchlistItem?._id.toString() } });
     } catch (err) {
         console.error(err);

@@ -90,7 +90,7 @@ export default class Series {
             showId: mediajson.next_episode_to_air.show_id,
             stillPath: mediajson.next_episode_to_air.still_path
         } as Episode : null;
-        
+
         this.createdBy = mediajson.created_by.map((author: any) => {
             return {
                 id: author.id,
@@ -159,7 +159,7 @@ export default class Series {
                 name: member.name,
                 originalName: member.original_name,
                 popularity: member.popularity,
-                profilePath: member.profile_path ? `${config.tmdbImageLarge}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+                profilePath: member.profile_path ? `${config.tmdbImageLarge}${member.profile_path}` : null,
                 castId: member.cast_id,
                 character: member.character,
                 creditId: member.credit_id,
@@ -175,7 +175,7 @@ export default class Series {
                 name: member.name,
                 originalName: member.original_name,
                 popularity: member.popularity,
-                profilePath: member.profile_path ? `${config.tmdbImageLarge}${member.profile_path}` : "https://via.placeholder.com/300x450.png?text=No+Image",
+                profilePath: member.profile_path ? `${config.tmdbImageLarge}${member.profile_path}` : null,
                 creditId: member.credit_id,
                 department: member.department,
                 job: member.job
@@ -194,8 +194,8 @@ export default class Series {
                 id: media.id,
                 title: media.name,
                 description: media.overview,
-                posterUrl: media.poster_path ? `${config.tmdbImageLarge}${media.poster_path}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: media.backdrop_path ? `${config.tmdbImageOriginal}${media.backdrop_path}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: media.poster_path ? `${config.tmdbImageLarge}${media.poster_path}` : null,
+                backdropUrl: media.backdrop_path ? `${config.tmdbImageOriginal}${media.backdrop_path}` : null,
                 type: media.media_type === "tv" ? "series" : "movie",
                 releaseDate: media.first_air_date || media.release_date,
                 voteAverage: media.vote_average,

@@ -144,8 +144,8 @@ interface CustomMediaResponse {
     id: number;
     title: string;
     description: string;
-    posterUrl: string;
-    backdropUrl: string;
+    posterUrl: string | null;
+    backdropUrl: string | null;
     logoUrl?: string;
     type: string;
     genres: string[];
@@ -154,7 +154,7 @@ interface CustomMediaResponse {
     votes: number;
 }
 
-export { 
+export {
     User,
     APIResponse,
     Author,

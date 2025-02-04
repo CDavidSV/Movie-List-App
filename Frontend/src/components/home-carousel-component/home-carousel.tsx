@@ -7,12 +7,12 @@ import { saveSearchResult, shortenNumber } from '../../helpers/util.helpers';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import './home-carousel.css';
 
-const Logo = ({ title, logoUrl }: { title: string, logoUrl: string }) => {
+const Logo = ({ title, logoUrl }: { title: string, logoUrl: string | null }) => {
   const [logoError, setLogoError] = useState<boolean>(false);
 
   return (
     <>
-      {logoError ? (
+      {logoError || !logoUrl ? (
         <h1 className='text-xl sm:text-3xl md:text-6xl'>{title}</h1>
       ) : (
         <img src={logoUrl} alt={`logo-${title}`} loading="eager" onError={() => setLogoError(true)} />
@@ -195,7 +195,7 @@ export default function HomeCarousel({ items }: { items: SliderItem[] }) {
         <div className="images-wrapper">
           {slides.map((item, index) => (
             <div key={`${item.backdropUrl}-${index}`} className={`slide${index + 1 === activeSlide ? ' active' : ''}`}>
-              <img className="slide-backdrop-img" src={item.backdropUrl} alt={`backdrop-${item.title}`} loading="eager" />
+              <img className="slide-backdrop-img" src={item.backdropUrl || "/img/No_Backdrop.jpeg"} alt={`backdrop-${item.title}`} loading="eager" />
             </div>
           ))}
         </div>

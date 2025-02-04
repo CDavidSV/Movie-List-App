@@ -16,7 +16,7 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
         { $match: mongoQuery },
         { $sort: { rank: 1 } },
         { $limit: 100 },
-        {   
+        {
             $lookup: {
                 from: 'media',
                 let: { media_id: '$media_id', type: '$type' },
@@ -78,8 +78,8 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 dateAdded: favorite.date_added,
                 title: "Untitled",
                 description: "No description available",
-                posterUrl: "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: null,
+                backdropUrl: null,
                 watchlisted: favorite.watchlisted >= 1 ? true : false
             };
             return {
@@ -89,8 +89,8 @@ const getFavorites = async (req: express.Request, res: express.Response) => {
                 dateAded: favorite.date_added,
                 title: favorite.media[0].title,
                 description: favorite.media[0].description,
-                posterUrl: favorite.media[0].poster_url ? `${config.tmdbImageLarge}${favorite.media[0].poster_url}` : "https://via.placeholder.com/300x450.png?text=No+Poster",
-                backdropUrl: favorite.media[0].backdrop_url ? `${config.tmdbImageLarge}${favorite.media[0].backdrop_url}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop",
+                posterUrl: favorite.media[0].poster_url ? `${config.tmdbImageLarge}${favorite.media[0].poster_url}` : null,
+                backdropUrl: favorite.media[0].backdrop_url ? `${config.tmdbImageLarge}${favorite.media[0].backdrop_url}` : null,
                 watchlisted: favorite.watchlisted >= 1 ? true : false
             }
         });
@@ -187,7 +187,7 @@ const reorderFavorites = async (req: express.Request, res: express.Response) => 
             case "before":
                 // Find the previos favorite from the reference favorite
                 const previousFavorite = await favoritesSchema.findOne().where("rank").lt(reference.rank).where("_id").ne(target.id).sort({ rank: -1 });
-                if (!previousFavorite) { 
+                if (!previousFavorite) {
                     newRank = getPreviousLexoRank(reference.rank);
                 } else {
                     newRank = calculateLexoRank(previousFavorite?.rank, reference.rank);
@@ -209,7 +209,7 @@ const reorderFavorites = async (req: express.Request, res: express.Response) => 
         // Update the target favorite with the new rank
         await favoritesSchema.findByIdAndUpdate(target._id, { rank: newRank });
         res.status(200).send({ status: "success", message: "Favorites reordered" });
-        
+
     } catch (err) {
         console.error(err);
         return res.status(500).send({ status: "error", message: "Error reordering favorites" });

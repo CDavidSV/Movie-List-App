@@ -114,15 +114,15 @@ const getMediaById = async (req: express.Request, res: express.Response) => {
 
     if (!media_id || !type) return sendResponse(res, { status: 400, message: "Missing query parameters" });
     if (!isValidMediaType(type as string)) return sendResponse(res, { status: 400, message: "Invalid type" });
-    
+
     try {
         const mediaData: MovieResponse | SeriesResponse | null = await findMediaById(media_id as string, type as string, ['videos', 'credits', 'recommendations']);
         if (!mediaData) return sendResponse(res, { status: 404, message: "Media not found" });
 
         // Replace poster and backdrop paths with full URLs.
-        mediaData.posterPath ? mediaData.posterPath = `${config.tmdbImageLarge}${mediaData.posterPath}` : "https://via.placeholder.com/300x450.png?text=No+Poster";
-        mediaData.backdropPath ? mediaData.backdropPath = `${config.tmdbImageOriginal}${mediaData.backdropPath}` : "https://via.placeholder.com/1280x720.png?text=No+Backdrop";
-    
+        mediaData.posterPath ? mediaData.posterPath = `${config.tmdbImageLarge}${mediaData.posterPath}` : null;
+        mediaData.backdropPath ? mediaData.backdropPath = `${config.tmdbImageOriginal}${mediaData.backdropPath}` : null;
+
         sendResponse(res, { status: 200, message: "Media fetched successfully", responsePayload: mediaData });
     } catch (err) {
         console.error(err);
@@ -234,7 +234,7 @@ const getMoviesHomeCarousel = async (req: express.Request, res: express.Response
 
     let response = await fetchMedia("movie", "upcoming", page, matureContent);
     if (!response) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
-    
+
     const imageRequests = [];
     const carouselItems: CustomMediaResponse[] = [];
     const pickedIndices = new Set();
@@ -248,23 +248,23 @@ const getMoviesHomeCarousel = async (req: express.Request, res: express.Response
         carouselItems.push(response[randomIndex]);
         imageRequests.push(getMediaImages(response[randomIndex].id.toString(), 'movie', matureContent));
     }
-    
+
     const imageResponses = await Promise.all(imageRequests);
     if (!imageResponses) return sendResponse(res, { status: 500, message: "Error fetching movies carousel" });
 
     imageResponses.forEach((imageResponse, index) => {
-        carouselItems[index].logoUrl = imageResponse && imageResponse.logos && imageResponse.logos.length > 0 ? imageResponse.logos[0].previewFilePath : "https://via.placeholder.com/350x100.png?text=No+Logo";
+        carouselItems[index].logoUrl = imageResponse && imageResponse.logos && imageResponse.logos.length > 0 ? imageResponse.logos[0].previewFilePath : null;
     });
-    
+
     sendResponse(res, { status: 200, message: "Movies fetched successfully", responsePayload: carouselItems });
 };
 
-export { 
-    getPopularMovies, 
-    getUpcomingMovies, 
-    searchByTitle, 
-    getTopRatedMovies, 
-    getNowPlayingMovies, 
+export {
+    getPopularMovies,
+    getUpcomingMovies,
+    searchByTitle,
+    getTopRatedMovies,
+    getNowPlayingMovies,
     getMediaById,
     getPopularSeries,
     getMoviesByGenre,
