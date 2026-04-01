@@ -1,6 +1,6 @@
 import Movie from "../Models/Movie";
 import Series from "../Models/Series";
-import mediaSchema from "../scheemas/mediaSchema"
+import mediaSchema from "../schemas/mediaSchema"
 
 const saveMovie = async (mediaData: Movie | Series, type: string) => {
     // Check if media already exists.

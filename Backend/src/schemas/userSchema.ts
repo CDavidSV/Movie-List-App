@@ -18,7 +18,7 @@ interface IUser {
 
 const UserSchema = new Schema<IUser>({
     username: { type: String, required: true, unique: true },
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     profile_picture_url: { type: String },
     profile_banner_url: { type: String },
     verified: { type: Boolean, default: false, required: true },
@@ -32,7 +32,5 @@ const UserSchema = new Schema<IUser>({
     favorite_genres: { type: [String] }
 });
 
-UserSchema.index({ username: 1 });
-UserSchema.index({ email: 1 });
-
-export default model<IUser>("User", UserSchema);
+const UserModel = model<IUser>("User", UserSchema);
+export default UserModel;

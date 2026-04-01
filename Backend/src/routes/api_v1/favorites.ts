@@ -1,5 +1,5 @@
 import express from "express";
-import favoritesSchema from "../../scheemas/favoritesSchema";
+import favoritesSchema from "../../schemas/favoritesSchema";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import { calculateLexoRank, getNextLexoRank, getPreviousLexoRank } from "../../util/lexorank";
 import { sendResponse } from "../../util/apiHandler";

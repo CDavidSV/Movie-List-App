@@ -1,8 +1,8 @@
 
-import historySchema from "../scheemas/historySchema";
-import userSchema from "../scheemas/userSchema";
-import watchlistSchema from "../scheemas/watchlistSchema";
-import favoritesSchema from "../scheemas/favoritesSchema";
+import historySchema from "../schemas/historySchema";
+import userSchema from "../schemas/userSchema";
+import watchlistSchema from "../schemas/watchlistSchema";
+import favoritesSchema from "../schemas/favoritesSchema";
 
 // Automatic job that deletes users scheduled for deletion
 const userCleanup = async () => {
@@ -23,7 +23,7 @@ const userCleanup = async () => {
         const nextCleanupTimestamp = new Date();
         nextCleanupTimestamp.setDate(nextCleanupTimestamp.getDate() + 1);
         nextCleanupTimestamp.setHours(0, 0, 0, 0);
-    
+
         console.log('User cleanup job finished.');
         setTimeout(userCleanup, nextCleanupTimestamp.getTime() - Date.now());
     }

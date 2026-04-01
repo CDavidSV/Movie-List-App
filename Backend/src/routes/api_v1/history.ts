@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import historySchema from "../../scheemas/historySchema";
+import historySchema from "../../schemas/historySchema";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";

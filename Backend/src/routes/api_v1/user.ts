@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { sendResponse } from "../../util/apiHandler";
-import watchlistSchema from "../../scheemas/watchlistSchema";
-import favoritesSchema from "../../scheemas/favoritesSchema";
+import watchlistSchema from "../../schemas/watchlistSchema";
+import favoritesSchema from "../../schemas/favoritesSchema";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import Series from "../../Models/Series";
-import userSchema from "../../scheemas/userSchema";
+import userSchema from "../../schemas/userSchema";
 import { SHA256 } from "crypto-js";
 import Joi from "joi";
 import { v4 as uuid } from 'uuid';

@@ -1,5 +1,5 @@
 import express from "express";
-import watchlistSchema from "../../scheemas/watchlistSchema";
+import watchlistSchema from "../../schemas/watchlistSchema";
 import { findMediaById, isValidMediaType } from "../../util/TMDB";
 import { sendResponse } from "../../util/apiHandler";
 import config from "../../config/config";

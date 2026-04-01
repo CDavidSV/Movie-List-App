@@ -1,14 +1,13 @@
 import express from "express";
 import { User } from "../../Models/interfaces";
-import UserSchema from "../../scheemas/userSchema";
 import hashPassword from "../../util/hashPassword";
 import { generateNewAccessToken, verifyToken } from "../../util/jwt";
 import SHA256 from "crypto-js/sha256";
 import { createSession, invalidateSession } from "../../util/sessionHandler";
 import config from "../../config/config";
 import { sendResponse } from "../../util/apiHandler";
-import userSchema from "../../scheemas/userSchema";
-import userSessionsSchema from "../../scheemas/userSessionsSchema";
+import userSchema from "../../schemas/userSchema";
+import userSessionsSchema from "../../schemas/userSessionsSchema";
 import Joi from "joi";
 
 const registerUser = async (req: express.Request, res: express.Response) => {
@@ -27,22 +26,22 @@ const registerUser = async (req: express.Request, res: express.Response) => {
 
     try {
         // Check if username already exists.
-        const user = await UserSchema.findOne({ "$or": [{ email: value.email }, { username: value.username }] }, { username: 1, email: 1 });
+        const user = await userSchema.findOne({ "$or": [{ email: { $regex: `^${value.email.toLowerCase()}$`, $options: 'i' } }, { username: value.username }] }, { username: 1, email: 1 });
         if (user && user.username === value.username) return sendResponse(res, { status: 400, message: "Username already in use" });
         if (user && user.email === value.email) return sendResponse(res, { status: 400, message: "Email already in use" });
 
         // Create new user.
-        const newUser = await UserSchema.create(
-            { 
-                username: value.username, 
-                email: value.email, 
-                favorite_genres: value.favorite_genres || [], 
-                verified: false, 
-                password_hash: hashResult.hashedPassword, 
+        const newUser = await userSchema.create(
+            {
+                username: value.username,
+                email: value.email.trim().toLowerCase(),
+                favorite_genres: value.favorite_genres || [],
+                verified: false,
+                password_hash: hashResult.hashedPassword,
                 password_salt: hashResult.salt,
                 joined_at: new Date()
             });
-        
+
         // Create session.
         const session = await createSession(newUser._id.toString(), req);
         if (!session) return sendResponse(res, { status: 500, message: "Error on sign up" });
@@ -75,18 +74,18 @@ const registerUser = async (req: express.Request, res: express.Response) => {
             }
         );
 
-        sendResponse(res, { 
-            status: 201, 
-            message: "User created", 
-            responsePayload: { 
-                username: newUser.username, 
-                userEmail: newUser.email, 
+        sendResponse(res, {
+            status: 201,
+            message: "User created",
+            responsePayload: {
+                username: newUser.username,
+                userEmail: newUser.email,
                 userId: newUser._id.toString(),
                 expiresIn: session.tokenExpirations.accessTokenExpitation,
                 matureContent: newUser.mature_content,
                 publicWatchlist: newUser.public_watchlist,
                 publicFavorites: newUser.public_favorites
-            } 
+            }
         });
     } catch (err) {
         console.error(err);
@@ -102,7 +101,9 @@ const loginUser = async (req: express.Request, res: express.Response) => {
     if (!username || !password) return sendResponse(res, { status: 400, message: "Invalid request body" });
 
     try {
-        const user = await UserSchema.findOne({ email: username });
+        console.log(await userSchema.countDocuments())
+
+        const user = await userSchema.findOne({ email: username.trim().toLowerCase() });
         if (!user) return sendResponse(res, { status: 400, message: "Invalid email or password" });
 
         // Check if user account is scheduled for deletion.
@@ -111,6 +112,8 @@ const loginUser = async (req: express.Request, res: express.Response) => {
         const passwordHash = user.password_hash;
         const passwordSalt = user.password_salt;
 
+        console.log(SHA256(`${password}${passwordSalt}`).toString());
+        console.log(passwordHash);
         if (SHA256(`${password}${passwordSalt}`).toString() !== passwordHash) return sendResponse(res, { status: 400, message: "Invalid email or password" });
 
         // Create session.
