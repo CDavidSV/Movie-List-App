@@ -537,7 +537,7 @@ const searchUserByName = async (req: Request, res: Response) => {
                 text: {
                     query: `/${username}/`,
                     path: "username",
-                    fuzzy: {}
+                    fuzzy: { maxEdits: 1 }
                 }
             }
         },
