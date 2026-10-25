@@ -1,31 +1,33 @@
-import axios from 'axios';
-import Movie from '../Models/Movie';
-import Series from '../Models/Series';
-import config from '../config/config';
-import saveMovie from './mediaHandler';
-import { CustomMediaResponse, Genre } from '../Models/interfaces';
+import axios from "axios";
+import Movie from "../Models/Movie";
+import Series from "../Models/Series";
+import config from "../config/config";
+import saveMovie from "./mediaHandler";
+import { CustomMediaResponse, Genre } from "../Models/interfaces";
 
 const tmdb_token = process.env.TMDB_ACCESS_TOKEN;
 
-const genres: { movies: Genre[], series: Genre[] } = { movies: [], series: [] };
+const genres: { movies: Genre[]; series: Genre[] } = { movies: [], series: [] };
 let clearGenresTimeout: NodeJS.Timeout | null = null;
 
 const makeTMDBRequest = async (url: string, matureContent: boolean = false) => {
     const path = url.split("?")[0];
     const params = url.split("?")[1];
     return await axios({
-        method: 'get',
+        method: "get",
         url: `https://api.themoviedb.org/3${path}?include_adult=${matureContent}${params ? `&${params}` : ""}`,
         headers: {
-            "Authorization": "Bearer " + tmdb_token,
-            "Content-Type": "application/json"
-        }
-    }).then((response) => {
-        return response.data;
-    }).catch((err) => {
-        console.error(`Failed to make TMDB request to ${url}:`.red, err);
-        return null;
+            Authorization: "Bearer " + tmdb_token,
+            "Content-Type": "application/json",
+        },
     })
+        .then((response) => {
+            return response.data;
+        })
+        .catch((err) => {
+            console.error(`Failed to make TMDB request to ${url}:`.red, err);
+            return null;
+        });
 };
 
 /**
@@ -33,10 +35,19 @@ const makeTMDBRequest = async (url: string, matureContent: boolean = false) => {
  * @param type
  * @returns
  */
-const fetchMedia  = async (type: string, url: string, page: number, matureContent: boolean = false) => {
-    if (type !== "movie" && type !== "tv") throw new Error("Invalid media type");
+const fetchMedia = async (
+    type: string,
+    url: string,
+    page: number,
+    matureContent: boolean = false,
+) => {
+    if (type !== "movie" && type !== "tv")
+        throw new Error("Invalid media type");
 
-    const response = await makeTMDBRequest(`/${type}/${url}?language=en-US&page=${page}`, matureContent);
+    const response = await makeTMDBRequest(
+        `/${type}/${url}?language=en-US&page=${page}`,
+        matureContent,
+    );
     if (!response) return null;
 
     let media: CustomMediaResponse[] = [];
@@ -46,14 +57,20 @@ const fetchMedia  = async (type: string, url: string, page: number, matureConten
                 id: item.id,
                 title: item.title,
                 description: item.overview,
-                posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : null,
-                backdropUrl: item.backdrop_path ? `${config.tmdbImageXXLarge}${item.backdrop_path}` : null,
+                posterUrl: item.poster_path
+                    ? `${config.tmdbImageLarge}${item.poster_path}`
+                    : null,
+                backdropUrl: item.backdrop_path
+                    ? `${config.tmdbImageXXLarge}${item.backdrop_path}`
+                    : null,
                 type: "movie",
-                genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
+                genres: item.genre_ids.map((genreId: number) =>
+                    getGenreName(genreId, "movie"),
+                ),
                 releaseDate: item.release_date,
                 voteAverage: item.vote_average,
-                votes: item.vote_count
-            } as CustomMediaResponse
+                votes: item.vote_count,
+            } as CustomMediaResponse;
         });
 
         return media;
@@ -65,22 +82,37 @@ const fetchMedia  = async (type: string, url: string, page: number, matureConten
             id: item.id,
             title: item.name,
             description: item.overview,
-            posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : null,
-            backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : null,
+            posterUrl: item.poster_path
+                ? `${config.tmdbImageLarge}${item.poster_path}`
+                : null,
+            backdropUrl: item.backdrop_path
+                ? `${config.tmdbImageXLarge}${item.backdrop_path}`
+                : null,
             type: "series",
-            genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "series")),
+            genres: item.genre_ids.map((genreId: number) =>
+                getGenreName(genreId, "series"),
+            ),
             releaseDate: item.first_air_date, // release_date is first_air_date for series
             voteAverage: item.vote_average,
-            votes: item.vote_count
-        } as CustomMediaResponse
+            votes: item.vote_count,
+        } as CustomMediaResponse;
     });
     return media;
 };
 
-const findMediaByTitle = async (title: string, matureContent: boolean = false) => {
-    const [ moviesResponse, seriesResponse ] = await Promise.all([
-        makeTMDBRequest(`/search/movie?query=${title}&language=en-US&page=1`, matureContent),
-        makeTMDBRequest(`/search/tv?query=${title}&language=en-US&page=1`, matureContent)
+const findMediaByTitle = async (
+    title: string,
+    matureContent: boolean = false,
+) => {
+    const [moviesResponse, seriesResponse] = await Promise.all([
+        makeTMDBRequest(
+            `/search/movie?query=${title}&language=en-US&page=1`,
+            matureContent,
+        ),
+        makeTMDBRequest(
+            `/search/tv?query=${title}&language=en-US&page=1`,
+            matureContent,
+        ),
     ]);
     if (!moviesResponse || !seriesResponse) return null;
 
@@ -91,15 +123,21 @@ const findMediaByTitle = async (title: string, matureContent: boolean = false) =
                 id: movie.id,
                 title: movie.title,
                 description: movie.overview,
-                posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : null,
-                backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : null,
+                posterUrl: movie.poster_path
+                    ? `${config.tmdbImageLarge}${movie.poster_path}`
+                    : null,
+                backdropUrl: movie.backdrop_path
+                    ? `${config.tmdbImageXLarge}${movie.backdrop_path}`
+                    : null,
                 type: "movie",
-                genres: movie.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
+                genres: movie.genre_ids.map((genreId: number) =>
+                    getGenreName(genreId, "movie"),
+                ),
                 releaseDate: movie.release_date,
                 voteAverage: movie.vote_average,
-                votes: movie.vote_count
+                votes: movie.vote_count,
             });
-        };
+        }
     });
     seriesResponse.results.forEach((movie: any) => {
         if (movie.poster_path && movie.name) {
@@ -107,15 +145,21 @@ const findMediaByTitle = async (title: string, matureContent: boolean = false) =
                 id: movie.id,
                 title: movie.name,
                 description: movie.overview,
-                posterUrl: movie.poster_path ? `${config.tmdbImageLarge}${movie.poster_path}` : null,
-                backdropUrl: movie.backdrop_path ? `${config.tmdbImageXLarge}${movie.backdrop_path}` : null,
+                posterUrl: movie.poster_path
+                    ? `${config.tmdbImageLarge}${movie.poster_path}`
+                    : null,
+                backdropUrl: movie.backdrop_path
+                    ? `${config.tmdbImageXLarge}${movie.backdrop_path}`
+                    : null,
                 type: "series",
-                genres: movie.genre_ids.map((genreId: number) => getGenreName(genreId, "series")),
+                genres: movie.genre_ids.map((genreId: number) =>
+                    getGenreName(genreId, "series"),
+                ),
                 releaseDate: movie.first_air_date,
                 voteAverage: movie.vote_average,
-                votes: movie.vote_count
+                votes: movie.vote_count,
             });
-        };
+        }
     });
 
     return media;
@@ -127,23 +171,36 @@ const findMediaByTitle = async (title: string, matureContent: boolean = false) =
  * @param type type of the media (movie | series)
  * @returns Movie | Series | null
  */
-const findMediaById = async (id: string, type: string, append?: string[]): Promise<Movie | Series | null> => {
+const findMediaById = async (
+    id: string,
+    type: string,
+    append?: string[],
+): Promise<Movie | Series | null> => {
     let appendString = "";
     if (append) {
         const validAppendStrings = ["videos", "credits", "recommendations"];
-        const filteredAppendStrings = append.filter((str: string) => validAppendStrings.includes(str));
-        appendString = filteredAppendStrings.length > 0 ? `?append_to_response=${filteredAppendStrings.join(",")}` : "";
+        const filteredAppendStrings = append.filter((str: string) =>
+            validAppendStrings.includes(str),
+        );
+        appendString =
+            filteredAppendStrings.length > 0
+                ? `?append_to_response=${filteredAppendStrings.join(",")}`
+                : "";
     }
 
     if (type === "movie") {
-        const data = await makeTMDBRequest(`/movie/${id}${appendString}&language=en-US`);
+        const data = await makeTMDBRequest(
+            `/movie/${id}${appendString}&language=en-US`,
+        );
         if (!data) return null;
 
         const movie = new Movie(data);
         saveMovie(movie, type);
         return movie;
     } else if (type === "series") {
-        const data = await makeTMDBRequest(`/tv/${id}${appendString}&language=en-US`);
+        const data = await makeTMDBRequest(
+            `/tv/${id}${appendString}&language=en-US`,
+        );
         if (!data) return null;
 
         const series = new Series(data);
@@ -154,8 +211,15 @@ const findMediaById = async (id: string, type: string, append?: string[]): Promi
     }
 };
 
-const fetchMoviesByGenre = async (genreId: number, page: number, matureContent: boolean = false) => {
-    const response = await makeTMDBRequest(`/discover/movie?with_genres=${genreId}&page=${page}&include_video=false&language=en-US&sort_by=popularity.desc`, matureContent);
+const fetchMoviesByGenre = async (
+    genreId: number,
+    page: number,
+    matureContent: boolean = false,
+) => {
+    const response = await makeTMDBRequest(
+        `/discover/movie?with_genres=${genreId}&page=${page}&include_video=false&language=en-US&sort_by=popularity.desc`,
+        matureContent,
+    );
     if (!response) return null;
 
     const media = response.results.map((item: any) => {
@@ -165,20 +229,28 @@ const fetchMoviesByGenre = async (genreId: number, page: number, matureContent: 
             title: item.title,
             type: "movie",
             description: item.overview,
-            posterUrl: item.poster_path ? `${config.tmdbImageLarge}${item.poster_path}` : null,
-            backdropUrl: item.backdrop_path ? `${config.tmdbImageXLarge}${item.backdrop_path}` : null,
-            genres: item.genre_ids.map((genreId: number) => getGenreName(genreId, "movie")),
+            posterUrl: item.poster_path
+                ? `${config.tmdbImageLarge}${item.poster_path}`
+                : null,
+            backdropUrl: item.backdrop_path
+                ? `${config.tmdbImageXLarge}${item.backdrop_path}`
+                : null,
+            genres: item.genre_ids.map((genreId: number) =>
+                getGenreName(genreId, "movie"),
+            ),
             releaseDate: item.release_date,
             voteAverage: item.vote_average,
-            votes: item.vote_count
-        } as CustomMediaResponse
+            votes: item.vote_count,
+        } as CustomMediaResponse;
     });
 
     return media;
 };
 
 const getCredits = async (id: string, type: string) => {
-    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/credits?language=en-US`);
+    const response = await makeTMDBRequest(
+        `/${type === "series" ? "tv" : "movie"}/${id}/credits?language=en-US`,
+    );
     if (!response) return null;
 
     const cast = response.cast.map((cast: any) => {
@@ -194,8 +266,10 @@ const getCredits = async (id: string, type: string) => {
             creditId: cast.credit_id,
             order: cast.order,
             character: cast.character,
-            profilePath: cast.profile_path ? `${config.tmdbImageLarge}${cast.profile_path}` : null
-        }
+            profilePath: cast.profile_path
+                ? `${config.tmdbImageLarge}${cast.profile_path}`
+                : null,
+        };
     });
 
     const crew = response.crew.map((crew: any) => {
@@ -210,8 +284,10 @@ const getCredits = async (id: string, type: string) => {
             creditId: crew.credit_id,
             department: crew.department,
             job: crew.job,
-            profilePath: crew.profile_path ? `${config.tmdbImageLarge}${crew.profile_path}` : null
-        }
+            profilePath: crew.profile_path
+                ? `${config.tmdbImageLarge}${crew.profile_path}`
+                : null,
+        };
     });
     response.cast = cast;
     response.crew = crew;
@@ -219,51 +295,72 @@ const getCredits = async (id: string, type: string) => {
     return response;
 };
 
-const getMediaImages = async (id: string, type: string, matureContent: boolean) => {
-    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/images?include_image_language=en,null&include_video=false`, matureContent);
+const getMediaImages = async (
+    id: string,
+    type: string,
+    matureContent: boolean,
+) => {
+    const response = await makeTMDBRequest(
+        `/${type === "series" ? "tv" : "movie"}/${id}/images?include_image_language=en,null&include_video=false`,
+        matureContent,
+    );
     if (!response) return null;
 
     response.backdrops = response.backdrops.map((backdrop: any) => {
         return {
             aspectRatio: backdrop.aspect_ratio,
-            previewFilePath: backdrop.file_path ? `${config.tmdbImageLarge}${backdrop.file_path}` : null,
-            originalFilePath: backdrop.file_path ? `${config.tmdbImageOriginal}${backdrop.file_path}` : null,
+            previewFilePath: backdrop.file_path
+                ? `${config.tmdbImageLarge}${backdrop.file_path}`
+                : null,
+            originalFilePath: backdrop.file_path
+                ? `${config.tmdbImageOriginal}${backdrop.file_path}`
+                : null,
             height: backdrop.height,
             width: backdrop.width,
             iso6391: backdrop.iso_639_1,
             voteAverage: backdrop.vote_average,
-            voteCount: backdrop.vote_count
-        }
+            voteCount: backdrop.vote_count,
+        };
     });
     response.posters = response.posters.map((poster: any) => {
         return {
             aspectRatio: poster.aspect_ratio,
-            previewFilePath: poster.file_path ? `${config.tmdbImageLarge}${poster.file_path}` : null,
-            originalFilePath: poster.file_path ? `${config.tmdbImageOriginal}${poster.file_path}` : null,
+            previewFilePath: poster.file_path
+                ? `${config.tmdbImageLarge}${poster.file_path}`
+                : null,
+            originalFilePath: poster.file_path
+                ? `${config.tmdbImageOriginal}${poster.file_path}`
+                : null,
             height: poster.height,
             width: poster.width,
             iso6391: poster.iso_639_1,
             voteAverage: poster.vote_average,
-            voteCount: poster.vote_count
-        }
+            voteCount: poster.vote_count,
+        };
     });
     response.logos = response.logos.map((logo: any) => {
         return {
             aspectRatio: logo.aspect_ratio,
-            previewFilePath: logo.file_path ? `${config.tmdbImageLarge}${logo.file_path}` : null,
-            originalFilePath: logo.file_path ? `${config.tmdbImageOriginal}${logo.file_path}` : null,
+            previewFilePath: logo.file_path
+                ? `${config.tmdbImageLarge}${logo.file_path}`
+                : null,
+            originalFilePath: logo.file_path
+                ? `${config.tmdbImageOriginal}${logo.file_path}`
+                : null,
             height: logo.height,
             width: logo.width,
             iso6391: logo.iso_639_1,
             voteAverage: logo.vote_average,
-            voteCount: logo.vote_count
-        }
+            voteCount: logo.vote_count,
+        };
     });
     return response;
 };
 
 const getMediaVideos = async (id: string, type: string) => {
-    const response = await makeTMDBRequest(`/${type === 'series' ? 'tv' : 'movie'}/${id}/videos?i`);
+    const response = await makeTMDBRequest(
+        `/${type === "series" ? "tv" : "movie"}/${id}/videos?i`,
+    );
     if (!response) return null;
 
     response.results = response.results.map((video: any) => {
@@ -278,31 +375,63 @@ const getMediaVideos = async (id: string, type: string) => {
             type: video.type,
             official: video.official,
             publishedAt: video.published_at,
-            thumbnail: video.site === "YouTube" ? `https://img.youtube.com/vi/${video.key}/maxresdefault.jpg` : null
-        }
+            thumbnail:
+                video.site === "YouTube"
+                    ? `https://img.youtube.com/vi/${video.key}/maxresdefault.jpg`
+                    : null,
+        };
     });
 
     return response.results;
 };
 
+const getWatchProviders = async (id: string, type: string, region: string) => {
+    const response = await makeTMDBRequest(
+        `/${type === "series" ? "tv" : "movie"}/${id}/watch/providers`,
+    );
+    if (!response) return null;
+
+    const mapProviders = (providers?: any[]) =>
+        (providers || []).map((provider: any) => ({
+            id: provider.provider_id,
+            name: provider.provider_name,
+            logoUrl: provider.logo_path
+                ? `${config.tmdbImageSmall}${provider.logo_path}`
+                : null,
+        }));
+
+    const regionData = response.results?.[region];
+    return {
+        region,
+        link: regionData?.link || null,
+        stream: mapProviders(regionData?.flatrate),
+        rent: mapProviders(regionData?.rent),
+        buy: mapProviders(regionData?.buy),
+    };
+};
+
 const fetchGenres = async () => {
     const [seriesGenres, movieGenres] = await Promise.all([
         makeTMDBRequest(`/genre/tv/list?language=en`),
-        makeTMDBRequest(`/genre/movie/list?language=en`)
+        makeTMDBRequest(`/genre/movie/list?language=en`),
     ]);
-    if (!seriesGenres || !movieGenres) throw new Error("Failed to fetch genres");
+    if (!seriesGenres || !movieGenres)
+        throw new Error("Failed to fetch genres");
 
     genres.movies = movieGenres.genres;
     genres.series = seriesGenres.genres;
 
     if (clearGenresTimeout) clearTimeout(clearGenresTimeout);
-    clearGenresTimeout = setTimeout(async () => {
-        try {
-            await fetchGenres();
-        } catch (err) {
-            console.error("Failed to refetch genres: ".red, err);
-        }
-    }, 1000 * 60 * 60 * 24);
+    clearGenresTimeout = setTimeout(
+        async () => {
+            try {
+                await fetchGenres();
+            } catch (err) {
+                console.error("Failed to refetch genres: ".red, err);
+            }
+        },
+        1000 * 60 * 60 * 24,
+    );
 };
 
 const getGenreName = (genreId: number, type: string) => {
@@ -324,9 +453,14 @@ const getGenreName = (genreId: number, type: string) => {
  * @param type Valid types are "movie" and "series"
  * @returns boolean value indicating whether the type is valid or not
  */
-const isValidMediaType = (type: string, acceptBoth: boolean = false): boolean => {
-    return type === "movie" || type === "series" || (acceptBoth && type === 'both');
-}
+const isValidMediaType = (
+    type: string,
+    acceptBoth: boolean = false,
+): boolean => {
+    return (
+        type === "movie" || type === "series" || (acceptBoth && type === "both")
+    );
+};
 
 export {
     findMediaById,
@@ -338,6 +472,7 @@ export {
     getCredits,
     getMediaImages,
     getMediaVideos,
+    getWatchProviders,
     getGenreName,
-    fetchGenres
+    fetchGenres,
 };

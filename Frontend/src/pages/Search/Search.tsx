@@ -23,12 +23,13 @@ function PrevSearchResultCard(props: { name: string, url: string, remove: React.
 }
 
 export default function Browse() {
-    const [media, setMedia] = useState<any[]>([]);
+    const { getSavedItems, mml_api, userData, getListCache, setListCache } = useContext(GlobalContext);
+    const cachedSearch = (query: string | null) => query ? getListCache(`search.${query}`) : undefined;
+    const [media, setMedia] = useState<any[]>(() => cachedSearch(new URLSearchParams(window.location.search).get("query")) ?? []);
     const [loading, setLoading] = useState<boolean>(false);
     const [timeoutFunc, setTimeoutFunc] = useState<NodeJS.Timeout | null>(null);
     const [searchHistory, setSearchHistory] = useState<SearchResultItem[]>(getSearchResultsHistory());
     const [defaultValue, setDefaultValue] = useState<string>("");
-    const { getSavedItems, mml_api, userData } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
     const cooldown = 400;
 
@@ -39,7 +40,7 @@ export default function Browse() {
         const query = params.get("query");
 
         if (query) {
-            search(query);
+            if (!cachedSearch(query)) search(query);
             setDefaultValue(query);
         }
     }, []);
@@ -50,8 +51,8 @@ export default function Browse() {
         mml_api.get(`api/v1/media/search?title=${query}&mature_content=${userData?.matureContent}`).then((response) => {
             setLoading(false);
             window.history.pushState({}, "", `/search?query=${query}`);
-            
-            if (response.data.responseData.length > 0) getSavedItems(response.data.responseData, response.data.responseData.map((media: any) => ({ id: media.id, type: media.type })), (media: any) => setMedia(media));
+
+            if (response.data.responseData.length > 0) getSavedItems(response.data.responseData, response.data.responseData.map((media: any) => ({ id: media.id, type: media.type })), (media: any) => { setListCache(`search.${query}`, media); setMedia(media); });
         }).catch(() => {
             toast.open("Error fetching search results", "error");
             setLoading(false);
@@ -83,9 +84,9 @@ export default function Browse() {
             <div className="search-bar">
                 <InputField
                     key={defaultValue}
-                    type="text" 
-                    id="search-query" 
-                    required={false} 
+                    type="text"
+                    id="search-query"
+                    required={false}
                     label="Search"
                     onInputChange={(value: string) => querySearchCooldown(value)}
                     clearButton={true}
@@ -109,7 +110,7 @@ export default function Browse() {
                     {media.filter(movie => movie.type === "movie").length > 0 &&
                         <div className="search-results">
                             <h2>Movies</h2>
-                            <div className="search-results-container">  
+                            <div className="search-results-container">
                                 {media.map((movie) => {
                                     if (movie.type === "movie") {
                                         return (
@@ -137,11 +138,11 @@ export default function Browse() {
                     {media.filter(movie => movie.type === "series").length > 0 &&
                         <div className="search-results">
                             <h2>Series</h2>
-                            <div className="search-results-container">  
+                            <div className="search-results-container">
                                 {media.map((show) => {
                                     if (show.type === "series") {
                                         return (
-                                            <FilmCard 
+                                            <FilmCard
                                                 key={`${show.id}.${show.type}`}
                                                 filmData={{
                                                     id: show.id,

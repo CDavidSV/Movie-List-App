@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import NotFound from "../../components/not-found-component/not-found";
-import { Link } from "react-router-dom";
+import { Link, useNavigationType } from "react-router-dom";
 import WatchlistProgress from "../../components/watchlist-progress-component/watchlist-progress";
 import FavoriteButton from "../../components/favorite-button-component/favorite-button";
 import Modal from "../../components/modal-component/modal";
@@ -122,19 +122,25 @@ const tabsConfig = [
 ];
 
 export default function Watchlist() {
-    const [selectedTab, setSelectedTab] = useState<number>(0);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [watchlist, setWatchlist] = useState<any[]>([]);
+    const { removeFromWatchlist, mml_api_protected, getListCache, setListCache } = useContext(GlobalContext);
+    const cached = useRef(useNavigationType() === "POP" ? getListCache("watchlist") : undefined).current;
+    const dataTab = useRef<number>(cached?.tab ?? 0);
+    const loadedTab = useRef<number | null>(cached ? cached.tab : null);
+    const [selectedTab, setSelectedTab] = useState<number>(cached?.tab ?? 0);
+    const [loading, setLoading] = useState<boolean>(!cached);
+    const [watchlist, setWatchlist] = useState<any[]>(cached?.items ?? []);
     const [source, setSource] = useState<CancelTokenSource | null>(null);
-    const [cursor, setCursor] = useState<number | null>(null);
+    const [cursor, setCursor] = useState<number | null>(cached?.cursor ?? null);
     const toast = useContext(ToastContext);
-    const { removeFromWatchlist, mml_api_protected } = useContext(GlobalContext);
 
     useInfiniteScroll(() => getNextPage(), loading, !cursor);
 
     useEffect(() => {
         document.title = "Watchlist | My Movie List";
         if (selectedTab > tabsConfig.length - 1) return;
+
+        if (loadedTab.current === selectedTab) return;
+        loadedTab.current = selectedTab;
 
         if (source) source.cancel();
 
@@ -150,6 +156,7 @@ export default function Watchlist() {
             cancelToken: newSource.token
         }).then((response) => {
             setLoading(false);
+            dataTab.current = selectedTab;
             setWatchlist(response.data.responseData.watchlist);
 
             if (response.data.responseData.cursor) setCursor(response.data.responseData.cursor);
@@ -162,6 +169,10 @@ export default function Watchlist() {
         });
 
     }, [selectedTab]);
+
+    useEffect(() => {
+        if (!loading) setListCache("watchlist", { tab: dataTab.current, items: watchlist, cursor });
+    }, [watchlist, cursor, loading]);
 
     const getNextPage = () => {
         if (!cursor) return;

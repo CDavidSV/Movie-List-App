@@ -4,7 +4,8 @@ import express from "express";
 import { addFavorite, getFavorites, removeFavorite, reorderFavorites } from "./favorites";
 import { getWatchlist, removeItemFromWatchlist, updateWatchlist } from "./watchlist";
 import { getHistory, addHistory, removeHistory, clearHistory } from "./history";
-import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMoviesByGenre, getTopRatedSeries, getUpcomingSeries, getCast, getCrew, getImages, getVideos, getMoviesHomeCarousel } from "./media";
+import { getNote, saveNote } from "./notes";
+import { getMediaById, getNowPlayingMovies, getPopularMovies, getTopRatedMovies, getUpcomingMovies, searchByTitle, getPopularSeries, getMoviesByGenre, getTopRatedSeries, getUpcomingSeries, getCast, getCrew, getImages, getVideos, getProviders, getMoviesHomeCarousel } from "./media";
 import { hasMedia, getStatusInPersonalLists, getMeUserInfo, uploadProfilePicture, changeUsername, deleteAccount, getUserInfo, uploadBannerPicture, updateUser, getUserWatchlist, getUserFavorites, searchUserByName } from "./user";
 import requireUser from "../../middlewares/requireUser";
 import createMulterInstance from "../../config/multer.config";
@@ -60,6 +61,11 @@ router.get("/media/:type/:id/cast", getCast);
 router.get("/media/:type/:id/crew", getCrew);
 router.get("/media/:type/:id/images", getImages);
 router.get("/media/:type/:id/videos", getVideos);
+router.get("/media/:type/:id/providers", getProviders);
+
+// Notes routes
+router.get("/notes", requireUser, getNote);
+router.put("/notes", requireUser, saveNote);
 
 // History routes
 router.get("/history", requireUser, getHistory);

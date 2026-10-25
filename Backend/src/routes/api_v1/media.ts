@@ -1,6 +1,6 @@
 import express from 'express';
 import { sendResponse } from '../../util/apiHandler';
-import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre, getCredits, getMediaImages, getMediaVideos } from '../../util/TMDB';
+import { findMediaById, isValidMediaType, fetchMedia, findMediaByTitle, makeTMDBRequest, fetchMoviesByGenre, getCredits, getMediaImages, getMediaVideos, getWatchProviders } from '../../util/TMDB';
 import Movie from '../../Models/Movie';
 import Series from '../../Models/Series';
 import config from '../../config/config';
@@ -228,6 +228,19 @@ const getVideos = async (req: express.Request, res: express.Response) => {
     sendResponse(res, { status: 200, message: "Videos fetched successfully", responsePayload: videos });
 };
 
+const getProviders = async (req: express.Request, res: express.Response) => {
+    const { type, id } = req.params;
+    const region = typeof req.query.region === 'string' && /^[A-Za-z]{2}$/.test(req.query.region) ? req.query.region.toUpperCase() : 'US';
+
+    if (!type || !id) return sendResponse(res, { status: 400, message: "Missing query parameters" });
+    if (!isValidMediaType(type)) return sendResponse(res, { status: 400, message: "Invalid media type" });
+
+    const providers = await getWatchProviders(id, type, region);
+    if (!providers) return sendResponse(res, { status: 500, message: "Error fetching watch providers" });
+
+    sendResponse(res, { status: 200, message: "Watch providers fetched successfully", responsePayload: providers });
+};
+
 const getMoviesHomeCarousel = async (req: express.Request, res: express.Response) => {
     const page = parseInt(req.query.page as string, 10) || 1;
     const matureContent = req.query.mature_content && req.query.mature_content === 'true' ? true : false;
@@ -274,5 +287,6 @@ export {
     getCrew,
     getImages,
     getVideos,
+    getProviders,
     getMoviesHomeCarousel
 };

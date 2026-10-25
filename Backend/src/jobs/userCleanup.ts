@@ -3,6 +3,7 @@ import historySchema from "../schemas/historySchema";
 import userSchema from "../schemas/userSchema";
 import watchlistSchema from "../schemas/watchlistSchema";
 import favoritesSchema from "../schemas/favoritesSchema";
+import notesSchema from "../schemas/notesSchema";
 
 // Automatic job that deletes users scheduled for deletion
 const userCleanup = async () => {
@@ -15,7 +16,8 @@ const userCleanup = async () => {
             userSchema.deleteMany({ _id: { '$in': users.map((user: any) => user._id) } }),
             historySchema.deleteMany({ user_id: { '$in': users.map((user: any) => user._id) } }),
             watchlistSchema.deleteMany({ user_id: { '$in': users.map((user: any) => user._id) } }),
-            favoritesSchema.deleteMany({ user_id: { '$in': users.map((user: any) => user._id) } })
+            favoritesSchema.deleteMany({ user_id: { '$in': users.map((user: any) => user._id) } }),
+            notesSchema.deleteMany({ user_id: { '$in': users.map((user: any) => user._id) } })
         ]);
     } catch (err) {
         console.error("Error running user cleanup job: ", err);

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
@@ -6,11 +6,12 @@ import { ToastContext } from "../../contexts/ToastContext";
 import { Clapperboard } from "lucide-react";
 
 export default function Movies() {
-    const [movies, setMovies] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1);
+    const { getSavedItems, mml_api, userData, getListCache, setListCache } = useContext(GlobalContext);
+    const [movies, setMovies] = useState<any[]>(() => getListCache("movies")?.items ?? []);
+    const [loading, setLoading] = useState(!getListCache("movies"));
+    const [page, setPage] = useState<number>(() => getListCache("movies")?.page ?? 1);
+    const loadedPage = useRef<number>(getListCache("movies")?.page ?? 0);
     const toast = useContext(ToastContext);
-    const { getSavedItems, mml_api, userData } = useContext(GlobalContext);
 
     const getMovies = (page: number) => {
         setLoading(true);
@@ -32,8 +33,14 @@ export default function Movies() {
     useEffect(() => {
         document.title = "Movies | My Movie List";
 
+        if (page <= loadedPage.current) return;
+        loadedPage.current = page;
         getMovies(page);
     }, [page]);
+
+    useEffect(() => {
+        if (movies.length > 0) setListCache("movies", { items: movies, page });
+    }, [movies, page]);
 
     return (
         <div className="content">

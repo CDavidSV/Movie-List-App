@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import FilmCard from "../../components/film-card-component/filmCard";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 import { GlobalContext } from "../../contexts/GlobalContext";
@@ -6,11 +6,12 @@ import { ToastContext } from "../../contexts/ToastContext";
 import { TvMinimalPlay } from "lucide-react";
 
 export default function Series() {
-    const [movies, setMovies] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1);
+    const { getSavedItems, mml_api, userData, getListCache, setListCache } = useContext(GlobalContext);
+    const [movies, setMovies] = useState<any[]>(() => getListCache("series")?.items ?? []);
+    const [loading, setLoading] = useState(!getListCache("series"));
+    const [page, setPage] = useState<number>(() => getListCache("series")?.page ?? 1);
+    const loadedPage = useRef<number>(getListCache("series")?.page ?? 0);
     const toast = useContext(ToastContext);
-    const { getSavedItems, mml_api, userData } = useContext(GlobalContext);
 
     const getShows = (page: number) => {
         setLoading(true);
@@ -32,8 +33,14 @@ export default function Series() {
     useEffect(() => {
         document.title = "Series | My Movie List";
 
+        if (page <= loadedPage.current) return;
+        loadedPage.current = page;
         getShows(page);
     }, [page]);
+
+    useEffect(() => {
+        if (movies.length > 0) setListCache("series", { items: movies, page });
+    }, [movies, page]);
 
     return (
         <div className="content">

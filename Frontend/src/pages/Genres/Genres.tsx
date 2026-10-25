@@ -1,4 +1,4 @@
-import { JSX, useContext, useEffect, useState } from "react";
+import { JSX, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import FilmCard from "../../components/film-card-component/filmCard";
@@ -113,15 +113,21 @@ const genereMap: GenreMap = {
 
 export default function Genres() {
     const { genreName } = useParams<{ genreName: string }>();
-    const [media, setMedia] = useState<any[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [page, setPage] = useState<number>(1);
-    const { getSavedItems, mml_api, userData } = useContext(GlobalContext);
+    const { getSavedItems, mml_api, userData, getListCache, setListCache } = useContext(GlobalContext);
+    const cacheKey = `genre.${genreName}`;
+    const [media, setMedia] = useState<any[]>(() => getListCache(cacheKey)?.items ?? []);
+    const [loading, setLoading] = useState<boolean>(!getListCache(cacheKey));
+    const [page, setPage] = useState<number>(() => getListCache(cacheKey)?.page ?? 1);
+    const loadedGenre = useRef<string | undefined>(getListCache(cacheKey) ? genreName : undefined);
+    const dataGenre = useRef<string | undefined>(loadedGenre.current);
     const toast = useContext(ToastContext);
     const navigate = useNavigate();
 
     useEffect(() => {
         document.title = `${genreName} | My Movie List`;
+
+        if (loadedGenre.current === genreName) return;
+        loadedGenre.current = genreName;
 
         setPage(1);
         setMedia([]);
@@ -131,6 +137,7 @@ export default function Genres() {
             setLoading(false);
 
             getSavedItems(response.data.responseData, response.data.responseData.map((film: any) => ({ id: film.id, type: film.type})), (films: any) => {
+                dataGenre.current = genreName;
                 setMedia(films);
             });
         }).catch(() => {
@@ -138,6 +145,10 @@ export default function Genres() {
             navigate("/genres");
         });
     }, [navigate, genreName]);
+
+    useEffect(() => {
+        if (media.length > 0 && dataGenre.current === genreName) setListCache(cacheKey, { items: media, page });
+    }, [media, page]);
 
     const getNextPage = () => {
         const nextPage = page + 1;

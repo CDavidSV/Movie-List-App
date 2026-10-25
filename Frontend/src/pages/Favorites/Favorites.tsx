@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { Link, useNavigationType } from "react-router-dom";
 import WatchlistButton from "../../components/watchlist-button-component/watchlist-button";
 import Modal from "../../components/modal-component/modal";
 import useInfiniteScroll from "../../hooks/useInfiniteScroll";
@@ -75,11 +75,12 @@ function FilmListCard({ filmData, removeItem }: { filmData: any, removeItem: Fun
 }
 
 export default function Favorites() {
-    const [favorites, setFavorites] = useState<any[]>([]);
-    const [lastRank, setlastRank] = useState<number | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const { mml_api_protected, getListCache, setListCache } = useContext(GlobalContext);
+    const cached = useRef(useNavigationType() === "POP" ? getListCache("favorites") : undefined).current;
+    const [favorites, setFavorites] = useState<any[]>(cached?.items ?? []);
+    const [lastRank, setlastRank] = useState<number | null>(cached?.lastRank ?? null);
+    const [loading, setLoading] = useState<boolean>(!cached);
 
-    const { mml_api_protected } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
 
     useInfiniteScroll(() => getNextPage(), loading, !lastRank);
@@ -95,6 +96,8 @@ export default function Favorites() {
     useEffect(() => {
         document.title = "Favorites | My Movie List";
 
+        if (cached) return;
+
         mml_api_protected.get("api/v1/favorites").then((res) => {
             setFavorites(res.data.responseData.favorites);
             setLoading(false);
@@ -104,6 +107,10 @@ export default function Favorites() {
             toast.open("Error loading favorites", "error");
         });
     }, []);
+
+    useEffect(() => {
+        if (!loading) setListCache("favorites", { items: favorites, lastRank });
+    }, [favorites, lastRank, loading]);
 
     const getNextPage = () => {
         if (!lastRank) return;

@@ -1,7 +1,7 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { GlobalContext } from "@/contexts/GlobalContext";
-import { useContext, useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Link, useNavigationType, useParams, useSearchParams } from "react-router-dom";
 import defaultPfp from '../../assets/images/profile-default.png';
 import TabHandler from "@/components/tab-handler/tab-handler";
 import { ToastContext } from "@/contexts/ToastContext";
@@ -63,16 +63,20 @@ function FavoriteItem({ index, mediaId, title, type, poster, backdrop }: UserFav
 }
 
 function UserFavorites({ userId, username }: { userId: string, username: string }) {
-    const { mml_api_protected } = useContext(GlobalContext);
+    const { mml_api_protected, getListCache, setListCache } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
+    const cacheKey = `user.favorites.${userId}`;
+    const cached = useRef(useNavigationType() === "POP" ? getListCache(cacheKey) : undefined).current;
 
-    const [ loading, setLoading ] = useState(true);
-    const [ favorites, setFavorites ] = useState<UserFavoriteItemProps[]>([]);
+    const [ loading, setLoading ] = useState(!cached);
+    const [ favorites, setFavorites ] = useState<UserFavoriteItemProps[]>(cached ?? []);
 
     useEffect(() => {
+        if (cached) return;
+
         setLoading(true);
         mml_api_protected.get(`/api/v1/user/${userId}/favorites`).then((response) => {
-            setFavorites(response.data.responseData.responseFavorites.map((f: any, index: number) => ({
+            const items = response.data.responseData.responseFavorites.map((f: any, index: number) => ({
                 mediaId: f.mediaId,
                 title: f.title,
                 type: f.type,
@@ -81,7 +85,9 @@ function UserFavorites({ userId, username }: { userId: string, username: string 
                 poster: f.posterUrl,
                 backdrop: f.backdropUrl,
                 index: index + 1
-            })));
+            }));
+            setListCache(cacheKey, items);
+            setFavorites(items);
         }).catch((err)  => {
             console.error(err);
             toast.open("An error occurred while fetching this user's favortes", "error");
@@ -111,16 +117,20 @@ function UserFavorites({ userId, username }: { userId: string, username: string 
 }
 
 function UserWatchlist({ userId }: { userId: string }) {
-    const { mml_api_protected } = useContext(GlobalContext);
+    const { mml_api_protected, getListCache, setListCache } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
+    const cacheKey = `user.watchlist.${userId}`;
+    const cached = useRef(useNavigationType() === "POP" ? getListCache(cacheKey) : undefined).current;
 
-    const [ loading, setLoading ] = useState(true);
-    const [ watchlist, setWatchlist ] = useState<UserWatchlistItemProps[]>([]);
+    const [ loading, setLoading ] = useState(!cached);
+    const [ watchlist, setWatchlist ] = useState<UserWatchlistItemProps[]>(cached ?? []);
 
     useEffect(() => {
+        if (cached) return;
+
         setLoading(true);
         mml_api_protected.get(`/api/v1/user/${userId}/watchlist`).then((response) => {
-            setWatchlist(response.data.responseData.responseWatchlist.map((w: any) => ({
+            const items = response.data.responseData.responseWatchlist.map((w: any) => ({
                 title: w.title,
                 progress: w.progress,
                 totalProgress: w.totalProgress,
@@ -129,7 +139,9 @@ function UserWatchlist({ userId }: { userId: string }) {
                 status: w.status,
                 mediaId: w.mediaId,
                 type: w.type
-            })));
+            }));
+            setListCache(cacheKey, items);
+            setWatchlist(items);
         }).catch((err)  => {
             console.error(err);
             toast.open("An error occurred while fetching this user's watchlist", "error");
@@ -156,12 +168,13 @@ function UserWatchlist({ userId }: { userId: string }) {
 export default function UserPage() {
     let { username } = useParams<{ username: string }>();
     const [searchParams, setSearchParams] = useSearchParams();
-    const { mml_api_protected } = useContext(GlobalContext);
+    const { mml_api_protected, getListCache, setListCache } = useContext(GlobalContext);
     const toast = useContext(ToastContext);
+    const cachedInfo = useRef(useNavigationType() === "POP" ? getListCache(`user.info.${username}`) : undefined).current;
 
-    const [ userInfo, setUserInfo ] = useState<UserPageData>();
+    const [ userInfo, setUserInfo ] = useState<UserPageData | undefined>(cachedInfo);
     const [ tab, setTab ] = useState<string>(searchParams.get("tab") || "");
-    const [ loading, setLoading ] = useState(true);
+    const [ loading, setLoading ] = useState(!cachedInfo);
 
     useEffect(() => {
         document.title = `${username} | My Movie List`;
@@ -172,16 +185,20 @@ export default function UserPage() {
     }, [searchParams]) ;
 
     useEffect(() => {
+        if (cachedInfo) return;
+
         setLoading(true);
         mml_api_protected.get(`/api/v1/user/${username}`).then((response) => {
-            setUserInfo({
+            const info = {
                 id: response.data.responseData.id,
                 username: response.data.responseData.username,
                 profileBannerUrl: response.data.responseData.profile_banner_url,
                 profilePictureUrl: response.data.responseData.profile_picture_url,
                 publicWatchlist: response.data.responseData.public_watchlist,
                 publicFavorites: response.data.responseData.public_favorites
-            });
+            };
+            setListCache(`user.info.${username}`, info);
+            setUserInfo(info);
         })
         .catch((err) => {
             console.error(err);

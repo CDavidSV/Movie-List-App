@@ -15,13 +15,33 @@ interface GlobalContextProps {
     updateUserData: () => void | SessionData;
     updateUserSettings: (settings: UserSettings) => void;
     clearSessionData: () => void;
-    setSessionData: (email: string, username: string, expiresIn: number, matureContent: boolean, publicWatchlist: boolean, publicFavorites: boolean, profilePictureUrl?: string, profileBannerUrl?: string) => void;
-    getSavedItems: (films: any[], media: { id: string, type: string }[], callback: (films: any) => void) => void;
+    setSessionData: (
+        email: string,
+        username: string,
+        expiresIn: number,
+        matureContent: boolean,
+        publicWatchlist: boolean,
+        publicFavorites: boolean,
+        profilePictureUrl?: string,
+        profileBannerUrl?: string,
+    ) => void;
+    getSavedItems: (
+        films: any[],
+        media: { id: string; type: string }[],
+        callback: (films: any) => void,
+    ) => void;
     setFavorite: (id: string, type: string) => Promise<void>;
     removeFavorite: (id: string, type: string) => Promise<void>;
-    setWatchlist: (id: string, type: string, status?: number, progress?: number) => Promise<void>;
+    setWatchlist: (
+        id: string,
+        type: string,
+        status?: number,
+        progress?: number,
+    ) => Promise<void>;
     removeFromWatchlist: (id: string, type: string) => Promise<void>;
     saveToHistory: (id: string, type: string, loggedIn: boolean) => void;
+    getListCache: (key: string) => any;
+    setListCache: (key: string, value: any) => void;
     logOut: () => void;
     mml_api: AxiosInstance;
     mml_api_protected: AxiosInstance;
@@ -40,17 +60,24 @@ export const GlobalContext = createContext<GlobalContextProps>({
     setWatchlist: async () => {},
     removeFromWatchlist: async () => {},
     saveToHistory: () => {},
+    getListCache: () => undefined,
+    setListCache: () => {},
     mml_api: axios.create(),
     mml_api_protected: axios.create(),
     loggedIn: false,
     logOut: () => {},
-    userData: null
+    userData: null,
 });
 
-export default function GlobalProvider({ children }: { children: React.ReactNode }) {
+export default function GlobalProvider({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const [userData, setUserData] = useState<SessionData | null>(null);
     const [loggedIn, setLoggedIn] = useState(false);
     const firstUpdate = useRef(true);
+    const listCache = useRef(new Map<string, any>());
     const toast = useContext(ToastContext);
 
     useEffect(() => {
@@ -66,24 +93,31 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
 
         if (!userData) return;
 
-        mml_api_protected.get("/api/v1/me").then((res) => {
-            const sessionData = { 
-                ...userData, 
-                username: res.data.responseData.username, 
-                profilePictureUrl: res.data.responseData.profile_picture_url, 
-                profileBannerUrl: res.data.responseData.profile_banner_url, 
-                email: res.data.responseData.email,
-                matureContent: res.data.responseData.mature_content,
-                publicWatchlist: res.data.responseData.public_watchlist,
-                publicFavorites: res.data.responseData.public_favorites
-            };
-            localStorage.setItem('sessionData', JSON.stringify(sessionData));
+        mml_api_protected
+            .get("/api/v1/me")
+            .then((res) => {
+                const sessionData = {
+                    ...userData,
+                    username: res.data.responseData.username,
+                    profilePictureUrl:
+                        res.data.responseData.profile_picture_url,
+                    profileBannerUrl: res.data.responseData.profile_banner_url,
+                    email: res.data.responseData.email,
+                    matureContent: res.data.responseData.mature_content,
+                    publicWatchlist: res.data.responseData.public_watchlist,
+                    publicFavorites: res.data.responseData.public_favorites,
+                };
+                localStorage.setItem(
+                    "sessionData",
+                    JSON.stringify(sessionData),
+                );
 
-            firstUpdate.current = false;
-            setUserData(sessionData);
-        }).catch(() => {
-            toast.open("Error fetching user data.", "error");
-        });
+                firstUpdate.current = false;
+                setUserData(sessionData);
+            })
+            .catch(() => {
+                toast.open("Error fetching user data.", "error");
+            });
     }, [userData]);
 
     const mml_api_protected = axios.create({
@@ -110,78 +144,108 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         requestQueue.length = 0;
     };
 
-    mml_api_protected.interceptors.request.use(async (config) => {
-        // Validate the users current session
-        if (!userData) return config;
+    mml_api_protected.interceptors.request.use(
+        async (config) => {
+            // Validate the users current session
+            if (!userData) return config;
 
-        const expiresIn = userData.expiresIn;
-        const now = Date.now();
+            const expiresIn = userData.expiresIn;
+            const now = Date.now();
 
-        // Check if the access token is expired
-        if (now - userData.setAt >= expiresIn - 1000) {
-            // Renew the access token
-            try {
-                if (!isRefreshing) {
-                    isRefreshing = true;
-                    const response = await mml_api.post('/auth/token');
-            
-                    const { responseData } = response.data
-            
-                    // Update the session data
-                    setSessionData(userData.email, userData.username, responseData.expiresIn, userData.matureContent, userData.publicWatchlist, userData.publicFavorites, userData.profilePictureUrl, userData.profileBannerUrl);
-                    processQueue(null);
-                    return config;
+            // Check if the access token is expired
+            if (now - userData.setAt >= expiresIn - 1000) {
+                // Renew the access token
+                try {
+                    if (!isRefreshing) {
+                        isRefreshing = true;
+                        const response = await mml_api.post("/auth/token");
+
+                        const { responseData } = response.data;
+
+                        // Update the session data
+                        setSessionData(
+                            userData.email,
+                            userData.username,
+                            responseData.expiresIn,
+                            userData.matureContent,
+                            userData.publicWatchlist,
+                            userData.publicFavorites,
+                            userData.profilePictureUrl,
+                            userData.profileBannerUrl,
+                        );
+                        processQueue(null);
+                        return config;
+                    }
+
+                    return new Promise((resolve, reject) => {
+                        requestQueue.push({ resolve, reject, config });
+                    });
+                } catch (err) {
+                    processQueue(err);
+                    clearSessionData();
+                    window.location.href = "/login";
+                    return Promise.reject(err);
                 }
-
-                return new Promise((resolve, reject) => {
-                    requestQueue.push({ resolve, reject, config });
-                });
-
-            } catch (err) {
-                processQueue(err);
-                clearSessionData();
-                window.location.href = "/login";
-                return Promise.reject(err);
             }
-        }
 
-        return config;
-    }, (err) => {
-        return Promise.reject(err); 
-    });
+            return config;
+        },
+        (err) => {
+            return Promise.reject(err);
+        },
+    );
 
-    mml_api_protected.interceptors.response.use((response) => {
-        return response;
-    }, async (error) => {
-
-        // If the error is unauthorized, or forbidden, then redirect to the login page
-        console.error("Error in request: ", error);
-        if (!error.response || error.response.status !== 401 && error.response.status !== 403) return Promise.reject(error);
-        clearSessionData();
-        window.location.href = "/login";
-    });
+    mml_api_protected.interceptors.response.use(
+        (response) => {
+            return response;
+        },
+        async (error) => {
+            // If the error is unauthorized, or forbidden, then redirect to the login page
+            console.error("Error in request: ", error);
+            if (
+                !error.response ||
+                (error.response.status !== 401 && error.response.status !== 403)
+            )
+                return Promise.reject(error);
+            clearSessionData();
+            window.location.href = "/login";
+        },
+    );
 
     const clearSessionData = () => {
-        localStorage.removeItem('sessionData');
+        localStorage.removeItem("sessionData");
         setUserData(null);
-    }
-    
-    const logOut = () => {
-       clearSessionData();
-       setLoggedIn(false);
-    
-        mml_api.post('/auth/logout', {}, {
-            withCredentials: true
-        });
-
-        window.location.href = "/login";
-    }
-
-    const getSessionData = () => {
-        return JSON.parse(localStorage.getItem('sessionData')!) as SessionData;
     };
 
-    const setSessionData = (email: string, username: string, expiresIn: number, matureContent: boolean, publicWatchlist: boolean, publicFavorites: boolean, profilePictureUrl?: string, profileBannerUrl?: string) => {
+    const logOut = () => {
+        clearSessionData();
+        setLoggedIn(false);
+
+        mml_api.post(
+            "/auth/logout",
+            {},
+            {
+                withCredentials: true,
+            },
+        );
+
+        window.location.href = "/login";
+    };
+
+    const getSessionData = () => {
+        return JSON.parse(localStorage.getItem("sessionData")!) as SessionData;
+    };
+
+    const setSessionData = (
+        email: string,
+        username: string,
+        expiresIn: number,
+        matureContent: boolean,
+        publicWatchlist: boolean,
+        publicFavorites: boolean,
+        profilePictureUrl?: string,
+        profileBannerUrl?: string,
+    ) => {
         setLoggedIn(true);
 
         const sessionData = {
@@ -191,9 +255,9 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
             setAt: Date.now(),
             matureContent,
             publicWatchlist,
-            publicFavorites
+            publicFavorites,
         } as SessionData;
-    
+
         if (profilePictureUrl) {
             sessionData.profilePictureUrl = profilePictureUrl;
         }
@@ -201,43 +265,54 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
         if (profileBannerUrl) {
             sessionData.profileBannerUrl = profileBannerUrl;
         }
-    
-        localStorage.setItem('sessionData', JSON.stringify(sessionData));
+
+        localStorage.setItem("sessionData", JSON.stringify(sessionData));
         setUserData(sessionData);
-    }
+    };
 
     const updateUsername = (username: string) => {
         let sessionData = getSessionData();
         if (!sessionData) return;
         sessionData.username = username;
-    
-        localStorage.setItem('sessionData', JSON.stringify(sessionData));
+
+        localStorage.setItem("sessionData", JSON.stringify(sessionData));
         setUserData(sessionData);
-    }  
+    };
 
     const updateUserData = () => {
         if (!userData) return;
 
-        mml_api_protected.get("/api/v1/me").then((res) => {
-            const sessionData = { 
-                ...userData, 
-                username: res.data.responseData.username, 
-                profilePictureUrl: res.data.responseData.profile_picture_url, 
-                profileBannerUrl: res.data.responseData.profile_banner_url, 
-                email: res.data.responseData.email,
-                matureContent: res.data.responseData.mature_content,
-                publicWatchlist: res.data.responseData.public_watchlist,
-                publicFavorites: res.data.responseData.public_favorites
-            };
-            localStorage.setItem('sessionData', JSON.stringify(sessionData));
+        mml_api_protected
+            .get("/api/v1/me")
+            .then((res) => {
+                const sessionData = {
+                    ...userData,
+                    username: res.data.responseData.username,
+                    profilePictureUrl:
+                        res.data.responseData.profile_picture_url,
+                    profileBannerUrl: res.data.responseData.profile_banner_url,
+                    email: res.data.responseData.email,
+                    matureContent: res.data.responseData.mature_content,
+                    publicWatchlist: res.data.responseData.public_watchlist,
+                    publicFavorites: res.data.responseData.public_favorites,
+                };
+                localStorage.setItem(
+                    "sessionData",
+                    JSON.stringify(sessionData),
+                );
 
-            setUserData(sessionData);
-        }).catch(() => {
-            toast.open("Error fetching user data.", "error");
-        });
+                setUserData(sessionData);
+            })
+            .catch(() => {
+                toast.open("Error fetching user data.", "error");
+            });
     };
 
-    const getSavedItems = (films: any[], media: { id: string, type: string }[], callback: (films: any) => void) => {
+    const getSavedItems = (
+        films: any[],
+        media: { id: string; type: string }[],
+        callback: (films: any) => void,
+    ) => {
         // Check first if the user is logged in
         if (!loggedIn) {
             films.forEach((film) => {
@@ -246,69 +321,85 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
             });
             callback(films);
             return;
-        };
-    
+        }
+
         const requestMedia = media.map((item) => {
             return {
                 media_id: item.id,
-                type: item.type
+                type: item.type,
             };
         });
-    
-        mml_api_protected.post('api/v1/user/in-personal-lists', requestMedia).then((response) => {
-            const { responseData } = response.data;
-            films.forEach((film) => {
-                if (film.id in responseData) {
-                    film.inWatchlist = responseData[film.id].watchlist;
-                    film.inFavorites = responseData[film.id].favorite;
-                } else {
-                    film.inWatchlist = false;
-                    film.inFavorites = false;
-                }
+
+        mml_api_protected
+            .post("api/v1/user/in-personal-lists", requestMedia)
+            .then((response) => {
+                const { responseData } = response.data;
+                films.forEach((film) => {
+                    if (film.id in responseData) {
+                        film.inWatchlist = responseData[film.id].watchlist;
+                        film.inFavorites = responseData[film.id].favorite;
+                    } else {
+                        film.inWatchlist = false;
+                        film.inFavorites = false;
+                    }
+                });
+                callback(films);
+            })
+            .catch(() => {
+                toast.open("Error fetching personal lists.", "error");
+                callback(films);
             });
-            callback(films);
-        }).catch(() => {
-            toast.open("Error fetching personal lists.", "error");
-            callback(films);
-        });
     };
 
     const setFavorite = async (id: string, type: string) => {
-        await mml_api_protected.post(`api/v1/favorites/add?media_id=${id}&type=${type}`).catch(() => {
-            toast.open("Error adding to favorites.", "error");
-        });
+        await mml_api_protected
+            .post(`api/v1/favorites/add?media_id=${id}&type=${type}`)
+            .catch(() => {
+                toast.open("Error adding to favorites.", "error");
+            });
     };
-    
+
     const removeFavorite = async (id: string, type: string) => {
-        await mml_api_protected.delete(`api/v1/favorites/remove?media_id=${id}&type=${type}`).catch(() => {
-            toast.open("Error removing from favorites.", "error");
-        });
+        await mml_api_protected
+            .delete(`api/v1/favorites/remove?media_id=${id}&type=${type}`)
+            .catch(() => {
+                toast.open("Error removing from favorites.", "error");
+            });
     };
-    
-    const setWatchlist = async (id: string, type: string, status: number = 1, progress: number = 0) => {
-        await mml_api_protected.post(`api/v1/watchlist/update`, {
-            media_id: id.toString(),
-            status: status,
-            progress: progress,
-            type: type
-        }).catch(() => {
-            toast.open("Error adding to watchlist.", "error");
-        });
+
+    const setWatchlist = async (
+        id: string,
+        type: string,
+        status: number = 1,
+        progress: number = 0,
+    ) => {
+        await mml_api_protected
+            .post(`api/v1/watchlist/update`, {
+                media_id: id.toString(),
+                status: status,
+                progress: progress,
+                type: type,
+            })
+            .catch(() => {
+                toast.open("Error adding to watchlist.", "error");
+            });
     };
-    
+
     const removeFromWatchlist = async (id: string, type: string) => {
-        await mml_api_protected.delete(`api/v1/watchlist/remove?media_id=${id}&type=${type}`).catch(() => {
-            toast.open("Error removing from watchlist.", "error");
-        });
-    }
-    
+        await mml_api_protected
+            .delete(`api/v1/watchlist/remove?media_id=${id}&type=${type}`)
+            .catch(() => {
+                toast.open("Error removing from watchlist.", "error");
+            });
+    };
+
     const saveToHistory = (id: string, type: string, loggedIn: boolean) => {
         // Save the selected film to the users history
         if (!loggedIn) return;
 
         mml_api_protected.post("api/v1/history/add", {
             media_id: id,
-            type: type
+            type: type,
         });
     };
 
@@ -318,9 +409,18 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
 
         const updatedSessionData = {
             ...sessionData,
-            matureContent: settings.matureContent !== undefined ? settings.matureContent : sessionData.matureContent,
-            publicWatchlist: settings.publicWatchlist !== undefined ? settings.publicWatchlist : sessionData.publicWatchlist,
-            publicFavorites: settings.publicFavorites !== undefined ? settings.publicFavorites : sessionData.publicFavorites
+            matureContent:
+                settings.matureContent !== undefined
+                    ? settings.matureContent
+                    : sessionData.matureContent,
+            publicWatchlist:
+                settings.publicWatchlist !== undefined
+                    ? settings.publicWatchlist
+                    : sessionData.publicWatchlist,
+            publicFavorites:
+                settings.publicFavorites !== undefined
+                    ? settings.publicFavorites
+                    : sessionData.publicFavorites,
         };
 
         setSessionData(
@@ -331,30 +431,40 @@ export default function GlobalProvider({ children }: { children: React.ReactNode
             updatedSessionData.publicWatchlist,
             updatedSessionData.publicFavorites,
             updatedSessionData.profilePictureUrl,
-            updatedSessionData.profileBannerUrl
+            updatedSessionData.profileBannerUrl,
         );
-    }
+    };
+
+    // Keeps list page state so going back restores the list and scroll position.
+    const getListCache = (key: string) => listCache.current.get(key);
+    const setListCache = (key: string, value: any) => {
+        listCache.current.set(key, value);
+    };
 
     return (
-        <GlobalContext.Provider value={{
-            updateUsername,
-            updateUserData,
-            setSessionData,
-            clearSessionData,
-            updateUserSettings,
-            getSavedItems,
-            logOut,
-            setFavorite,
-            removeFavorite,
-            setWatchlist,
-            removeFromWatchlist,
-            saveToHistory,
-            mml_api,
-            mml_api_protected,
-            userData,
-            loggedIn
-            }}>
+        <GlobalContext.Provider
+            value={{
+                updateUsername,
+                updateUserData,
+                setSessionData,
+                clearSessionData,
+                updateUserSettings,
+                getSavedItems,
+                logOut,
+                setFavorite,
+                removeFavorite,
+                setWatchlist,
+                removeFromWatchlist,
+                saveToHistory,
+                getListCache,
+                setListCache,
+                mml_api,
+                mml_api_protected,
+                userData,
+                loggedIn,
+            }}
+        >
             {children}
         </GlobalContext.Provider>
-    )
+    );
 }
